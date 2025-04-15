@@ -37,10 +37,34 @@
         border-right: 1px solid black;
         }
 
+        .map {
+          width: 40%;
+          height: 100vh; /* Or whatever height you want */
+          padding: 20px;
+          box-sizing: border-box;
+        }
+
         #map { 
         height: 180px; 
+        width: 180px;
         }
         
+        /* Style for header*/
+        #TopLogo {
+        display: inline-block;
+        padding: 10px;
+        margin: 0px;
+        background-color: #f1f1f1;
+        text-align: left;
+        font-size: 30px;
+        padding: 0%;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 2%;
+        margin-top: 0.5rem;
+        margin-bottom: 10px;
+        }
+
         #TopLogo ul, #TopLogo li {
         font-size: 30px;
         display: inline-block;
@@ -69,12 +93,16 @@
         <h3>Restaurant Details</h3>
         <!-- Restaurant descriptions go here -->
       </div>
-      <div id="map"></div>
-        <h3>Map</h3>
-        <!-- Embed a map here (like Google Maps) -->
+      <div class="map">
+        <div id="map"></div>
       </div>
     </div>
+    <script>
+      var map = L.map('map').setView([51.505, -0.09], 13);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+    </script>
   </body>
   </html>
-
-  I think its how its done
