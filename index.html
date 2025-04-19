@@ -14,3 +14,17 @@
 
     <p><strong>Opening Hours: </strong> {{ data.opening }}</p>
     <p><strong>Address:</strong> {{ data.address }}</p>
+
+    <h3>Foods</h3>
+    {% for f in data.foods %}
+    <img src="/static/image/{{ f }}" width="100px"
+    {% endfor %}
+
+    <div>
+        <a href="{{ data.website }}">Website</a> &vert;
+        <a href="tel:{{ data.phonr }}">Call</a> &vert;
+        <a href="{{ data.map }}">Map</a>
+    </div>
+
+    </body>
+    </html>
