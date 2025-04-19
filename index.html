@@ -24,6 +24,25 @@
         font-size: 20px;
         margin-left: 5px;
     }
+    .restaurant-images {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        align-items: flex-start;
+    }
+    .main-image {
+        width: 500px;
+        height: auto;
+    }
+    .side-images {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .side-images img {
+        width: 150px;
+        height: auto;
+    }
 </style>
 
     <h1>MMU Foodie</h1>
@@ -42,6 +61,18 @@
     <img src="/static/image/{{ f }}" width="100px"
     {% endfor %}
 
+    <div class="restaurant-images">
+        <div class="main-image">
+            <img src="{{ data.image }}"="Main restaurant image">
+        </div>
+    <div class="side-images">
+        <img src="{{ data.image2 }}" alt="Food 1">
+        <p>Food 1</p>
+        <img src="{{ data.image2 }}" alt="Food 2">
+        <p>Food 2</p>
+        <img src="{{ data.image2 }}" alt="Food 3">
+        <p>Food 3</p>
+     </div>
     <div>
         <a href="{{ data.website }}">Website</a> &vert;
         <a href="tel:{{ data.phonr }}">Call</a> &vert;
