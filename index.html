@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <!--Font Awesome Icon Library-->
-        <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <style>
-            .checked{
-            colour:orange;
-            }
-        </style>
-    </head>
-</html>
+ <head>
+        <title>{{ data.name }}</title>
+        <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <h1>MMU Foodie</h1>
+    <h2>{{ data.name }}</h2>
+    <p>Rating:{{ data.rating }} / 5</p>
+
+    <img src="/static/image/{{ data.image }}" width="300px">
+
+    <p><strong>Opening Hours: </strong> {{ data.opening }}</p>
+    <p><strong>Address:</strong> {{ data.address }}</p>
