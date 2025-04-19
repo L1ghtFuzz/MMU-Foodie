@@ -14,14 +14,23 @@
         color: red;
     }
     img {
+        border-radius: 2px solid red;
         border-radius: 10px;
-        margin: 10px;
+        padding: 5px;
+         max-width: 100%
+        }
+    .stars {
+        color: gold;
+        font-size: 20px;
+        margin-left: 5px;
     }
 </style>
 
     <h1>MMU Foodie</h1>
-    <h2>{{ data.name }}</h2>
-    <p>Rating:{{ data.rating }} / 5</p>
+    <h2>Ayam Gepuk Pak Gembus</h2>
+    <p>Rating: 5.0
+            <span class="stars">★★★★★</span>
+    </p>
 
     <img src="/static/image/{{ data.image }}" width="300px">
 
