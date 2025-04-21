@@ -1,3 +1,8 @@
+*{
+    box-sizing: border-box;
+}
+
+
 body {
     margin: 0;
     color: black;
@@ -61,6 +66,8 @@ body {
     margin-bottom: 10px;
     }
 
+
+/* See More Button Styling */
 .see-more-container {
     display: flex;
     flex-direction: row;
@@ -80,8 +87,31 @@ body {
     display: none;
 }
 
-.more-category--show{
+.more-category--show {
     display: inline;
 }
 
+
+/* Filter Search Styling */
+input {
+    width: 100%;
+    outline: none;
+    margin-bottom: 2rem;
+
+    padding: 0.5rem ;
+    border: 1px;
+    border-radius: 10px;
+}
+
+.list-items {
+    list-style: none;
+    border: 1px #ccc;
+    border-radius: 10px;
+}
+
+.list-item {
+    background-color: white;
+    padding: 1rem;
+    border-bottom: 1px solid #ccc;
+}
 
