@@ -5,17 +5,26 @@
         <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>MMU Foodie</h1>
-    <h2>Ayam Gepuk Pak Gembus</h2>
-    <p>Rating: 5.0
-            <span class="stars">★★★★★</span>
+    <div class="container">
+        <header>
+            <div class="logo-title">
+                <img src="{{ url_for('static', filename='image/mmu_logo.png') }}" alt="MMU Logo">
+            <h1><span class="hightlight">MMU</span>Foodie</h1>
+            <nav><a href="/">HOME</a></nav>
+    </header>
+
+    <div class="content">
+        <div class="main-info">
+        <h2>Ayam Gepuk Pak Gembus</h2>
+        <p>Rating: 5.0 <span class="stars">★★★★★</span>
     </p>
-
-    <img src="/static/image/{{ data.image }}" width="300px">
-
+    <div class="main-image">
+        <img src="{{ url_for('static', filename='image/' + data.image) }}" alt="Main image">
+    </div>
     <p><strong>Opening Hours: </strong> {{ data.opening }}</p>
     <p><strong>Address:</strong> {{ data.address }}</p>
-
+    
+ <div
     <h3>Foods</h3>
     {% for f in data.foods %}
     <img src="/static/image/{{ f }}" width="100px"
