@@ -18,15 +18,16 @@ parentContainer.addEventListener('click', event=>{
 
 })
 
-//Filter Search List Script
-const list = [
-    "HTML 5",
-    "CSS3",
-    "React",
-    "PHP",
-    "Node.js",
-    "JavaScript",
-]
+//*Filter Search List Script
+//const list = [
+  //  "HTML 5",
+  //  "CSS3",
+  //  "React",
+  //  "PHP",
+  //  "Node.js",
+  //  "JavaScript",
+//]
+//* Deleted the column cuz not needed for now 
 
 const output = document.querySelector(".output");
 const search = document.querySelector(".filter-input");
