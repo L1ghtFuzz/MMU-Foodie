@@ -1,4 +1,6 @@
 //*Show More Show Less
+const seeMoreBtn = document.querySelector('.see-more-btn');
+
 const parentContainer = document.querySelector('.see-more-container');
 
 parentContainer.addEventListener('click', event=>{
