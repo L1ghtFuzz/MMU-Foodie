@@ -1,4 +1,6 @@
 //*Show More Show Less
+const seeMoreBtn = document.querySelector('.see-more-btn');
+
 const parentContainer = document.querySelector('.see-more-container');
 
 parentContainer.addEventListener('click', event=>{
@@ -18,16 +20,16 @@ parentContainer.addEventListener('click', event=>{
 
 })
 
-//*Filter Search List Script
-//const list = [
-  //  "HTML 5",
-  //  "CSS3",
-  //  "React",
-  //  "PHP",
-  //  "Node.js",
-  //  "JavaScript",
-//]
-//* Deleted the column cuz not needed for now 
+
+// const list = [
+//     "HTML 5",
+//    "CSS3",
+//    "React",
+//    "PHP",
+//    "Node.js",
+//    "JavaScript",
+// ]
+// Deleted the column cuz not needed for now 
 
 const output = document.querySelector(".output");
 const search = document.querySelector(".filter-input");
