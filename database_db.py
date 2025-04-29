@@ -12,11 +12,13 @@ CREATE TABLE IF NOT EXISTS restaurants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     address TEXT NOT NULL,
-    phone_number TEXT,
-    cuisine_type TEXT
+    map_link TEXT,
+    culinary_type TEXT,
+    prating TEXT,
+    image_url TEXT
 )
 ''')
-
+#test
 # Insert sample data into the table
 cursor.execute('''
 INSERT INTO restaurants (name, address, phone_number, cuisine_type)
