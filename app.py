@@ -22,17 +22,19 @@ def init_db():
 def index():
     return render_template('form.html')
 
-@app.route('/add', methods=['POST'])
+@app.route('/add_restaurant', methods=['POST'])
 def add_restaurant():
     name = request.form['name']
-    category = request.form['category']
-    rating = request.form['rating']
     address = request.form['address']
+    phone = request.form['phone_number']
+    maps_link = request.form['google_maps_link']
+    culinary_type_id = request.form['culinary_type_id']
+    rating = request.form['rating']
 
     conn = sqlite3.connect('restaurants.db')
     c = conn.cursor()
     c.execute("INSERT INTO restaurants (name, category, rating, address) VALUES (?, ?, ?, ?)",
-              (name, category, rating, address))
+          (name, culinary_type_id, rating, address))
     conn.commit()
     conn.close()
 

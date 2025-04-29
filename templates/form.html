@@ -8,24 +8,24 @@
 </head>
 <body>
     <h1>Admin Restaurant Form</h1>
-    <form action="/submit_restaurant" method="POST">
+    <form action="/add_restaurant" method="POST">
         <label>Restaurant Name:</label><br>
-        <input type="text" name="name"><br><br>
+        <input type="text" name="name" required><br><br>
 
         <label>Address:</label><br>
-        <input type="text" name="address"><br><br>
+        <input type="text" name="address" required><br><br>
 
         <label>Phone Number:</label><br>
-        <input type="text" name="phone_number"><br><br>
+        <input type="text" name="phone_number" required><br><br>
 
         <label>Google Maps Link:</label><br>
-        <input type="text" name="google_maps_link"><br><br>
+        <input type="url" name="google_maps_link" required><br><br>
 
         <label>Culinary Type ID:</label><br>
-        <input type="text" name="culinary_type"><br><br>
+        <input type="text" name="culinary_type_id" required><br><br>
 
-        <label>Rating (1-5):</label><br>
-        <input type="number" name="culinary_type"><br><br>
+        <label>Rating (1–5):</label><br>
+        <input type="number" name="rating" min="1" max="5" step="0.1" required><br><br>
 
         <input type="submit" value="Add Restaurant">
     </form>
