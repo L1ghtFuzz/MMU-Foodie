@@ -1,5 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -19,14 +20,37 @@ class Restaurant(db.Model):
     phone = db.Column(db.String(20))
     cuisine = db.Column(db.String(100))
     google_maps_link = db.Column(db.String(300))
-
+    rating = db.Column(db.Integer)  
+    
     def __repr__(self):
         return f"<Restaurant {self.name}>"
 
 # Define a basic route
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-        return render_template('form.html')
+    if request.method == 'POST':
+        name = request.form['name']
+        address = request.form['address']
+        phone = request.form['phone']
+        cuisine = request.form['cuisine']
+        google_maps_link = request.form['google_maps_link']
+        rating = int(request.form['rating'])
+
+        new_restaurant = Restaurant(
+            name=name,
+            address=address,
+            phone=phone,
+            cuisine=cuisine,
+            google_maps_link=google_maps_link,
+            rating=rating
+        )
+
+        db.session.add(new_restaurant)
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('form.html')
+
 
 # Run the app
 if __name__ == '__main__':

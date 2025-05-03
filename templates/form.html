@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Add Restaurant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styleform.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <div class="form-container">
@@ -15,12 +16,12 @@
             </div>
 
             <div class="form-group">
-                <label>Category:</label>
-                <input type="text" name="category" required>
+                <label>Cuisine:</label>
+                <input type="text" name="cuisine" required>
             </div>
 
             <div class="form-group">
-                <label>Rating (1-5):</label>
+                <label>Rating (1–5):</label>
                 <input type="number" name="rating" min="1" max="5" required>
             </div>
 
@@ -29,8 +30,19 @@
                 <input type="text" name="address" required>
             </div>
 
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" name="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label>Google Maps Link:</label>
+                <input type="url" name="google_maps_link" required>
+            </div>
+
             <button type="submit">Add Restaurant</button>
         </form>
     </div>
 </body>
 </html>
+
