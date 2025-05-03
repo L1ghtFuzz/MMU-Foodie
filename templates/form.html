@@ -1,34 +1,36 @@
-<!-- templates/form.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Restaurant Form</title>
-    <link rel="stylesheet" href="form.css">
+    <title>Add Restaurant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styleform.css') }}">
 </head>
 <body>
-    <h1>Admin Restaurant Form</h1>
-    <form action="/add_restaurant" method="POST">
-        <label>Restaurant Name:</label><br>
-        <input type="text" name="name" required><br><br>
+    <div class="form-container">
+        <h1>Add a New Restaurant</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+            </div>
 
-        <label>Address:</label><br>
-        <input type="text" name="address" required><br><br>
+            <div class="form-group">
+                <label>Category:</label>
+                <input type="text" name="category" required>
+            </div>
 
-        <label>Phone Number:</label><br>
-        <input type="text" name="phone_number" required><br><br>
+            <div class="form-group">
+                <label>Rating (1-5):</label>
+                <input type="number" name="rating" min="1" max="5" required>
+            </div>
 
-        <label>Google Maps Link:</label><br>
-        <input type="url" name="google_maps_link" required><br><br>
+            <div class="form-group">
+                <label>Address:</label>
+                <input type="text" name="address" required>
+            </div>
 
-        <label>Culinary Type ID:</label><br>
-        <input type="text" name="culinary_type_id" required><br><br>
-
-        <label>Rating (1–5):</label><br>
-        <input type="number" name="rating" min="1" max="5" step="0.1" required><br><br>
-
-        <input type="submit" value="Add Restaurant">
-    </form>
+            <button type="submit">Add Restaurant</button>
+        </form>
+    </div>
 </body>
 </html>
