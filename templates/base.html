@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MMU Foodie</title>
+  <title>{%block title %}MMU Foodie{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -15,150 +16,79 @@
   <!-- Make sure you put this AFTER Leaflet's CSS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-<style>
-  body {
-    margin: 0;
-    color: black;
-    background-color: #f1f1f1;
-    font-family: sans-serif;
-  }
-  
-  .container {
-    display: flex;
-    height: 100vh;
-  }
-  
-  .filters, .details, .map {
-    padding: 20px;
-  }
-  
-  .filters {
-    width: 15%;
-    border-right: 1px;
-  }
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></script>
 
-  .details {
-    width: 45%;
-    border-right: 0;
-  }
 
-  .map {
-    width: 40%;
-    height: 100%;
-    padding: 0;
-  }
+  <style>
+    body {
+      margin: 0;
+      color: black;
+      background-color: #f1f1f1;
+      font-family: sans-serif;
+    }
 
-  #map {
-    height: 80%;
-    width: 90%;
-    border-radius: 10px;
-  }
+    /* Style for header*/
+    #TopLogo {
+      display: inline-block;
+      padding: 10px;
+      margin: 0px;
+      background-color: #f1f1f1;
+      text-align: left;
+      font-size: 30px;
+      padding: 0%;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 2%;
+      margin-top: 0.5rem;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-bottom: black 1px;
+    }
 
-  /* Style for header*/
-  #TopLogo {
-    display: inline-block;
-    padding: 10px;
-    margin: 0px;
-    background-color: #f1f1f1;
-    text-align: left;
-    font-size: 30px;
-    padding: 0%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 2%;
-    margin-top: 0.5rem;
-    margin-bottom: 10px;
-    cursor: pointer;
-    border-bottom: black 1px;
-  }
+    #TopLogo ul,
+    #TopLogo li {
+      font-size: 30px;
+      display: inline-block;
+      vertical-align: middle;
+      padding: 0%;
+      color: black;
+      margin: 0%;
+    }
 
-  #TopLogo ul, #TopLogo li {
-    font-size: 30px;
-    display: inline-block;
-    vertical-align: middle;
-    padding: 0%;
-    color: black;
-    margin: 0%;
-  }
+    .header {
+      background-color: #f1f1f1;
+      border-bottom: black 1px;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+    }
 
-  .container, .filters .details, .map {
-    background-color: #f1f1f1;
-  }
+    .top-bar {
+      background-color: #0050a2;
+      color: white;
+      margin-left: 2%;
+      margin-right: 2%;
+      display: flex;
+      flex-direction: row;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
 
-  .header {
-    background-color: #f1f1f1;
-    border-bottom: black 1px;
-  }
-
-  .table {
-    border: black;
-    border-radius: 10px;
-  }
-
-  .top-bar {
-    background-color: #0050a2;
-    color: white;
-    margin-left: 2%;
-    margin-right: 2%;
-    display: flex;
-    flex-direction: row;
-    border-radius: 10px;
-    font-size: 0.9rem;
-  }
-
-  .blue-bar {
-    background-color: #0050a2;
-    padding: 10px 2%;
-    margin: 0 2%;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .price-buttons button, .category {
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    padding: 5px 15px;
-    background-color: white;
-    cursor: pointer;
-    margin: 5px 5px 5px 0;
-  }
-
-  /* See More Button Styling */
-  .see-more-container {
-    display: flex;
-    flex-direction: row;
-    color: #111;
-  }
-
-  .see-more-btn {
-    color: #0050a2;
-    cursor: pointer;
-  }
-
-  .container1 {
-    padding: 1rem;
-  }
-
-  .more-category {
-    display: none;
-  }
-
-  .more-category--show {
-    display: inline;
-  }
-
-  input[type="checkbox"] {
-    margin-right: 8px;
-  }
-    </style>
+    .blue-bar {
+      background-color: #0050a2;
+      padding: 10px 2%;
+      margin: 0 2%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  </style>
 </head>
 
-<header class="header">
-    <a id="TopLogo" href="/map-view.html">
+<body>
+  <header class="header">
+    <a id="TopLogo" href="/">
       <ul>
         <li><img src="https://www.mmu.edu.my/wp-content/themes/mmu2018/assets/images/logo-mmu2x.png" alt="MMU logo"
             width="150px"></li>
@@ -171,22 +101,37 @@
       <p style="margin: 0; padding: 20px;"></p>
       <div class="user-btn w3-xlarge">
         <button>
-          <a href="login-form.html" class="user-btn">
+          <a href="/login" class="user-btn">
             <i class="fa-solid fa-circle-user"></i>
           </a>
         </button>
       </div>
 
-    <!-- Search Bar, but wont show since outcome is bad-->
-    <!-- <div class="container2">
+      <!-- Search Bar, but wont show since outcome is bad-->
+      <!-- <div class="container2">
         <input type="text" placeholder=" Search" class="search-input">
         <div class="output"></div>
     </div> -->
   </header>
 
- 
-
-<body>
-    {% block body%}{% endblock %}
+  {% block body%}{% endblock %}
 </body>
+
+<script>
+  // Script for Login Form //
+  var modal = document.getElementById('id01');
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+
+
+
+  L.geoJSON(pointJSON).addTo(map)
+
+</script>
+<script src="script.js"></script>
+<script src="./data/point.js"></script>
+
 </html>

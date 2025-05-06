@@ -1,64 +1,49 @@
-*{
+    *{
     box-sizing: border-box;
-}
+    }
 
-
-body {
+    body {
     margin: 0;
     color: black;
     background-color: #f1f1f1;
     font-family: sans-serif;
     }
 
-.container {
+    .container {
     display: flex;
     height: 100vh;
+    overflow: hidden;
     }
-    
-.filters, .details, .map {
-    padding: 20px;
-}
 
-.filters {
+    .filters, .details, .map {
+    padding: 0;
+    }
+
+    .filters {
     width: 15%;
     border-right: 1px;
-}
+    padding-left: 40px;
+    }
 
-.details {
+    .details {
     width: 45%;
     border-right: 0;
-}
+    }
 
-.map {
+    .map {
     width: 40%;
     height: 100%;
-    /* Or whatever height you want */
     padding: 0;
-}
+    }
 
-#map {
+    #map {
     height: 80%;
     width: 90%;
     border-radius: 10px;
-}
-
-.container, .filters .details, .map {
-    background-color: #f1f1f1;
-}
-
-.table {
-    border: black;
-    border-radius: 10px;
-}
-
-/* Lines for styling header*/  
-.header {
-    background-color: #f1f1f1;
-    border-bottom: black 1px;
-    font-family: 'Roboto', sans-serif;
     }
 
-#TopLogo {
+    /* Style for header*/
+    #TopLogo {
     display: inline-block;
     padding: 10px;
     margin: 0px;
@@ -74,8 +59,8 @@ body {
     cursor: pointer;
     border-bottom: black 1px;
     }
-    
-#TopLogo ul, #TopLogo li {
+
+    #TopLogo ul, #TopLogo li {
     font-size: 30px;
     display: inline-block;
     vertical-align: middle;
@@ -84,7 +69,18 @@ body {
     margin: 0%;
     }
 
-.top-bar {
+    .header {
+    background-color: #f1f1f1;
+    border-bottom: black 1px;
+    font-family: 'Roboto', sans-serif;
+    }
+
+    .table {
+    border: black;
+    border-radius: 10px;
+    }
+
+    .top-bar {
     background-color: #0050a2;
     color: white;
     margin-left: 2%;
@@ -94,10 +90,8 @@ body {
     border-radius: 10px;
     font-size: 0.9rem;
     }
-    
 
-
-.blue-bar {
+    .blue-bar {
     background-color: #0050a2;
     padding: 10px 2%;
     margin: 0 2%;
@@ -108,69 +102,95 @@ body {
     align-items: center;
     }
 
-.user-btn i {
-    font-size: 20px;
-}
+    /* Styling for Filter List */
+    .container, .filters .details, .map {
+    background-color: #f1f1f1;
+    }
 
-/* Price Button Styling */
-.price-buttons button, .category {
-    border: 1px solid #ccc;
+    .container {
+    padding-left: 20px;
+    }
 
-    padding: 5px 15px;
+    /* Price button Styling */
+    .price-buttons.segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    overflow: hidden;
+    }
+
+    .price-buttons.segmented button {
+    flex: 1 1 auto; 
+    border: none;
+    padding: 8px 15px;
     background-color: white;
     cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    outline: none;
+    transition: background-color 0.2s;
+    border-left: 1px solid #ccc;
+    }
 
-}
+    .price-buttons.segmented button:first-child {
+    border-left: none;
+    }
 
-/* See More Button Styling */
-.see-more-container {
+    .price-buttons.segmented button:hover {
+    background-color: #eee;
+    }
+
+    .price-buttons.segmented button.active {
+    background-color: #0050a2;
+    color: white;
+    }
+
+    /* See More Button Styling */
+    .see-more-container {
     display: flex;
     flex-direction: row;
     color: #111;
-}
+    }
 
-.see-more-btn {
-    color: #0050a2; 
+    .see-more-btn {
+    color: #0050a2;
     cursor: pointer;
-}
+    }
 
-.container1 {
-    padding: 1rem;
-}
-
-.more-category {
+    .more-category {
     display: none;
-}
+    }
 
-.more-category--show {
+    .more-category--show {
     display: inline;
-}
+    }
 
-input[type="checkbox"] {
+    input[type="checkbox"] {
     margin-right: 8px;
-}
+    }
 
-/* Filter Search Styling */
-input [type="text"], input[type="search"]{
+    /* Filter Search Styling */
+    input [type="text"], input[type="search"]{
     width: 100%;
     outline: none;
     margin-bottom: 2rem;
     padding: 0.5rem ;
     border: 1px;
     border-radius: 10px;
-}
+    }
 
-.list-items {
+    .list-items {
     list-style: none;
     border: 1px #ccc;
     border-radius: 10px;
-}
+    }
 
-.list-item {
+    .list-item {
     background-color: white;
     padding: 1rem;
     border-bottom: 1px solid #ccc;
-}
+    }
 
 
-   
+

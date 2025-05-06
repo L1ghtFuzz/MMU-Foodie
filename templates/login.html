@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  button {
+    background-color: #04AA6D;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  button:hover {
+    opacity: 0.8;
+  }
+
+  .imgcontainer {
+    text-align: center;
+    margin: 20px 0 10px 0;
+    position: relative;
+  }
+
+  img.avatar {
+    width: 40%;
+    border-radius: 50%;
+  }
+
+  .container {
+    padding: 16px;
+  }
+
+  span.psw {
+    float: right;
+    padding-top: 16px;
+  }
+</style>
+
+<div class="container" style="max-width: 500px; margin-top: 30px;">
+  <div class="imgcontainer">
+    <img src="{{ url_for('static', filename='Avatar.png') }}" alt="Avatar" class="avatar">
+  </div>
+  <form method="POST">
+    <label for="identifier"><b>Email or Username</b></label>
+    <input type="text" placeholder="Enter Email or Username" name="identifier" required>
+  
+    <label for="password"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="password" required>
+  
+    <button type="submit">Login</button>
+    <label>
+      <input type="checkbox" name="remember" checked> Remember me
+    </label>
+    <p><a href="{{ url_for('auth.sign-up') }}">Don't have an account?</a></p>
+    <span class="psw"><a href="#">Forgot password?</a></span>
+  </form>
+</div>
+{% endblock %}
