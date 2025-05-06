@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ restaurant.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/restaurant_detail.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        h2 {
+            margin-top: 40px;
+            font-size: 24px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        .nav-tabs a.active {
+            border-bottom: 2px solid black;
+        }
+
+        .closed {
+            color: red;
+            font-weight: bold;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .info-row a {
+            text-decoration: none;
+            color: #000;
+            font-weight: 500;
+        }
+
+        .features {
+            margin-top: 20px;
+        }
+
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li::before {
+            content: '✓';
+            margin-right: 8px;
+            color: green;
+        }
+
+        aside {
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+        .map-image {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .save-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .save-card button {
+            padding: 10px 20px;
+            border: 1px solid #000;
+            border-radius: 30px;
+            background: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-card button:hover {
+            background: #000;
+            color: white;
+        }
+
+        .hours-table {
+            margin-top: 10px;
+        }
+
+        .hours-table td {
+            padding: 4px 8px;
+        }
+
+        .website-phone {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .photos img {
+            width: 200px;
+            margin: 10px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .photos form {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-tabs">
+        <a class="active" href="#">Overview</a>
+        <a href="#">Hours</a>
+        <a href="#">Location</a>
+        <a href="#">Reviews</a>
+    </div>
+
+    <div class="container">
+        <!-- Left side -->
+        <div>
+            <h2>At a glance</h2>
+            <p class="closed">Closed now <span style="color: #888;">• Opens at 12:00 PM</span></p>
+            <p>{{ restaurant.address }}</p>
+
+            <div class="info-row website-phone">
+                <a href="{{ restaurant.google_maps_link }}" target="_blank">Website</a>
+                <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
+                <span style="color:#888;">Improve this listing</span>
+            </div>
+
+            <h2>About</h2>
+            <p>{{ restaurant.description or 'No description provided.' }}</p>
+
+            <div class="features">
+                <h4>Features</h4>
+                <ul>
+                    <li>Lunch, Dinner</li>
+                    <li>{{ restaurant.cuisine }}</li>
+                </ul>
+                <a href="#" style="color: black; font-weight: bold;">See all features</a>
+            </div>
+
+            <h2>Location</h2>
+            <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_GOOGLE_MAPS_API_KEY" alt="Map">
+
+            <h2>Photos</h2>
+            <form method="POST" action="{{ url_for('upload_image', restaurant_id=restaurant.id) }}" enctype="multipart/form-data">
+                <input type="file" name="image" required>
+                <button type="submit">Upload</button>
+            </form>
+
+            <div class="photos">
+                {% for img in restaurant.images %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ img.filename) }}">
+                {% else %}
+                    <p>No photos uploaded yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right side -->
+        <aside>
+            <div class="save-card">
+                <h3>Save this restaurant</h3>
+                <button>♡ Save</button>
+            </div>
+
+            <div>
+                <h3>Hours</h3>
+                <p class="closed">Closed now • Opens at 12:00 PM</p>
+                <table class="hours-table">
+                    <tr><td>Sunday</td><td>12:00 PM - 8:30 PM</td></tr>
+                    <tr><td>Monday</td><td>12:00 PM - 8:30 PM</td></tr>
+                    <tr><td>Tuesday</td><td><strong>12:00 PM - 8:30 PM</strong></td></tr>
+                    <tr><td>Wednesday</td><td>12:00 PM - 8:30 PM</td></tr>
+                    <tr><td>Thursday</td><td>12:00 PM - 8:30 PM</td></tr>
+                    <tr><td>Friday</td><td>Closed</td></tr>
+                    <tr><td>Saturday</td><td>12:00 PM - 8:30 PM</td></tr>
+                </table>
+            </div>
+        </aside>
+    </div>
+
+</body>
+</html>
