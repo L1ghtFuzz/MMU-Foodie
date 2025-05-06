@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Random Restaurant Picker{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">Feeling Hungry? Get a Random Restaurant!</h2>
+
+<form method="POST">
+  <button type="submit" class="btn btn-primary">Pick One</button>
+</form>
+
+{% if selected %}
+  <div class="mt-4 alert alert-info">
+    <h4 class="alert-heading">We suggest:</h4>
+    <p>{{ selected restaurant }}</p>
+  </div>
+{% endif %}
+
+<ul class="mt-4">
+  {% for restaurant in restaurants %}
+    <li>{{ restaurant }}</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}
