@@ -36,12 +36,17 @@ label {
     color: #ffffff;
 }
 
-input {
+input, textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #7b0847;
     border-radius: 5px;
     box-sizing: border-box;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
 }
 
 button {
@@ -70,4 +75,3 @@ button:hover {
         margin-top: 40px;
     }
 }
-

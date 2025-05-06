@@ -19,6 +19,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 
 # ========== Models ==========
+
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -40,7 +41,7 @@ class RestaurantImage(db.Model):
 
 # ========== Routes ==========
 
-# Route for form page
+# Route for form page (add restaurant)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -52,6 +53,7 @@ def index():
         rating = int(request.form['rating'])
         description = request.form['description']
 
+        # Create restaurant
         new_restaurant = Restaurant(
             name=name,
             address=address,
@@ -61,9 +63,20 @@ def index():
             rating=rating,
             description=description
         )
-
         db.session.add(new_restaurant)
         db.session.commit()
+
+        # Handle image upload
+        if 'image' in request.files:
+            image = request.files['image']
+            if image and image.filename != '':
+                filename = secure_filename(image.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image.save(filepath)
+
+                new_image = RestaurantImage(filename=filename, restaurant_id=new_restaurant.id)
+                db.session.add(new_image)
+                db.session.commit()
 
         return redirect(url_for('restaurant_detail', restaurant_id=new_restaurant.id))
 
@@ -75,7 +88,7 @@ def restaurant_detail(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
     return render_template('restaurant_detail.html', restaurant=restaurant)
 
-# Upload image handler
+# Upload additional image to existing restaurant
 @app.route('/restaurant/<int:restaurant_id>/upload', methods=['POST'])
 def upload_image(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
@@ -98,6 +111,7 @@ def upload_image(restaurant_id):
     return redirect(url_for('restaurant_detail', restaurant_id=restaurant.id))
 
 # ========== Run App ==========
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
