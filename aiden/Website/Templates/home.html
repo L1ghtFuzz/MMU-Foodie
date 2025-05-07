@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %} Home {% endblock %}
+{% block content %}
+
+<style>
+  .restaurant-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+  }
+</style>
+
+<h1 align="center">Search Restaurants</h1>
+
+<form method="GET" action="/search">
+  <div class="input-group mb-3">
+    <input list="restaurant-options" type="text" class="form-control" placeholder="Search for a restaurant..." name="query" required>
+    <datalist id="restaurant-options">
+      {% for r in all_restaurants %}
+        <option value="{{ r.name }}">
+      {% endfor %}
+    </datalist>
+    <div class="input-group-append">
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+{% if results %}
+  <h3 class="mt-4">Search Results:</h3>
+  <ul class="list-group list-group-flush">
+    {% for restaurant in results %}
+    <li class="list-group-item">
+      <div class="card mb-3">
+        {% if restaurant.image %}
+        <img src="{{ url_for('static', filename=restaurant.image) }}" class="card-img-top" alt="{{ restaurant.name }}">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ restaurant.name }}</h5>
+          <p class="card-text">
+            <strong>Cuisine:</strong> {{ restaurant.cuisine }}<br>
+            <strong>Location:</strong> {{ restaurant.location }}<br>
+            <em>{{ restaurant.description }}</em>
+          </p>
+          {% if restaurant.id in user_favourites %}
+            <a href="/unfavourite/{{ restaurant.id }}" class="btn btn-outline-danger btn-sm">Unfavourite</a>
+          {% else %}
+            <a href="/favourite/{{ restaurant.id }}" class="btn btn-outline-primary btn-sm">Favourite</a>
+          {% endif %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+{% elif query %}
+  <p class="text-muted">No results found for "{{ query }}".</p>
+{% endif %}
+
+<h3 class="mt-5">All Restaurants:</h3>
+<div class="row">
+  {% for r in all_restaurants %}
+  <div class="col-md-6 mb-4">
+    <div class="card h-100">
+      {% if r.image %}
+      <img src="{{ url_for('static', filename=r.image) }}" class="card-img-top" alt="{{ r.name }}">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ r.name }}</h5>
+        <p class="card-text">
+          <strong>Cuisine:</strong> {{ r.cuisine }}<br>
+          <strong>Location:</strong> {{ r.location }}<br>
+          <em>{{ r.description }}</em>
+        </p>
+        {% if r.id in user_favourites %}
+          <a href="/unfavourite/{{ r.id }}" class="btn btn-outline-danger btn-sm">Unfavourite</a>
+        {% else %}
+          <a href="/favourite/{{ r.id }}" class="btn btn-outline-primary btn-sm">Favourite</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
