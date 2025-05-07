@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
+    background-color: rgb(4, 4, 104);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,11 +8,16 @@ body {
 }
 
 .form-container {
-    background: white;
+    background: rgb(224, 44, 44);
     padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     width: 350px;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #f9fafb; 
 }
 
 h2 {
@@ -23,6 +28,7 @@ h2 {
 label {
     display: block;
     margin-top: 10px;
+    color: white;
 }
 
 input {
