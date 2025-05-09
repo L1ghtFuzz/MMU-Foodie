@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}Login{% endblock %}
 
 {% block content %}
@@ -47,7 +48,6 @@
   }
 </style>
 
-{% block body %}
 <div class="container" style="max-width: 500px; margin-top: 30px;">
   <div class="imgcontainer">
     <img src="{{ url_for('static', filename='Avatar.png') }}" alt="Avatar" class="avatar">
@@ -63,9 +63,8 @@
     <label>
       <input type="checkbox" name="remember" checked> Remember me
     </label>
-    <p><a href="{{ url_for('sign_up') }}">Don't have an account?</a></p>
+    <p><a href="{{ url_for('/sign-up') }}">Don't have an account?</a></p>
     <span class="psw"><a href="#">Forgot password?</a></span>
   </form>
 </div>
-{% endblock %}
 {% endblock %}

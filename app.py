@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, flash, url_for
 from flask_scss import Scss
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_admin import Admin
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, login_user, login_required, logout_user, current_user
+
+
 
 
 app = Flask(__name__)
@@ -28,7 +32,15 @@ class Restaurant(db.Model):
     category = db.Column(db.String(20))  
     rating = db.Column(db.Float)  
     link = db.Column(db.String(200)) 
-
+    
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    email = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(150))
+    first_name = db.Column(db.String(150))
+    favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
+    is_admin = db.Column(db.Boolean, default=False)
 
 # Routes to Webpages
 
@@ -62,6 +74,38 @@ def login():
             return 'Invalid credentials'
 
     return render_template('login.html')
+
+# Sign Up 
+@app.route('/sign-up', methods=['GET', 'POST'])
+def sign_up():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        username = request.form.get('username')
+        first_name = request.form.get('firstName')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash('Email already exists.', category='error')
+        elif len(email) < 4:
+            flash('Email must be greater than 3 characters.', category='error')
+        elif len(first_name) < 2:
+            flash('First name must be greater than 1 character.', category='error')
+        elif password1 != password2:
+            flash('Passwords don\'t match.', category='error')
+        elif len(password1) < 7:
+            flash('Password must be at least 7 characters.', category='error')
+        else:
+            new_user = User(email=email, first_name=first_name, password=generate_password_hash(
+                password1, method='pbkdf2:sha256'))
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user, remember=True)
+            flash('Account created!', category='success')
+            return redirect(url_for('views.home'))
+
+    return render_template("sign-up.html", user=current_user)
 
 @app.route('/dashboard')
 def dashboard():

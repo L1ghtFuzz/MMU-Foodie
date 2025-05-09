@@ -87,7 +87,6 @@
   }
 </style>
 
-{% block body %}
 <form method="POST">
   <div class="container">
     <h1>Sign Up</h1>
@@ -96,9 +95,6 @@
 
     <label for="email"><b>Email</b></label>
     <input type="email" placeholder="Enter Email" name="email" id="email" required>
-
-    <label for="username"><b>Username</b></label>
-    <input type="username" placeholder="Enter Username" name="username" id="username" required>
 
     <label for="firstName"><b>First Name</b></label>
     <input type="text" placeholder="Enter First Name" name="firstName" id="firstName" required>
@@ -164,5 +160,4 @@
     length.className = myInput.value.length >= 8 ? "valid" : "invalid";
   };
 </script>
-{% endblock %}
 {% endblock %}
