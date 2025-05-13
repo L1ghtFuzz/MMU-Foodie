@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Favourites{% endblock %}
+{% block content %}
+
+<h2>Your Favourite Restaurants</h2>
+
+{% if favourites %}
+  <ul class="list-group">
+    {% for r in favourites %}
+      <li class="list-group-item">
+        <strong>{{ r.name }}</strong><br>
+        <small>{{ r.cuisine }} - {{ r.location }}</small><br>
+        <em>{{ r.description }}</em><br>
+        <a href="/unfavourite/{{ r.id }}" class="btn btn-sm btn-outline-danger mt-1">Unfavourite</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You haven’t favourited any restaurants yet.</p>
+{% endif %}
+
+{% endblock %}

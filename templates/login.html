@@ -1,71 +1,115 @@
 {% extends "base.html" %}
+
 {% block title %}Login{% endblock %}
 
-{% block content %}
+{% block style %}
 <style>
-  input[type=text], input[type=password] {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f7;
+}
 
-  button {
-    background-color: #04AA6D;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-  }
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+  width: 100%;
+}
 
-  button:hover {
-    opacity: 0.8;
-  }
+.login-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: left;
+}
 
-  .imgcontainer {
-    text-align: center;
-    margin: 20px 0 10px 0;
-    position: relative;
-  }
+.login-form h2 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+}
 
-  img.avatar {
-    width: 40%;
-    border-radius: 50%;
-  }
+.login-form label {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #333;
+}
 
-  .container {
-    padding: 16px;
-  }
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.2rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
 
-  span.psw {
-    float: right;
-    padding-top: 16px;
-  }
+.login-form .remember {
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.login-form button {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #005bb5;
+}
+
+.login-form .links {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.login-form .links a {
+  color: #0071e3;
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin: 0 0.5rem;
+}
 </style>
+{% endblock %}
 
 {% block body %}
-<div class="container" style="max-width: 500px; margin-top: 30px;">
-  <div class="imgcontainer">
-    <img src="{{ url_for('static', filename='Avatar.png') }}" alt="Avatar" class="avatar">
+<div class="container">
+  <div class="login-container">
+    <form method="POST" class="login-form">
+      <h2>Login</h2>
+      <label>Email or Username</label>
+      <input type="text" name="identifier" placeholder="Enter Email or Username" required>
+
+      <label>Password</label>
+      <input type="password" name="password" placeholder="Enter Password" required>
+
+      <div class="remember">
+        <input type="checkbox" name="remember"> Remember me
+      </div>
+
+      <button type="submit">Login</button>
+
+      <div class="links">
+        <a href="/sign-up">Don't have an account?</a>
+        <a href="#">Forgot password?</a>
+      </div>
+    </form>
   </div>
-  <form method="POST">
-    <label for="identifier"><b>Email or Username</b></label>
-    <input type="text" placeholder="Enter Email or Username" name="identifier" required>
-  
-    <label for="password"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="password" required>
-  
-    <button type="submit">Login</button>
-    <label>
-      <input type="checkbox" name="remember" checked> Remember me
-    </label>
-    <p><a href="{{ url_for('sign_up') }}">Don't have an account?</a></p>
-    <span class="psw"><a href="#">Forgot password?</a></span>
-  </form>
 </div>
-{% endblock %}
 {% endblock %}

@@ -2,6 +2,37 @@
 
 {% block title %}MMU Foodie{% endblock %}
 
+{% block style %}
+<style>
+  .restaurant-card {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.restaurant-image {
+  width: 150px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 1rem;
+}
+
+.restaurant-info h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.restaurant-info p {
+  margin: 0.3rem 0;
+}
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container">
   <div class="filters">
@@ -9,10 +40,12 @@
 
       <h3>Price</h3>
       <div class="price-buttons segmented">
-        <button>$</button>
-        <button>$$</button>
-        <button>$$$</button>
-        <button>$$$$</button>
+        <div class="price-buttons segmented">
+          <button onclick="updateURLParam('price', '$')">$</button>
+          <button onclick="updateURLParam('price', '$$')">$$</button>
+          <button onclick="updateURLParam('price', '$$$')">$$$</button>
+          <button onclick="updateURLParam('price', '$$$$')">$$$$</button>
+        </div>
       </div>
 
       <h3>Suggested</h3>
@@ -34,14 +67,15 @@
         <div class="container1">
 
           <h3>Category</h3>
-          <button class="category">Local</button>
-          <button class="category">Western</button>
-          <button class="category">Chinese</button>
-          <button class="category">Fast Food</button>
+          <button onclick="updateURLParam('category', 'Local')" class="category">Local</button>
+          <button onclick="updateURLParam('category', 'Western')" class="category">Western</button>
+          <button onclick="updateURLParam('category', 'Chinese')" class="category">Chinese</button>
+          <button onclick="updateURLParam('category', 'Fast Food')" class="category">Fast Food</button>
           <span class="more-category">
-            <button class="category">Japanese</button>
-            <button class="category">Italian</button>
-            <button class="category">Korean</button>
+            <button onclick="updateURLParam('category', 'Japanese')" class="category">Japanese</button>
+            <button onclick="updateURLParam('category', 'Italian')" class="category">Italian</button>
+            <button onclick="updateURLParam('category', 'Korean')" class="category">Korean</button>
+            <button onclick="updateURLParam('category', 'French')" class="category">French</button>
           </span>
           <span class="see-more-btn">Show More</span>
 
@@ -51,7 +85,15 @@
       <div class="rating-container">
         <div>
           <h3>Ratings</h3>
-          <label>Min Rating: <input type="number" id="rating" step="1" min="1" max="5"></label>
+          <label>Min Rating: 
+            <select onchange="updateURLParam('rating', this.value)">
+              <option value="">--</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -59,23 +101,62 @@
 
       <ul id="results"></ul>
     </div>
-
   </div>
 
   <div class="details">
-    <!-- Restaurant descriptions go here -->
+    {% for restaurant in restaurants %}
+    <div class="restaurant-card">
+      <img src="{{ restaurant.image_url or url_for('static', filename='default.jpg') }}" alt="{{ restaurant.name }}" class="restaurant-image">
+      <div class="restaurant-info">
+        <h2>{{ restaurant.name }}</h2>
+        <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+        <p><strong>Rating:</strong> {{ restaurant.rating }} / 5</p>
+        <p><strong>Price:</strong> {{ restaurant.price }}</p>
+        <!-- <p>{{ restaurant.description }}</p>
+        <a href="{{ restaurant.google_maps_link }}" target="_blank">View on Google Maps</a> -->
+      </div>
+    </div>
+    {% endfor %}
   </div>
+
   <div class="map">
     <div id="map"></div>
   </div>
 </div>
 <script>
+  function updateURLParam(key, value) {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    // If value already exists, toggle it off
+    let existing = params.get(key);
+    let values = existing ? existing.split(',') : [];
+
+    if (values.includes(value)) {
+      values = values.filter(v => v !== value);
+    } else {
+      values.push(value);
+    }
+
+    if (values.length > 0) {
+      params.set(key, values.join(','));
+    } else {
+      params.delete(key);
+    }
+
+    // Update URL and reload
+    url.search = params.toString();
+    window.location.href = url.toString();
+  }
 
   // Filters Apply Function
   async function applyFilters() {
     const prices = [...document.querySelectorAll('.price:checked')].map(el => el.value);
-    const categories = [...document.querySelectorAll('.category:checked')].map(el => el.value);
+    const categories = [...document.querySelectorAll('.category.active')].map(el => el.textContent.trim());
     const rating = parseFloat(document.getElementById('rating').value) || 0;
+
+
+    console.log({ price: prices, category: categories, rating }); // DEBUG
 
     const response = await fetch('/filter', {
       method: 'POST',
@@ -84,9 +165,30 @@
     });
 
     const data = await response.json();
+    console.log('Filtered Results:', data); // DEBUG
+
     const results = document.getElementById('results');
     results.innerHTML = data.map(r => `<li>${r.name} - ${r.price} - ${r.category} - ${r.rating}</li>`).join('');
   }
+
+    // Price button
+    const priceButtons = document.querySelectorAll('.price-buttons.segmented button');
+
+    priceButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        priceButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+
+    // Category Filter
+    const categoryButtons = document.querySelectorAll('.category');
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        button.classList.toggle('active');
+      });
+    });
 
   //*Show More Show Less
   const parentContainer = document.querySelector('.see-more-container');
@@ -100,16 +202,6 @@
       "Show Less" : "Show More";
   })
 
-  // Price button
-  const priceButtons = document.querySelectorAll('.price-buttons.segmented button');
-
-  priceButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      priceButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-    });
-  });
-
   // Script for Leaflet Map //
   const map = L.map('map').setView([2.927891727185679, 101.6418836043987], 15);
   var osm = L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
@@ -122,7 +214,8 @@
   var marker = L.marker([2.927891727185679, 101.6418836043987]).addTo(map);
   marker.bindPopup("<b>Multimedia University").openPopup();
 
-  map.on('click', onMapClick);
 
 </script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="{{ url_for('static', filename='data/point.js') }}"></script>
 {% endblock %}

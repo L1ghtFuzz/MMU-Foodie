@@ -1,168 +1,148 @@
 {% extends "base.html" %}
 {% block title %}Sign Up{% endblock %}
 
-{% block content %}
+{% block style %}
 <style>
   body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: black;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
   }
 
-  .container {
-    padding: 16px;
-    background-color: white;
-  }
-
-  input[type=text], input[type=password], input[type=email] {
+  .signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 85%;
     width: 100%;
-    padding: 15px;
-    margin: 5px 0 22px 0;
-    display: inline-block;
-    border: none;
-    background: #dacfcf;
   }
 
-  input:focus {
-    background-color: #ddd;
-    outline: none;
+  .signup-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
   }
 
-  hr {
-    border: 1px solid #f1f1f1;
-    margin-bottom: 25px;
+  .signup-form h2 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #1d1d1f;
   }
 
-  .registerbtn {
-    background-color: #04AA6D;
+  .signup-form label {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  .signup-form input[type="text"],
+  .signup-form input[type="password"],
+  .signup-form input[type="email"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.2rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .signup-form .password-rules {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.5rem;
+    background: #f1f1f1;
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .signup-form button {
+    width: 100%;
+    padding: 0.7rem;
+    background-color: #0071e3;
     color: white;
-    padding: 16px 20px;
-    margin: 8px 0;
     border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    margin-top: 1.5rem;
     cursor: pointer;
-    width: 100%;
-    opacity: 0.9;
+    transition: background 0.3s ease;
   }
 
-  .registerbtn:hover {
-    opacity: 1;
+  .signup-form button:hover {
+    background-color: #005bb5;
   }
 
-  .signin {
-    background-color: #f1f1f1;
+  .signup-form .links {
+    margin-top: 1rem;
     text-align: center;
   }
 
-  #message {
-    display: none;
-    background: #f1f1f1;
-    color: #000;
-    position: relative;
-    padding: 20px;
-    margin-top: 10px;
+  .signup-form .links a {
+    color: #0071e3;
+    text-decoration: none;
+    font-size: 0.85rem;
   }
 
-  #message p {
-    padding: 10px 35px;
-    font-size: 18px;
-  }
-
-  .valid {
-    color: green;
-  }
-
-  .valid:before {
-    position: relative;
-    left: -35px;
-    content: "✔";
-  }
-
-  .invalid {
+  .error-message {
     color: red;
-  }
-
-  .invalid:before {
-    position: relative;
-    left: -35px;
-    content: "✖";
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
   }
 </style>
+{% endblock %}
 
 {% block body %}
-<form method="POST">
-  <div class="container">
-    <h1>Sign Up</h1>
-    <p>Please fill in this form to create an account.</p>
-    <hr>
+<div class="container">
+  <div class="signup-container">
+    <form method="POST" class="signup-form">
+      <h2>Sign Up</h2>
 
-    <label for="email"><b>Email</b></label>
-    <input type="email" placeholder="Enter Email" name="email" id="email" required>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="error-message">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-    <label for="username"><b>Username</b></label>
-    <input type="username" placeholder="Enter Username" name="username" id="username" required>
+      <label>Email</label>
+      <input type="email" name="email" placeholder="Enter Email" required>
 
-    <label for="firstName"><b>First Name</b></label>
-    <input type="text" placeholder="Enter First Name" name="firstName" id="firstName" required>
+      <label>Username</label>
+      <input type="text" name="username" placeholder="Enter Username" required>
 
-    <label for="password1"><b>Password</b></label>
-    <input
-      type="password"
-      placeholder="Enter Password"
-      name="password1"
-      id="psw"
-      pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-      title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-      required
-    />
+      <label>First Name</label>
+      <input type="text" name="firstName" placeholder="Enter First Name" required>
 
-    <div id="message">
-      <h3>Password must contain the following:</h3>
-      <p id="letter" class="invalid">A <b>Lowercase</b> letter</p>
-      <p id="capital" class="invalid">A <b>Capital (uppercase)</b> letter</p>
-      <p id="number" class="invalid">A <b>Number</b></p>
-      <p id="length" class="invalid">Minimum <b>8 characters</b></p>
-    </div>
+      <label>Password</label>
+      <input type="password" name="password1" placeholder="Enter Password" 
+             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+             title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 characters"
+             required>
+      <div class="password-rules">
+        Password must contain:
+        <ul>
+          <li>At least 8 characters</li>
+          <li>At least one uppercase letter</li>
+          <li>At least one lowercase letter</li>
+          <li>At least one number</li>
+        </ul>
+      </div>
 
-    <label for="password2"><b>Confirm Password</b></label>
-    <input type="password" placeholder="Repeat Password" name="password2" id="psw-repeat" required>
+      <label>Confirm Password</label>
+      <input type="password" name="password2" placeholder="Repeat Password" required>
 
-    <hr>
-    <p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
+      <button type="submit">Register</button>
 
-    <button type="submit" class="registerbtn">Register</button>
+      <div class="links">
+        <a href="/login">Already have an account?</a>
+      </div>
+    </form>
   </div>
-
-  <div class="container signin">
-    <p>Already have an account? <a href="/login">Log in</a>.</p>
-  </div>
-</form>
-
-<script>
-  var myInput = document.getElementById("psw");
-  var letter = document.getElementById("letter");
-  var capital = document.getElementById("capital");
-  var number = document.getElementById("number");
-  var length = document.getElementById("length");
-
-  myInput.onfocus = function () {
-    document.getElementById("message").style.display = "block";
-  };
-
-  myInput.onblur = function () {
-    document.getElementById("message").style.display = "none";
-  };
-
-  myInput.onkeyup = function () {
-    var lowerCaseLetters = /[a-z]/g;
-    letter.className = myInput.value.match(lowerCaseLetters) ? "valid" : "invalid";
-
-    var upperCaseLetters = /[A-Z]/g;
-    capital.className = myInput.value.match(upperCaseLetters) ? "valid" : "invalid";
-
-    var numbers = /[0-9]/g;
-    number.className = myInput.value.match(numbers) ? "valid" : "invalid";
-
-    length.className = myInput.value.length >= 8 ? "valid" : "invalid";
-  };
-</script>
-{% endblock %}
+</div>
 {% endblock %}

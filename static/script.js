@@ -1,33 +1,11 @@
-//*Show More Show Less
-const parentContainer = document.querySelector('.see-more-container');
-
-parentContainer.addEventListener('click', event=>{
-    
-    const current = event.target;
-
-    const isSeeMoreBtn = current.className.includes('see-more-btn');
-
-    if(!isSeeMoreBtn) return;
-
-    const currentText = event.target.parentNode.querySelector('.more-category');
-
-    currentText.classList.toggle('more-category--show');
-
-    current.textContent = current.textContent.includes('Show More') ?
-    "Show Less" : "Show More";
-
-})
-
-
-// const list = [
-//     "HTML 5",
-//    "CSS3",
-//    "React",
-//    "PHP",
-//    "Node.js",
-//    "JavaScript",
-// ]
-// Deleted the column cuz not needed for now 
+const list = [
+    "HTML 5",
+   "CSS3",
+   "React",
+   "PHP",
+   "Node.js",
+   "JavaScript",
+]
 
 const output = document.querySelector(".output");
 const search = document.querySelector(".filter-input");
@@ -41,5 +19,9 @@ function loadList(){
     });
     temp += `</ul>`;
 
+    if (output) {
     output.innerHTML = temp
+    } else {
+    console.warn("output element not found");
+    }
 }

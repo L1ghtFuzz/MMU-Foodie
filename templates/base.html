@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{%block title %}MMU Foodie{% endblock %}</title>
+  <title>{% block title %}MMU Foodie{% endblock %}</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -13,12 +14,11 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <!-- Make sure you put this AFTER Leaflet's CSS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></script>
 
 
+  {% block style %}{% endblock %}
   <style>
     body {
       margin: 0;
@@ -42,7 +42,7 @@
       margin-top: 0.5rem;
       margin-bottom: 10px;
       cursor: pointer;
-      border-bottom: black 1px;
+      border-bottom: 1px black;
     }
 
     #TopLogo ul,
@@ -57,7 +57,7 @@
 
     .header {
       background-color: #f1f1f1;
-      border-bottom: black 1px;
+      border-bottom: 1px black;
       font-family: 'Roboto', sans-serif;
       overflow: hidden;
     }
@@ -83,55 +83,90 @@
       justify-content: flex-end;
       align-items: center;
     }
+
   </style>
 </head>
 
 <body>
-  <header class="header">
-    <a id="TopLogo" href="/">
-      <ul>
-        <li><img src="https://www.mmu.edu.my/wp-content/themes/mmu2018/assets/images/logo-mmu2x.png" alt="MMU logo"
-            width="150px"></li>
-        <li><b>MMU Foodie</b></li>
+<header class="header">
+  <a id="TopLogo" href="/">
+    <ul>
+      <li><img src="https://www.mmu.edu.my/wp-content/themes/mmu2018/assets/images/logo-mmu2x.png" alt="MMU logo" width="150px"></li>
+      <li><b>MMU Foodie</b></li>
+    </ul>
+  </a>
+
+  <div class="blue-bar">
+    <nav style="flex-grow: 1;">
+      <ul style="list-style: none; display: flex; gap: 20px; margin: 0; padding: 0; align-items: center;">
+        <li><a href="/" style="color: white; text-decoration: none;">Home</a></li>
+        <li><a href="/favourites" style="color: white; text-decoration: none;">Favourites</a></li>
+        <li><a href="/randomizer" style="color: white; text-decoration: none;">Randomizer</a></li>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          <li><a href="/form" style="color: white; text-decoration: none;">Add Restaurant</a></li>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <a href="/logout" style="padding: 10px; display: block; color: black; text-decoration: none;">Logout</a>
+        {% else %}
+          <a href="/login" style="padding: 10px; display: block; color: black; text-decoration: none;">Login</a>
+        {% endif %}
+        
       </ul>
-    </a>
+    </nav>
 
-    <div class="blue-bar">
-      <!-- You can put anything here, like search, filters, etc -->
-      <p style="margin: 0; padding: 20px;"></p>
-      <div class="user-btn w3-xlarge">
-        <button>
-          <a href="/login" class="user-btn">
-            <i class="fa-solid fa-circle-user"></i>
-          </a>
-        </button>
+    <!-- Login/Logout Dropdown -->
+    <div class="dropdown" style="position: relative;">
+      <button class="user-btn w3-xlarge" id="userDropdownBtn" style="background: none; border: none; color: white;">
+        <i class="fa-solid fa-circle-user"></i>
+      </button>
+      <div id="dropdownContent" class="dropdown-content" style="display: none; position: absolute; right: 0; background-color: white; min-width: 200px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 2000;">
+        {% if current_user.is_authenticated %}
+          <div style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <strong>{{ current_user.name }}</strong><br>
+            <span style="font-size: 0.9rem; color: #555;">{{ current_user.email }}</span>
+          </div>
+          <a href="/logout" style="padding: 10px; display: block; color: black; text-decoration: none;">Logout</a>
+        {% else %}
+          <a href="/login" style="padding: 10px; display: block; color: black; text-decoration: none;">Login</a>
+        {% endif %}
       </div>
+    </div>
+  </div>
+</header>
 
-      <!-- Search Bar, but wont show since outcome is bad-->
-      <!-- <div class="container2">
-        <input type="text" placeholder=" Search" class="search-input">
-        <div class="output"></div>
-    </div> -->
-  </header>
 
-  {% block body%}{% endblock %}
-</body>
+  {% block body %}{% endblock %}
 
-<script>
-  // Script for Login Form //
-  var modal = document.getElementById('id01');
-  window.onclick = function (event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
+  <!-- JavaScript Files -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='data/point.js') }}"></script>
+
+  <script>
+    // Dropdown functionality
+    const dropdownBtn = document.getElementById('userDropdownBtn');
+    const dropdownContent = document.getElementById('dropdownContent');
+
+    dropdownBtn.addEventListener('click', () => {
+      dropdownContent.style.display = 
+        dropdownContent.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(e) {
+      if (!dropdownBtn.contains(e.target) && !dropdownContent.contains(e.target)) {
+        dropdownContent.style.display = 'none';
+      }
+    });
+
+    // Script for Login Form //
+    var modal = document.getElementById('id01');
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
     }
-  }
 
-
-
-  L.geoJSON(pointJSON).addTo(map)
-
-</script>
-<script src="script.js"></script>
-<script src="./data/point.js"></script>
+  </script>
+</body>
 
 </html>

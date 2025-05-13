@@ -1,0 +1,8 @@
+var pointJSON = { 
+    "type": "FeatureCollection",                
+    "features": [{ "type": "Feature", 
+    "properties": { "name": "Salam Noodles" }, 
+    "geometry": { "coordinates": [101.65147749749315, 2.9259632740267705], 
+    "type": "Point" }, 
+    "id": 0 }] 
+}
