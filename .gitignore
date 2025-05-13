@@ -18,3 +18,5 @@ website/database.db
 migrations/__pycache__/
 
 lydia's/
+
+.vscode/
