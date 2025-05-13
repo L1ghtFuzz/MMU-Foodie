@@ -36,8 +36,8 @@
       {% if current_user.is_authenticated %}
         <a class="nav-item nav-link" id="home" href="/">Home</a>
         <a class="nav-item nav-link" href="/favourites">Favourites</a>
-        <a class="nav-item nav-link" href="rrandom.html">Random?</a>
-        <a class="nav-item nav-link" href="past_restaurants">Visited</a>
+        <a class="nav-item nav-link" href="{{ url_for('views.random_restaurant') }}">Random?</a>
+        <a class="nav-item nav-link" href="{{ url_for('views.past_page') }}">Visited</a>
       {% endif %}
     </div>
     <div class="navbar-nav ml-auto">

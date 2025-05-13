@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Visited Restaurants{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Visited Restaurants</h2>
+  {% if past_restaurants %}
+    {% for restaurant in past_restaurants %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ restaurant.name }}</h5>
+          <p class="card-text"><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+          <p class="card-text"><strong>Location:</strong> {{ restaurant.location }}</p>
+          <p class="card-text">{{ restaurant.description }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>You haven't marked any restaurants as visited yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

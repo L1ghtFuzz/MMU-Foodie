@@ -2,7 +2,6 @@ from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
 
-# Association table for many-to-many relationship
 favourites = db.Table(
     'favourites',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -29,3 +28,4 @@ class Restaurant(db.Model):
     cuisine = db.Column(db.String(100))
     location = db.Column(db.String(150))
     description = db.Column(db.String(255))
+    image = db.Column(db.String(255))

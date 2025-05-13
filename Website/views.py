@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, request, flash, jsonify, url_for, redirect
 from flask_login import login_required, current_user
-from .models import Restaurant
+from .models import Note
 from . import db
-from sqlalchemy.sql import func
 import json, random
+# from sqlalchemy.sql import func
 
 views = Blueprint('views', __name__)
 
+# Hardcoded list of restaurants
 hardcoded_restaurants = [
     {"id": 1, "name": "Namo Garden", "cuisine": "Thai", "location": "Cyberjaya", "description": "Lush garden setting with authentic Thai cuisine.", "image": "namo.jpg"},
     {"id": 2, "name": "Giggles and Geeks", "cuisine": "Western Fusion", "location": "Cyberjaya", "description": "Quirky cafe with geek-themed meals.", "image": "giggles.jpg"},
@@ -20,6 +21,7 @@ hardcoded_restaurants = [
 
 user_favourites = set()
 user_past = set()
+user_reviews = {}
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
@@ -68,7 +70,12 @@ def past_page():
     past_restaurants = [r for r in hardcoded_restaurants if r['id'] in user_past]
     return render_template('past_restaurants.html', user=current_user, past_restaurants=past_restaurants)
 
-@views.route('/random')
+
+# I can make a randomiser where it reaches for the one in db, using 'Restaurant.query.order_by(func.random()).first()'
+@views.route('/random', methods=['GET', 'POST'])
+@login_required
 def random_restaurant():
-    restaurant = Restaurant.query.order_by(func.random()).first()
-    return render_template('rrandom.html', restaurant=restaurant)
+    selected = None
+    if request.method == 'POST':
+        selected = random.choice(hardcoded_restaurants)
+    return render_template("random.html", user=current_user, selected=selected)

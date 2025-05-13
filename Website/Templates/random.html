@@ -1,7 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Random{% endblock %}
+
+{% block title %}Random Restaurant{% endblock %}
+
 {% block content %}
+<div class="card mt-4">
+  <div class="card-header bg-primary text-white">
+    <h4>We suggest:</h4>
+  </div>
+  <div class="card-body">
+    {% if selected %}
+      <h5 class="card-title">{{ selected.name }}</h5>
+      <p><img src="{{ url_for('static', filename=selected.image) }}" alt="{{ selected.name }}" class="img-fluid mb-3" style="max-height: 300px; border-radius: 10px;"></p>
+      <p class="card-text"><strong>Cuisine:</strong> {{ selected.cuisine }}</p>
+      <p class="card-text"><strong>Location:</strong> {{ selected.location }}</p>
+      <p class="card-text"><strong>Description:</strong> {{ selected.description }}</p>
+    {% else %}
+      <p>No restaurant selected yet. Click below to get a suggestion!</p>
+    {% endif %}
+  </div>
+</div>
 
-<h2>Feeling Hungry? Get a Random Restaurant!</h2>
-
+<form method="POST">
+  <button type="submit" class="btn btn-primary mt-3">🎲 Randomise</button>
+</form>
 {% endblock %}
