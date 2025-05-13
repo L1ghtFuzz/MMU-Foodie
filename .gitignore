@@ -1,22 +1,18 @@
-# Ignore Python cache files
 website/__pycache__
-__pycache__/
 *.pyc
 *.pyo
 
-# Ignore log files
 *.log
 
-# Ignore virtual environments
 .venv/
 env/
 
-# Ignore database
 website/database.db
 
-# Ignore migration's pycache
-migrations/__pycache__/
+migrations/
 
 lydia's/
 
 .vscode/
+
+__pycache__/
