@@ -2,106 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ restaurant.name }}</title>
+    <title>{{ restaurant.name }} - Restaurant Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='display.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+<div class="page-header"> </div>
+
 <div class="nav-tabs">
     <a class="active" href="#">Overview</a>
-    <a href="#">Hours</a>
-    <a href="#">Location</a>
+    <a href="#">Hours</a> <a href="#">Location</a>
     <a href="#">Reviews</a>
 </div>
 
 <div class="container">
-    <!-- Left side -->
-    <div>
+    <div class="restaurant-main-content">
         {% if restaurant.photo_url %}
-            <img src="{{ restaurant.photo_url }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
-        {% else %}
-            <p>No photos uploaded yet.</p>
-        {% endif %}
-
-        <h2>
-            {{ restaurant.name }}
-            {% if restaurant.average_rating %}
-                <span style="color: #ffb703; font-size: 20px;">★ {{ '%.1f'|format(restaurant.average_rating) }}</span>
+            {# If photo_url might contain multiple comma-separated URLs, take the first one for the main photo #}
+            {% set main_photo = restaurant.photo_url.split(',')[0] if restaurant.photo_url and ',' in restaurant.photo_url else restaurant.photo_url %}
+            {% if main_photo %}
+                <img src="{{ main_photo }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+            {% else %}
+                <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
             {% endif %}
-        </h2>
-
-        <p class="closed">Closed now <span style="color: #888;">• Opens at 12:00 PM</span></p>
-        <p>{{ restaurant.address }}</p>
-
-        <div class="info-row website-phone">
-            <a href="{{ restaurant.google_maps_link }}" target="_blank">Website</a>
-            <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
-            <span style="color:#888;">Improve this listing</span>
-        </div>
-
-        <h2>About</h2>
-        <p>{{ restaurant.description or 'No description provided.' }}</p>
-
-        <div class="features">
-            <h4>Features</h4>
-            <ul>
-                <li>Lunch, Dinner</li>
-                <li>{{ restaurant.cuisine }}</li>
-            </ul>
-            <a href="#" style="color: black; font-weight: bold;">See all features</a>
-        </div>
-
-        <h2>Location</h2>
-        <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_GOOGLE_MAPS_API_KEY" alt="Map">
-
-        <!-- Reviews -->
-        <h2>Reviews</h2>
-        {% if restaurant.reviews %}
-            <ul style="list-style: none; padding: 0;">
-                {% for review in restaurant.reviews %}
-                    <li style="border-bottom: 1px solid #ddd; padding: 10px 0;">
-                        <strong>{{ review.author or "Anonymous" }}</strong> —
-                        <span style="color: #f5a623;">★ {{ review.rating }}</span>
-                        <p>{{ review.text }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
         {% else %}
-            <p>No reviews yet.</p>
+            <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
         {% endif %}
 
-        <!-- Submit Review Form -->
-        <h3>Submit a Review</h3>
-        <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}">
-            <label for="rating">Rating:</label>
-            <select name="rating" required>
-                <option value="" disabled selected>Select rating</option>
-                {% for r in range(1, 6) %}
-                    <option value="{{ r }}">{{ r }}</option>
-                {% endfor %}
-            </select>
+        <div class="restaurant-header">
+            <h1>{{ restaurant.name }}</h1> {# Changed h2 to h1 for main page title #}
+            {% if restaurant.average_rating is not none %}
+                <span class="average-rating">★ {{ '%.1f'|format(restaurant.average_rating) }}</span>
+            {% else %}
+                <span class="no-rating-notice">(No reviews yet)</span>
+            {% endif %}
+        </div>
 
-            <label for="text">Review:</label>
-            <textarea name="text" rows="4" required></textarea>
+        <p class="status closed">Closed now <span class="status-detail">• Opens at 12:00 PM</span></p>
+        <p class="address-info">{{ restaurant.address }}</p> {# Added class for styling #}
 
-            <button type="submit">Submit Review</button>
-        </form>
+        <div class="info-row action-links"> {# Renamed class for clarity #}
+            {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Map</a>{% endif %}
+            {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
+            <a href="#" class="improve-listing-link">Improve this listing</a> {# Made this a link #}
+        </div>
+
+        <div class="content-section about-section">
+            <h2>About {{ restaurant.name }}</h2>
+            <p>{{ restaurant.description or 'No detailed description provided.' }}</p>
+        </div>
+
+        <div class="content-section features-section">
+            <h3>Features</h3>
+            <ul class="features-list">
+                <li>Lunch, Dinner</li> {# Assuming these are static for now #}
+                {% if restaurant.cuisine %}<li>{{ restaurant.cuisine }}</li>{% endif %}
+            </ul>
+            <a href="#" class="see-all-link">See all features</a>
+        </div>
+
+        {% if restaurant.address %}
+        <div class="content-section location-section">
+            <h3>Location</h3>
+            <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_Maps_API_KEY" alt="Map showing location of {{ restaurant.name }}">
+        </div>
+        {% endif %}
+
+        <div class="content-section reviews-section">
+            <h2>User Reviews</h2>
+            {% if restaurant.reviews %}
+                <ul class="reviews-list">
+                    {% for review in restaurant.reviews %}
+                        <li class="review-item">
+                            <div class="review-item-header">
+                                <strong class="review-author">{{ review.author or "Anonymous User" }}</strong>
+                                <div class="review-stars-display">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= review.rating %}<span class="star filled">★</span>
+                                        {% else %}<span class="star empty">☆</span>{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="review-text">{{ review.text }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-content-notice">This restaurant hasn't been reviewed yet. Be the first!</p>
+            {% endif %}
+        </div>
+
+        <div class="content-section submit-review-section">
+            <h3>Write a Review for {{ restaurant.name }}</h3>
+            <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}" class="review-form">
+                <div class="form-group">
+                    <label for="author">Your Name <span class="optional-text">(Optional)</span>:</label>
+                    <input type="text" id="author" name="author" class="form-control" placeholder="e.g., Alex P.">
+                </div>
+
+                <div class="form-group rating-group">
+                    <label>Your Rating:</label> 
+                    <div class="star-rating-input">
+                        {# Reversed order for CSS hover trick to work left-to-right #}
+                        <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars - Excellent">☆</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Very Good">☆</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average">☆</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars - Poor">☆</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star - Terrible">☆</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="text">Your Review:</label>
+                    <textarea name="text" id="text" rows="5" class="form-control" required placeholder="Share your experience... What did you like or dislike?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit-review">Post Review</button>
+            </form>
+        </div>
     </div>
 
-    <!-- Right side -->
-    <aside>
-        <div class="save-card">
-            <h3>Save this restaurant</h3>
+    <aside class="sidebar-column">
+        <div class="sidebar-card save-card">
+            <h3>Save to Favorites</h3>
             <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
-                <button type="submit">
-                    {% if restaurant.is_saved %}✔ Saved{% else %}♡ Save{% endif %}
+                <button type="submit" class="btn {% if restaurant.is_saved %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
+                    {% if restaurant.is_saved %}✔ Saved{% else %}♡ Add to Saved{% endif %}
                 </button>
             </form>
         </div>
 
-        <div>
-            <h3>Hours</h3>
-            <p class="closed">Closed now • Opens at 12:00 PM</p>
+        <div class="sidebar-card hours-card">
+            <h3>Opening Hours</h3>
+            <p class="status closed">Currently Closed <span class="status-detail">• Opens at 12:00 PM</span></p>
             <table class="hours-table">
                 <tr><td>Sunday</td><td>12:00 PM - 8:30 PM</td></tr>
                 <tr><td>Monday</td><td>12:00 PM - 8:30 PM</td></tr>
@@ -115,9 +150,26 @@
     </aside>
 </div>
 
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <script>alert("{{ messages[0] }}");</script>
+    <div class="flashes-container"> {# Wrapper for better positioning #}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category or 'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    <script>
+        // Auto-hide flash messages after a few seconds
+        document.addEventListener('DOMContentLoaded', (event) => {
+            setTimeout(function() {
+                const flashesContainer = document.querySelector('.flashes-container');
+                if (flashesContainer) {
+                    flashesContainer.style.transition = 'opacity 0.5s ease-out';
+                    flashesContainer.style.opacity = '0';
+                    setTimeout(function() { flashesContainer.style.display = 'none'; }, 500); // Wait for fade out
+                }
+            }, 5000); // 5 seconds
+        });
+    </script>
   {% endif %}
 {% endwith %}
 </body>

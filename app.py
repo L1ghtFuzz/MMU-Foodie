@@ -9,17 +9,17 @@ from sqlalchemy.ext.hybrid import hybrid_property
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure, random key in production!
 
-# Image upload folder
+# image upload folder
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Database config
+# database config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurant.db'  # Use a proper database URL in production
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Models
+# models
 class Restaurant(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
@@ -31,7 +31,7 @@ class Restaurant(db.Model):
     photo_url = Column(String(300))
     is_saved = Column(Boolean, default=False)
 
-    @property
+    @property 
     def average_rating(self):
         """
         Calculates the average rating for the restaurant based on its reviews.
@@ -39,7 +39,7 @@ class Restaurant(db.Model):
         Returns:
             float: The average rating, or None if there are no reviews.
         """
-        reviews = self.reviews  # Access the reviews using the backref
+        reviews = self.reviews  # access the reviews using the backref
         if reviews:
             return sum(review.rating for review in reviews) / len(reviews)
         return None
@@ -53,14 +53,13 @@ class Review(db.Model):
     restaurant_id = Column(Integer, ForeignKey('restaurant.id'), nullable=False)
     rating = Column(Integer, nullable=False)
     text = Column(Text, nullable=False)
-    author = Column(String(100))  # Added author field
-    restaurant = relationship('Restaurant', backref=backref('reviews', lazy=True)) # Changed backref to 'reviews'
-
+    author = Column(String(100))  
+    restaurant = relationship('Restaurant', backref=backref('reviews', lazy=True)) # set up relationship between the review & restaurant models
     def __repr__(self):
         return f'<Review by {self.author or "Anonymous"} for Restaurant {self.restaurant_id}>'
 
 
-# Routes
+# route
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -71,7 +70,7 @@ def index():
         phone = request.form['phone']
         google_maps_link = request.form['google_maps_link']
 
-        images = request.files.getlist('images')  # Get a list of files
+        images = request.files.getlist('images')  
         image_urls = []
 
         for image_file in images:
@@ -81,7 +80,7 @@ def index():
                 image_file.save(image_path)
                 image_urls.append(url_for('static', filename='uploads/' + filename))
 
-        # Join the URLs with a comma.  This is simple, but consider a JSON structure for more robust storage
+        # joins all the urls into one string separated by commas
         photo_url = ','.join(image_urls) if image_urls else None
 
         new_restaurant = Restaurant(
@@ -122,7 +121,7 @@ def submit_review(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
     rating = int(request.form['rating'])
     text = request.form['text']
-    author = request.form.get('author')  # Optional author
+    author = request.form.get('author')  # author
 
     review = Review(restaurant_id=restaurant.id, rating=rating, text=text, author=author)
     db.session.add(review)
@@ -139,7 +138,6 @@ def allowed_file(filename):
 
 
 if __name__ == '__main__':
-    # Create the database tables within the application context
     with app.app_context():
-        db.create_all()  # Create tables if they don't exist
+        db.create_all()  # create new tables
     app.run(debug=True)

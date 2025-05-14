@@ -1,159 +1,223 @@
+/* === Global Resets & Base Styles === */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9fafa;
-    color: #333; /* Slightly softer black */
-    max-width: 1200px;
-    margin: 20px auto; /* Reduced top/bottom margin */
-    padding: 0 20px;
+    font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Lighter, more neutral background */
+    color: #495057; /* Softer default text color */
     line-height: 1.6;
-}
-
-a {
-    color: #d62828; /* Primary action color */
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
+    font-size: 16px; /* Base font size */
+    margin: 0; /* Remove default body margin */
 }
 
 .container {
+    max-width: 1200px;
+    margin: 30px auto; /* Centering the main content area */
+    padding: 0 20px; /* Padding on the sides */
     display: grid;
-    grid-template-columns: 2fr 1fr; /* Main content and sidebar */
-    gap: 40px;
-    margin-top: 20px;
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Flexible columns */
+    gap: 30px; /* Increased gap for better separation */
 }
 
-.restaurant-details { /* Class for the left main content area */
-    background-color: #fff;
-    padding: 20px;
+/* === Typography === */
+h1, h2, h3, h4, h5, h6 {
+    color: #343a40; /* Darker grey for headings */
+    font-weight: 700; /* Bolder headings */
+    line-height: 1.3;
+    margin-bottom: 0.75em; /* Consistent bottom margin */
+}
+h1 { font-size: 2.25em; margin-top: 0; } /* Main page title */
+h2 { font-size: 1.75em; } /* Section titles */
+h3 { font-size: 1.4em; } /* Sub-section titles */
+h4 { font-size: 1.1em; }
+
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    color: #007bff; /* Professional blue for links */
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* === Navigation Tabs === */
+.nav-tabs {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0 20px; /* Padding inside the nav bar */
+    margin-bottom: 30px; /* Space below nav */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.nav-tabs-container { /* If you want to constrain nav-tabs width */
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 25px;
+}
+.nav-tabs a { /* Using .nav-tabs-container a if you add the wrapper */
+    display: inline-block; /* Or flex item if using .nav-tabs-container */
+    padding: 15px 10px; /* More clickable area */
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.2s ease, color 0.2s ease;
+    margin-bottom: -1px; /* Align with parent border */
+}
+.nav-tabs a.active,
+.nav-tabs a:hover {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    text-decoration: none;
+}
+
+/* === Main Content & Sidebar Structure === */
+.restaurant-main-content,
+.sidebar-card {
+    background-color: #ffffff;
+    padding: 25px 30px; /* More padding */
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer, more professional shadow */
+}
+.sidebar-column .sidebar-card { /* Space between cards in sidebar */
+    margin-bottom: 25px;
+}
+.sidebar-column .sidebar-card:last-child {
+    margin-bottom: 0;
 }
 
-.sidebar { /* Class for the right sidebar area */
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-
-h2, h3, h4 {
-    color: #2c3e50; /* Darker, more modern heading color */
-    margin-top: 20px;
-    margin-bottom: 10px; /* Added bottom margin for spacing */
-}
-
-h2 {
-    font-size: 1.8em;
-}
-
-h3 {
-    font-size: 1.4em;
-}
-
+/* === Restaurant Header & Details === */
 .restaurant-header {
-    display: flex; /* Aligns name and rating on the same line */
-    align-items: center; /* Vertically aligns items in the header */
-    gap: 10px; /* Space between name and rating */
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center; /* Vertically align name and rating */
+    justify-content: space-between; /* Pushes rating to the right if space allows */
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 15px;
+    margin-bottom: 20px; /* Space below header */
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
 }
-
-.restaurant-header h2 {
-    margin-bottom: 0; /* Remove default bottom margin from h2 inside this container */
+.restaurant-header h1 {
+    margin-bottom: 0; /* Override default h1 margin */
 }
 
 .average-rating {
-    color: #ffb703; /* Gold color for stars */
-    font-size: 1.2em; /* Slightly larger rating text */
-    font-weight: bold;
-    background-color: #fff8e1; /* Light yellow background */
-    padding: 5px 10px;
-    border-radius: 5px;
+    color: #ffffff;
+    background-color: #ffc107; /* Gold background */
+    font-size: 1.1em; /* Adjust size */
+    font-weight: 700;
+    padding: 8px 15px;
+    border-radius: 20px; /* Pill shape */
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap; /* Prevent wrapping of stars and number */
+}
+.average-rating::before { /* Star symbol */
+    content: '★';
+    margin-right: 6px;
+    font-size: 1.1em; /* Match font size or slightly larger */
 }
 
-.no-rating {
+.no-rating-notice {
     font-size: 0.9em;
-    color: #777;
+    color: #6c757d;
+    font-style: italic;
 }
 
 .main-photo {
     width: 100%;
     height: auto;
-    max-height: 400px; /* Max height for the main photo */
-    object-fit: cover; /* Ensures the image covers the area well */
-    border-radius: 10px;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+}
+.no-content-notice { /* Used for "no photo", "no reviews" */
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px dashed #d1d9e0;
+    border-radius: 4px;
+    text-align: center;
     margin-bottom: 20px;
 }
+.no-content-notice p { margin-bottom: 0; }
 
-.nav-tabs {
-    display: flex;
-    gap: 20px;
-    border-bottom: 2px solid #eee; /* Lighter border */
+
+.status { font-weight: 600; margin-bottom: 8px; }
+.status.closed { color: #dc3545; }
+.status.open { color: #28a745; } /* You'd need to add this class dynamically */
+.status-detail { color: #6c757d; font-weight: normal; font-size: 0.9em; }
+
+.address-info {
+    color: #495057;
     margin-bottom: 20px;
-    padding-bottom: 10px; /* Space below tabs */
+    font-size: 1.05em;
 }
 
-.nav-tabs a {
-    color: #555;
-    font-weight: bold;
-    padding-bottom: 10px; /* Ensure border is below text */
-    border-bottom: 3px solid transparent;
-    transition: border-color 0.3s, color 0.3s;
-}
-
-.nav-tabs a.active,
-.nav-tabs a:hover {
-    border-bottom: 3px solid #d62828;
-    color: #d62828;
-}
-
-.status.closed { /* More specific class for status */
-    color: #d62828; /* Consistent with primary action color */
-    font-weight: bold;
-}
-
-.address {
-    color: #555;
-    margin-bottom: 15px;
-}
-
-.info-row {
+.action-links {
     display: flex;
-    gap: 15px;
-    margin-top: 10px;
-    margin-bottom: 20px; /* Space after info row */
+    gap: 10px;
+    margin-bottom: 25px;
     flex-wrap: wrap;
     align-items: center;
 }
+.improve-listing-link {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-left: auto; /* Pushes to the right if space */
+}
+.improve-listing-link:hover { color: #007bff; }
 
-.button-link {
-    background-color: #f0f0f0;
-    color: #333;
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-weight: 500;
-    transition: background-color 0.2s;
+/* === Content Sections (About, Features, etc.) === */
+.content-section {
+    padding-top: 25px;
+    margin-top: 25px;
+    border-top: 1px solid #e9ecef;
+}
+.content-section:first-of-type { /* E.g., if 'About' is the first section after the header */
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+.content-section h2 { /* Section titles */
+    margin-bottom: 15px; /* More space below section titles */
+}
+.content-section h3 { /* Sub-section titles like "Write a review" */
+    margin-bottom: 20px;
 }
 
-.button-link:hover {
-    background-color: #e0e0e0;
-    text-decoration: none;
-}
-
-.features ul {
+.features-list {
     list-style: none;
     padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
-
-.features li {
-    margin-bottom: 5px;
-    background-color: #f9f9f9;
-    padding: 5px 10px;
-    border-radius: 4px;
-    display: inline-block; /* Makes them sit nicely */
-    margin-right: 5px;
+.features-list li {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 8px 15px;
+    border-radius: 20px; /* Pill shape */
+    font-size: 0.9em;
+}
+.see-all-link {
+    font-weight: 600;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-top: 15px;
 }
 
 .map-image {
@@ -161,184 +225,288 @@ h3 {
     height: auto;
     border-radius: 8px;
     margin-top: 10px;
-    border: 1px solid #eee; /* Subtle border for map */
+    border: 1px solid #dee2e6;
 }
 
-.save-card {
-    background-color: #f9f9f9; /* Lighter background */
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    margin-bottom: 30px;
-    border: 1px solid #eee;
+/* === Enhanced Review Display Styling === */
+.reviews-section h2 { /* "User Reviews" title */
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
 }
 
-.save-card h3 {
-    margin-top: 0; /* Remove top margin for heading in card */
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.save-card button {
-    background-color: #d62828;
-    color: #fff;
-    border: none;
-    padding: 12px 25px; /* Larger button */
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.2s;
-}
-
-.save-card button:hover {
-    background-color: #b82020; /* Darker shade on hover */
-}
-
-.hours-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    color: #333;
-}
-
-.hours-table td {
-    padding: 8px 5px; /* Adjusted padding */
-    border-bottom: 1px solid #eee; /* Lighter border */
-}
-
-.hours-table tr:last-child td {
-    border-bottom: none; /* Remove border for the last row */
-}
-
-/* Review Section Styling */
 .reviews-list {
     list-style: none;
     padding: 0;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .review-item {
-    background-color: #fdfdfd;
-    border: 1px solid #efefef;
-    padding: 15px;
-    margin-bottom: 15px;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    padding: 20px 25px; /* More padding */
+    margin-bottom: 20px;
     border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
 }
 
-.review-item strong {
-    color: #2c3e50;
+.review-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
 }
 
-.review-rating {
-    color: #ffb703; /* Gold for review stars */
-    font-weight: bold;
-    margin-left: 5px;
+.review-author {
+    font-weight: 700;
+    color: #343a40;
+    font-size: 1.05em;
 }
+
+.review-stars-display {
+    font-size: 1.2em; /* Size of displayed stars */
+    line-height: 1;
+}
+.review-stars-display .star.filled { color: #ffc107; }
+.review-stars-display .star.empty { color: #d1d1d1; }
 
 .review-text {
-    margin-top: 8px;
-    color: #555;
-    font-size: 0.95em;
+    color: #495057;
+    font-size: 1em; /* Standardize review text size */
+    line-height: 1.7;
 }
 
-/* Review Form Styling */
+/* === Enhanced Submit Review Form Styling === */
+.submit-review-section h3 { /* "Write a Review" title */
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+}
+
 .review-form {
-    background-color: #f9f9f9;
-    padding: 20px;
+    background-color: #f8f9fa;
+    padding: 30px; /* More padding */
     border-radius: 8px;
-    margin-top: 20px;
-    border: 1px solid #eee;
+    border: 1px solid #dee2e6;
+    margin-top: 10px; /* Space from heading */
 }
 
-.review-form div {
-    margin-bottom: 15px;
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group:last-of-type {
+    margin-bottom: 25px; /* More space before button */
 }
 
 .review-form label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #444;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.95em;
+}
+.optional-text {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #6c757d;
 }
 
-.review-form input[type="text"],
-.review-form select,
-.review-form textarea {
+.form-control { /* Shared by input and textarea */
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding doesn't expand width */
-}
-
-.review-form textarea {
-    resize: vertical; /* Allow vertical resizing */
-}
-
-.review-form button {
-    background-color: #28a745; /* Green for submit */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 12px 15px;
     font-size: 1em;
-    transition: background-color 0.2s;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.form-control::placeholder { color: #6c757d; opacity: 1; }
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+.review-form textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
 }
 
-.review-form button:hover {
-    background-color: #218838; /* Darker green on hover */
+/* Star Rating Input CSS */
+.rating-group label { margin-bottom: 10px; } /* More space for star input group */
+
+.star-rating-input {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    font-size: 2em; /* Size of the interactive stars */
+    line-height: 1;
+}
+.star-rating-input input[type="radio"] { display: none; }
+.star-rating-input label {
+    color: #d1d1d1; /* Empty star color */
+    cursor: pointer;
+    padding: 0 0.05em; /* Fine-tune spacing */
+    transition: color 0.2s ease-in-out;
+    font-weight: normal; /* Override general label bolding */
+    margin-bottom: 0;
+}
+.star-rating-input input[type="radio"]:checked ~ label,
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label {
+    color: #ffc107; /* Filled star color */
 }
 
-/* Flash Messages */
-.flashes {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 20px 0; /* Standardize margin */
+/* === Buttons === */
+.btn {
+    display: inline-block;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    padding: 0.75rem 1.5rem; /* Slightly larger buttons */
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.3rem; /* Slightly more rounded */
+    transition: all 0.15s ease-in-out;
+    text-decoration: none;
 }
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
+.btn:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
     color: #fff;
+    text-decoration: none;
 }
-.alert-success { /* Assuming you might use flash('message', 'success') */
+.btn:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+}
+
+.btn-outline {
+    color: #007bff;
+    background-color: transparent;
+    border-color: #007bff;
+}
+.btn-outline:hover {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-success {
     background-color: #28a745;
     border-color: #28a745;
 }
-.alert-danger { /* Assuming flash('message', 'danger') for errors */
-    background-color: #dc3545;
-    border-color: #dc3545;
+.btn-success:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
 }
-.alert-info { /* Default if no category or just 'message' */
-    background-color: #17a2b8;
-    border-color: #17a2b8;
+
+.btn-outline-primary { /* For save button if not saved */
+    color: #007bff;
+    border-color: #007bff;
+}
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.btn-block { /* For buttons that take full width of parent */
+    display: block;
+    width: 100%;
+}
+
+.btn-submit-review { /* Customizations for the review submit button */
+    background-color: #28a745; /* Green color for submit */
+    border-color: #28a745;
+}
+.btn-submit-review:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
 }
 
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* === Sidebar Cards === */
+.save-card h3, .hours-card h3 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #343a40;
+}
+.hours-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.95em;
+}
+.hours-table td {
+    padding: 10px 5px; /* More vertical padding */
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+.hours-table tr:last-child td { border-bottom: none; }
+.hours-table strong { color: #007bff; }
+
+
+/* === Flash Messages === */
+.flashes-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    width: auto;
+    max-width: 380px;
+}
+.alert {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.3rem;
+    color: #fff;
+    opacity: 1;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    font-size: 0.95em;
+}
+.alert-success { background-color: #28a745; border-color: #1e7e34; }
+.alert-danger  { background-color: #dc3545; border-color: #b02a37; }
+.alert-info    { background-color: #17a2b8; border-color: #117a8b; }
+.alert-warning { background-color: #ffc107; border-color: #d39e00; color: #212529; }
+
+
+/* === Responsive Adjustments === */
+@media (max-width: 992px) {
     .container {
-        grid-template-columns: 1fr; /* Stack main content and sidebar on smaller screens */
+        grid-template-columns: 1fr; /* Single column for tablet and below */
     }
+    .sidebar-column {
+        margin-top: 30px;
+    }
+}
 
+@media (max-width: 768px) {
+    body { font-size: 15px; } /* Slightly smaller base font for mobile */
     .restaurant-header {
-        flex-direction: column; /* Stack name and rating vertically */
-        align-items: flex-start; /* Align to the start */
+        flex-direction: column;
+        align-items: flex-start;
     }
+    .average-rating { margin-top: 10px; font-size: 1em; }
+    .main-photo { max-height: 350px; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.6em; }
+    h3 { font-size: 1.3em; }
+    .nav-tabs a { padding: 12px 8px; font-size: 0.95em; }
+}
 
-    .average-rating {
-        margin-top: 5px; /* Add some space when stacked */
-    }
-
-    .nav-tabs {
-        gap: 10px; /* Reduce gap for smaller screens */
-        font-size: 0.9em; /* Slightly smaller tab text */
-    }
-
-    .main-photo {
-        max-height: 300px;
-    }
+@media (max-width: 576px) {
+    body { padding: 0 15px; } /* Reduce side padding on very small screens */
+    .container { margin-top: 20px; margin-bottom: 20px; gap: 20px; }
+    .restaurant-main-content, .sidebar-card, .review-form { padding: 20px; }
+    .nav-tabs-container { gap: 10px; } /* Or .nav-tabs if not using wrapper */
+    .nav-tabs a { font-size: 0.9em; padding: 10px 5px; }
+    .action-links .btn { width: 100%; margin-bottom: 10px; }
+    .action-links .btn:last-child { margin-bottom: 0; }
+    .star-rating-input { font-size: 1.8em; }
+    .btn { padding: 0.6rem 1rem; font-size: 0.95rem; }
 }
