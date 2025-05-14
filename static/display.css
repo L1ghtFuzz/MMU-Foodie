@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9fafa; 
+    background-color: #f9fafa;
     color: #0a0101;
     max-width: 1200px;
     margin: 40px auto;
@@ -9,7 +9,7 @@ body {
 }
 
 a {
-    color: #d62828; 
+    color: #d62828;
     text-decoration: none;
 }
 
@@ -26,6 +26,13 @@ a:hover {
 h2, h3, h4 {
     color: #090808;
     margin-top: 20px;
+}
+
+.main-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
 .nav-tabs {

@@ -7,76 +7,118 @@
 </head>
 <body>
 
-    <div class="nav-tabs">
-        <a class="active" href="#">Overview</a>
-        <a href="#">Hours</a>
-        <a href="#">Location</a>
-        <a href="#">Reviews</a>
-    </div>
+<div class="nav-tabs">
+    <a class="active" href="#">Overview</a>
+    <a href="#">Hours</a>
+    <a href="#">Location</a>
+    <a href="#">Reviews</a>
+</div>
 
-    <div class="container">
-        <!-- Left side -->
-        <div>
-            <h2>{{ restaurant.name }}</h2>
-            <p class="closed">Closed now <span style="color: #888;">• Opens at 12:00 PM</span></p>
-            <p>{{ restaurant.address }}</p>
-
-            <div class="info-row website-phone">
-                <a href="{{ restaurant.google_maps_link }}" target="_blank">Website</a>
-                <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
-                <span style="color:#888;">Improve this listing</span>
-            </div>
-
-            <h2>About</h2>
-            <p>{{ restaurant.description or 'No description provided.' }}</p>
-
-            <div class="features">
-                <h4>Features</h4>
-                <ul>
-                    <li>Lunch, Dinner</li>
-                    <li>{{ restaurant.cuisine }}</li>
-                </ul>
-                <a href="#" style="color: black; font-weight: bold;">See all features</a>
-            </div>
-
-            <h2>Location</h2>
-            <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_GOOGLE_MAPS_API_KEY" alt="Map">
-
-            <h2>Photos</h2>
+<div class="container">
+    <!-- Left side -->
+    <div>
+        {% if restaurant.photo_url %}
+            <img src="{{ restaurant.photo_url }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+        {% else %}
             <p>No photos uploaded yet.</p>
+        {% endif %}
+
+        <h2>
+            {{ restaurant.name }}
+            {% if restaurant.average_rating %}
+                <span style="color: #ffb703; font-size: 20px;">★ {{ '%.1f'|format(restaurant.average_rating) }}</span>
+            {% endif %}
+        </h2>
+
+        <p class="closed">Closed now <span style="color: #888;">• Opens at 12:00 PM</span></p>
+        <p>{{ restaurant.address }}</p>
+
+        <div class="info-row website-phone">
+            <a href="{{ restaurant.google_maps_link }}" target="_blank">Website</a>
+            <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
+            <span style="color:#888;">Improve this listing</span>
         </div>
 
-        <!-- Right side -->
-        <aside>
-            <div class="save-card">
-                <h3>Save this restaurant</h3>
-                <button>♡ Save</button>
-            </div>
+        <h2>About</h2>
+        <p>{{ restaurant.description or 'No description provided.' }}</p>
 
-            <div>
-                <h3>Hours</h3>
-                <p class="closed">Closed now • Opens at 12:00 PM</p>
-                <table class="hours-table">
-                    <tr><td>Sunday</td><td>12:00 PM - 8:30 PM</td></tr>
-                    <tr><td>Monday</td><td>12:00 PM - 8:30 PM</td></tr>
-                    <tr><td>Tuesday</td><td><strong>12:00 PM - 8:30 PM</strong></td></tr>
-                    <tr><td>Wednesday</td><td>12:00 PM - 8:30 PM</td></tr>
-                    <tr><td>Thursday</td><td>12:00 PM - 8:30 PM</td></tr>
-                    <tr><td>Friday</td><td>Closed</td></tr>
-                    <tr><td>Saturday</td><td>12:00 PM - 8:30 PM</td></tr>
-                </table>
-            </div>
-        </aside>
+        <div class="features">
+            <h4>Features</h4>
+            <ul>
+                <li>Lunch, Dinner</li>
+                <li>{{ restaurant.cuisine }}</li>
+            </ul>
+            <a href="#" style="color: black; font-weight: bold;">See all features</a>
+        </div>
+
+        <h2>Location</h2>
+        <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_GOOGLE_MAPS_API_KEY" alt="Map">
+
+        <!-- Reviews -->
+        <h2>Reviews</h2>
+        {% if restaurant.reviews %}
+            <ul style="list-style: none; padding: 0;">
+                {% for review in restaurant.reviews %}
+                    <li style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+                        <strong>{{ review.author or "Anonymous" }}</strong> —
+                        <span style="color: #f5a623;">★ {{ review.rating }}</span>
+                        <p>{{ review.text }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endif %}
+
+        <!-- Submit Review Form -->
+        <h3>Submit a Review</h3>
+        <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}">
+            <label for="rating">Rating:</label>
+            <select name="rating" required>
+                <option value="" disabled selected>Select rating</option>
+                {% for r in range(1, 6) %}
+                    <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="text">Review:</label>
+            <textarea name="text" rows="4" required></textarea>
+
+            <button type="submit">Submit Review</button>
+        </form>
     </div>
 
-    <!-- Flash alert popup -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <script>
-          alert("{{ messages[0] }}");
-        </script>
-      {% endif %}
-    {% endwith %}
+    <!-- Right side -->
+    <aside>
+        <div class="save-card">
+            <h3>Save this restaurant</h3>
+            <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
+                <button type="submit">
+                    {% if restaurant.is_saved %}✔ Saved{% else %}♡ Save{% endif %}
+                </button>
+            </form>
+        </div>
 
+        <div>
+            <h3>Hours</h3>
+            <p class="closed">Closed now • Opens at 12:00 PM</p>
+            <table class="hours-table">
+                <tr><td>Sunday</td><td>12:00 PM - 8:30 PM</td></tr>
+                <tr><td>Monday</td><td>12:00 PM - 8:30 PM</td></tr>
+                <tr><td>Tuesday</td><td><strong>12:00 PM - 8:30 PM</strong></td></tr>
+                <tr><td>Wednesday</td><td>12:00 PM - 8:30 PM</td></tr>
+                <tr><td>Thursday</td><td>12:00 PM - 8:30 PM</td></tr>
+                <tr><td>Friday</td><td>Closed</td></tr>
+                <tr><td>Saturday</td><td>12:00 PM - 8:30 PM</td></tr>
+            </table>
+        </div>
+    </aside>
+</div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <script>alert("{{ messages[0] }}");</script>
+  {% endif %}
+{% endwith %}
 </body>
 </html>

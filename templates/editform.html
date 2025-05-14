@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Restaurant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='display.css') }}">
+</head>
+<body>
+    <h1>Edit Restaurant</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="name">Restaurant Name:</label>
+        <input type="text" name="name" value="{{ restaurant.name }}" required>
+
+        <label for="category">Category:</label>
+        <input type="text" name="category" value="{{ restaurant.category }}" required>
+
+        <label for="rating">Rating:</label>
+        <input type="number" name="rating" value="{{ restaurant.rating }}" step="0.1" required>
+
+        <label for="address">Address:</label>
+        <textarea name="address" required>{{ restaurant.address }}</textarea>
+
+        <!-- Additional fields for photo gallery and other attributes -->
+        <label for="photo">Upload Photo:</label>
+        <input type="file" name="photo" accept="image/*">
+
+        <!-- Submit button -->
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <div class="edit-link">
+        <a href="{{ url_for('edit_restaurant', restaurant_id=restaurant.id) }}">Edit Restaurant</a>
+    </div>
+    </body>
+</html>
