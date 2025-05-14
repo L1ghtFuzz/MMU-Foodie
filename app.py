@@ -27,7 +27,6 @@ class Restaurant(db.Model):
     phone = Column(String(20))
     cuisine = Column(String(100))
     google_maps_link = Column(String(300))
-    rating = Column(Integer)  #  This is the restaurant's overall rating.  It's not used in the average_rating calculation
     description = Column(Text)
     photo_url = Column(String(300))
     is_saved = Column(Boolean, default=False)
@@ -67,7 +66,6 @@ def index():
     if request.method == 'POST':
         name = request.form['name']
         cuisine = request.form['cuisine']
-        # removed rating from here
         description = request.form['description']
         address = request.form['address']
         phone = request.form['phone']
@@ -144,10 +142,4 @@ if __name__ == '__main__':
     # Create the database tables within the application context
     with app.app_context():
         db.create_all()  # Create tables if they don't exist
-        #  Optionally, you could add some initial data here
-        #  For example:
-        #  if not Restaurant.query.first():
-        #      restaurant1 = Restaurant(name="Example Restaurant", cuisine="Italian", description="A great place!", address="123 Main St", phone="555-1234", google_maps_link="#")
-        #      db.session.add(restaurant1)
-        #      db.session.commit()
     app.run(debug=True)
