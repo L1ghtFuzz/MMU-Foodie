@@ -1,15 +1,15 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f9fafa;
-    color: #0a0101;
+    color: #333; /* Slightly softer black */
     max-width: 1200px;
-    margin: 40px auto;
+    margin: 20px auto; /* Reduced top/bottom margin */
     padding: 0 20px;
     line-height: 1.6;
 }
 
 a {
-    color: #d62828;
+    color: #d62828; /* Primary action color */
     text-decoration: none;
 }
 
@@ -19,18 +19,70 @@ a:hover {
 
 .container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; /* Main content and sidebar */
     gap: 40px;
+    margin-top: 20px;
 }
 
+.restaurant-details { /* Class for the left main content area */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.sidebar { /* Class for the right sidebar area */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+
 h2, h3, h4 {
-    color: #090808;
+    color: #2c3e50; /* Darker, more modern heading color */
     margin-top: 20px;
+    margin-bottom: 10px; /* Added bottom margin for spacing */
+}
+
+h2 {
+    font-size: 1.8em;
+}
+
+h3 {
+    font-size: 1.4em;
+}
+
+.restaurant-header {
+    display: flex; /* Aligns name and rating on the same line */
+    align-items: center; /* Vertically aligns items in the header */
+    gap: 10px; /* Space between name and rating */
+    margin-bottom: 10px;
+}
+
+.restaurant-header h2 {
+    margin-bottom: 0; /* Remove default bottom margin from h2 inside this container */
+}
+
+.average-rating {
+    color: #ffb703; /* Gold color for stars */
+    font-size: 1.2em; /* Slightly larger rating text */
+    font-weight: bold;
+    background-color: #fff8e1; /* Light yellow background */
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.no-rating {
+    font-size: 0.9em;
+    color: #777;
 }
 
 .main-photo {
     width: 100%;
     height: auto;
+    max-height: 400px; /* Max height for the main photo */
+    object-fit: cover; /* Ensures the image covers the area well */
     border-radius: 10px;
     margin-bottom: 20px;
 }
@@ -38,32 +90,56 @@ h2, h3, h4 {
 .nav-tabs {
     display: flex;
     gap: 20px;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #eee; /* Lighter border */
     margin-bottom: 20px;
+    padding-bottom: 10px; /* Space below tabs */
 }
 
 .nav-tabs a {
-    color: #000000;
+    color: #555;
     font-weight: bold;
-    padding-bottom: 5px;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.3s;
+    padding-bottom: 10px; /* Ensure border is below text */
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.3s, color 0.3s;
 }
 
-.nav-tabs a.active {
-    border-bottom: 2px solid #d62828;
+.nav-tabs a.active,
+.nav-tabs a:hover {
+    border-bottom: 3px solid #d62828;
+    color: #d62828;
 }
 
-.closed {
-    color: #ff4d4d;
+.status.closed { /* More specific class for status */
+    color: #d62828; /* Consistent with primary action color */
     font-weight: bold;
+}
+
+.address {
+    color: #555;
+    margin-bottom: 15px;
 }
 
 .info-row {
     display: flex;
     gap: 15px;
     margin-top: 10px;
+    margin-bottom: 20px; /* Space after info row */
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.button-link {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.button-link:hover {
+    background-color: #e0e0e0;
+    text-decoration: none;
 }
 
 .features ul {
@@ -73,6 +149,11 @@ h2, h3, h4 {
 
 .features li {
     margin-bottom: 5px;
+    background-color: #f9f9f9;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block; /* Makes them sit nicely */
+    margin-right: 5px;
 }
 
 .map-image {
@@ -80,40 +161,184 @@ h2, h3, h4 {
     height: auto;
     border-radius: 8px;
     margin-top: 10px;
+    border: 1px solid #eee; /* Subtle border for map */
 }
 
 .save-card {
-    background-color: #1e1e2f;
+    background-color: #f9f9f9; /* Lighter background */
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     margin-bottom: 30px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+    border: 1px solid #eee;
 }
 
 .save-card h3 {
-    margin-bottom: 10px;
-    color: #fff;
+    margin-top: 0; /* Remove top margin for heading in card */
+    margin-bottom: 15px;
+    color: #333;
 }
 
 .save-card button {
     background-color: #d62828;
     color: #fff;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 25px; /* Larger button */
     border-radius: 6px;
     cursor: pointer;
     font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.save-card button:hover {
+    background-color: #b82020; /* Darker shade on hover */
 }
 
 .hours-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
-    color: #000000;
+    color: #333;
 }
 
 .hours-table td {
-    padding: 8px 0;
-    border-bottom: 1px solid #444;
+    padding: 8px 5px; /* Adjusted padding */
+    border-bottom: 1px solid #eee; /* Lighter border */
+}
+
+.hours-table tr:last-child td {
+    border-bottom: none; /* Remove border for the last row */
+}
+
+/* Review Section Styling */
+.reviews-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+.review-item {
+    background-color: #fdfdfd;
+    border: 1px solid #efefef;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+.review-item strong {
+    color: #2c3e50;
+}
+
+.review-rating {
+    color: #ffb703; /* Gold for review stars */
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.review-text {
+    margin-top: 8px;
+    color: #555;
+    font-size: 0.95em;
+}
+
+/* Review Form Styling */
+.review-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid #eee;
+}
+
+.review-form div {
+    margin-bottom: 15px;
+}
+
+.review-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.review-form input[type="text"],
+.review-form select,
+.review-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures padding doesn't expand width */
+}
+
+.review-form textarea {
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.review-form button {
+    background-color: #28a745; /* Green for submit */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.review-form button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Flash Messages */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0; /* Standardize margin */
+}
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #fff;
+}
+.alert-success { /* Assuming you might use flash('message', 'success') */
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.alert-danger { /* Assuming flash('message', 'danger') for errors */
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.alert-info { /* Default if no category or just 'message' */
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr; /* Stack main content and sidebar on smaller screens */
+    }
+
+    .restaurant-header {
+        flex-direction: column; /* Stack name and rating vertically */
+        align-items: flex-start; /* Align to the start */
+    }
+
+    .average-rating {
+        margin-top: 5px; /* Add some space when stacked */
+    }
+
+    .nav-tabs {
+        gap: 10px; /* Reduce gap for smaller screens */
+        font-size: 0.9em; /* Slightly smaller tab text */
+    }
+
+    .main-photo {
+        max-height: 300px;
+    }
 }
