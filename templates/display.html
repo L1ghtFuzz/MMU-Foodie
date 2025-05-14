@@ -20,7 +20,7 @@
 <div class="container">
     <div class="restaurant-main-content">
         {% if restaurant.photo_url %}
-            {# If photo_url might contain multiple comma-separated URLs, take the first one for the main photo #}
+            {# many photos separated by commas #}
             {% set main_photo = restaurant.photo_url.split(',')[0] if restaurant.photo_url and ',' in restaurant.photo_url else restaurant.photo_url %}
             {% if main_photo %}
                 <img src="{{ main_photo }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
@@ -32,7 +32,7 @@
         {% endif %}
 
         <div class="restaurant-header">
-            <h1>{{ restaurant.name }}</h1> {# Changed h2 to h1 for main page title #}
+            <h1>{{ restaurant.name }}</h1> 
             {% if restaurant.average_rating is not none %}
                 <span class="average-rating">★ {{ '%.1f'|format(restaurant.average_rating) }}</span>
             {% else %}
@@ -41,12 +41,12 @@
         </div>
 
         <p class="status closed">Closed now <span class="status-detail">• Opens at 12:00 PM</span></p>
-        <p class="address-info">{{ restaurant.address }}</p> {# Added class for styling #}
+        <p class="address-info">{{ restaurant.address }}</p> {# added class for styling #}
 
         <div class="info-row action-links"> {# Renamed class for clarity #}
             {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Map</a>{% endif %}
             {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
-            <a href="#" class="improve-listing-link">Improve this listing</a> {# Made this a link #}
+            <a href="#" class="improve-listing-link">Improve this listing</a> 
         </div>
 
         <div class="content-section about-section">
@@ -57,7 +57,7 @@
         <div class="content-section features-section">
             <h3>Features</h3>
             <ul class="features-list">
-                <li>Lunch, Dinner</li> {# Assuming these are static for now #}
+                <li>Lunch, Dinner</li> {# static for now #}
                 {% if restaurant.cuisine %}<li>{{ restaurant.cuisine }}</li>{% endif %}
             </ul>
             <a href="#" class="see-all-link">See all features</a>
@@ -105,7 +105,7 @@
                 <div class="form-group rating-group">
                     <label>Your Rating:</label> 
                     <div class="star-rating-input">
-                        {# Reversed order for CSS hover trick to work left-to-right #}
+                        {# stars are listed from 5 to 1 #}
                         <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars - Excellent">☆</label>
                         <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Very Good">☆</label>
                         <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average">☆</label>
@@ -152,20 +152,20 @@
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="flashes-container"> {# Wrapper for better positioning #}
+    <div class="flashes-container"> 
       {% for category, message in messages %}
         <div class="alert alert-{{ category or 'info' }}">{{ message }}</div>
       {% endfor %}
     </div>
     <script>
-        // Auto-hide flash messages after a few seconds
+        // flash messages
         document.addEventListener('DOMContentLoaded', (event) => {
             setTimeout(function() {
                 const flashesContainer = document.querySelector('.flashes-container');
                 if (flashesContainer) {
                     flashesContainer.style.transition = 'opacity 0.5s ease-out';
                     flashesContainer.style.opacity = '0';
-                    setTimeout(function() { flashesContainer.style.display = 'none'; }, 500); // Wait for fade out
+                    setTimeout(function() { flashesContainer.style.display = 'none'; }, 500); // fade out
                 }
             }, 5000); // 5 seconds
         });
