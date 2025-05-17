@@ -51,19 +51,22 @@
   <div class="imgcontainer">
     <img src="{{ url_for('static', filename='Avatar.png') }}" alt="Avatar" class="avatar">
   </div>
-  <form method="POST">
-    <label for="email"><b>Email</b></label>
-    <input type="text" placeholder="Enter Email" name="email" required>
+   <form method="POST" class="login-form">
+      <h2>Login</h2>
+      <label>Email or Username</label>
+      <input type="text" name="identifier" placeholder="Enter Email or Username" required>
 
-    <label for="password"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="password" required>
+      <label>Password</label>
+      <input type="password" name="password" placeholder="Enter Password" required>
 
-    <button type="submit">Login</button>
-    <label>
-      <input type="checkbox" name="remember" checked> Remember me
-    </label>
-    <p> <a href="{{ url_for('auth.sign_up') }}">Don't have an account?</a></p>
-    <span class="psw"><a href="#">Forgot password?</a></span>
-  </form>
+      <div class="remember">
+        <input type="checkbox" name="remember"> Remember me
+      </div>
+
+      <button type="submit">Login</button>
+
+      <div class="links">
+        <a href="/sign-up">Don't have an account?</a>
+        <a href="#">Forgot password?</a>
 </div>
 {% endblock %}

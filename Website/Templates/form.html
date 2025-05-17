@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Add Restaurant {% endblock %}
+
+{% block style %}
+<style>
+
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h1>Add a New Restaurant</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label>Name:</label>
+            <input type="text" name="name" required>
+
+            <label>Cuisine:</label>
+            <input type="text" name="cuisine" required>
+
+            <label>Rating (1–5):</label>
+            <input type="number" name="rating" min="1" max="5" required>
+
+            <label>Description:</label>
+            <textarea name="description" required></textarea>
+
+            <label>Price:</label>
+            <input type="text" name="price" required>
+
+            <label>Address:</label>
+            <input type="text" name="address" required>
+
+            <label>Phone:</label>
+            <input type="text" name="phone" required>
+
+            <label>Google Maps Link:</label>
+            <input type="url" name="google_maps_link" required>
+
+            <label>Restaurant Image:</label>
+            <input type="file" name="images" accept="image/*" multiple>
+
+            <button type="submit">Add Restaurant</button>
+        </form>
+    </div>
+{% endblock %}

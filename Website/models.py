@@ -16,16 +16,29 @@ class Note(db.Model):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note')
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
+    is_admin = db.Column(db.Boolean, default=False)
 
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
     cuisine = db.Column(db.String(100))
-    location = db.Column(db.String(150))
-    description = db.Column(db.String(255))
-    image = db.Column(db.String(255))
+    price = db.Column(db.String(4))
+    google_maps_link = db.Column(db.String(300))
+    rating = db.Column(db.Integer)
+    description = db.Column(db.Text)
+    image_url = db.Column(db.String(300))
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
+    content = db.Column(db.Text)
+    rating = db.Column(db.Integer)
