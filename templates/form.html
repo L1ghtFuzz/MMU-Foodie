@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='mmu_logo.png') }}" alt="MMU Logo" height="50">
+    </div>
     <div class="form-container">
         <h1>Add a New Restaurant</h1>
 
@@ -29,7 +32,16 @@
             <label>Google Maps Link:</label>
             <input type="url" name="google_maps_link" required>
 
-            <label>Latitude:</label>  <input type="number" name="latitude" step="any">  <label>Longitude:</label> <input type="number" name="longitude" step="any">
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Latitude:</label>
+                    <input type="number" name="latitude" step="any">
+                </div>
+                <div style="flex: 1;">
+                    <label>Longitude:</label>
+                    <input type="number" name="longitude" step="any">
+                </div>
+            </div>
 
             <label>Restaurant Images:</label>
             <input type="file" name="images" accept="image/*" multiple>

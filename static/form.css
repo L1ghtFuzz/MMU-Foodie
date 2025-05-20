@@ -5,6 +5,23 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin: 0; /* Remove default body margin */
+    flex-direction: column; /* Allow header and form to stack */
+}
+
+.header { /* New class for the blue header */
+    background-color: #05396f; /* Blue color */
+    color: white;
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: add a subtle shadow */
+    position: fixed; /* Fix header to the top */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure header is on top of other content */
 }
 
 .form-container {
@@ -13,11 +30,12 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     width: 350px;
+    margin-top: 80px; /* Adjust margin-top to clear the fixed header */
 }
 h1 {
     text-align: center;
     margin-bottom: 20px;
-    color: #f9fafb; 
+    color: #f9fafb;
 }
 
 h2 {
@@ -31,20 +49,40 @@ label {
     color: white;
 }
 
-input {
+input[type="text"],
+input[type="url"],
+input[type="number"],
+textarea { /* Apply styles to textarea as well */
     width: 100%;
     padding: 8px;
     margin-top: 5px;
     box-sizing: border-box;
+    border: 1px solid #ccc; /* Add a subtle border */
+    border-radius: 4px; /* Slightly rounded corners */
 }
+
+input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    color: white; /* Ensure file input text is visible */
+}
+
 
 button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #043b76;
     border: none;
     color: white;
     margin-top: 20px;
     font-size: 16px;
     cursor: pointer;
+    border-radius: 5px; /* Slightly rounded button corners */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
 }
