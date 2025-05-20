@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='display.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
+</head><body> {# <-- FIX: Removed duplicated </head> tag here #}
 
 <div class="page-header"> </div>
 
@@ -44,7 +43,8 @@
         <p class="address-info">{{ restaurant.address }}</p> {# added class for styling #}
 
         <div class="info-row action-links"> {# Renamed class for clarity #}
-            {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Map</a>{% endif %}
+            {# Change Maps_link to Maps_link to match your database model #}
+            {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Google Maps</a>{% endif %}
             {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
             <a href="#" class="improve-listing-link">Improve this listing</a> 
         </div>
@@ -52,6 +52,16 @@
         <div class="content-section about-section">
             <h2>About {{ restaurant.name }}</h2>
             <p>{{ restaurant.description or 'No detailed description provided.' }}</p>
+
+            {# Display latitude and longitude if they exist #}
+            {% if restaurant.latitude and restaurant.longitude %}
+                <p class="coordinates">
+                    <strong>Latitude:</strong> {{ restaurant.latitude }}<br>
+                    <strong>Longitude:</strong> {{ restaurant.longitude }}
+                </p>
+            {% else %}
+                <p class="no-coordinates">No coordinates provided.</p>
+            {% endif %}
         </div>
 
         <div class="content-section features-section">
@@ -63,12 +73,23 @@
             <a href="#" class="see-all-link">See all features</a>
         </div>
 
-        {% if restaurant.address %}
-        <div class="content-section location-section">
-            <h3>Location</h3>
-            <img class="map-image" src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_Maps_API_KEY" alt="Map showing location of {{ restaurant.name }}">
+        {# BEGIN: INTERACTIVE MAP SECTION - Replaces your static map image #}
+        {% if restaurant.latitude is not none and restaurant.longitude is not none %}
+        <div class="content-section location-section map-section"> {# Added 'map-section' class for specific styling #}
+            <h3>Location Map:</h3>
+            <div class="map-container">
+                <iframe
+                    width="100%"
+                    height="400"
+                    frameborder="0"
+                    style="border:0"
+                    src="https://maps.google.com/maps?q={{ restaurant.latitude }},{{ restaurant.longitude }}&hl=en&z=14&output=embed"
+                    allowfullscreen>
+                </iframe>
+            </div>
         </div>
         {% endif %}
+        {# END: INTERACTIVE MAP SECTION #}
 
         <div class="content-section reviews-section">
             <h2>User Reviews</h2>

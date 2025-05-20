@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, Float # import float
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -30,6 +30,8 @@ class Restaurant(db.Model):
     description = Column(Text)
     photo_url = Column(String(300))
     is_saved = Column(Boolean, default=False)
+    latitude = Column(Float, nullable=True) # add latitude
+    longitude = Column(Float, nullable=True) # add longitude
 
     @property 
     def average_rating(self):
@@ -57,6 +59,15 @@ class Review(db.Model):
     restaurant = relationship('Restaurant', backref=backref('reviews', lazy=True)) # set up relationship between the review & restaurant models
     def __repr__(self):
         return f'<Review by {self.author or "Anonymous"} for Restaurant {self.restaurant_id}>'
+    
+# NEW: Flask CLI command to initialize the database
+@app.cli.command("init-db")
+def init_db_command():
+    """Clear existing data and create new tables."""
+    with app.app_context():
+        db.drop_all()  # Optional: Drops all existing tables. Useful for a clean start in development.
+        db.create_all()
+    print("Database initialized (tables created).")
 
 
 # route
@@ -69,6 +80,8 @@ def index():
         address = request.form['address']
         phone = request.form['phone']
         google_maps_link = request.form['google_maps_link']
+        latitude = request.form.get('latitude', None) # get latitude (use .get() to avoid KeyError)
+        longitude = request.form.get('longitude', None)  # get longitude
 
         images = request.files.getlist('images')  
         image_urls = []
@@ -91,6 +104,8 @@ def index():
             phone=phone,
             google_maps_link=google_maps_link,
             photo_url=photo_url,
+            latitude=latitude,       
+            longitude=longitude   
         )
 
         db.session.add(new_restaurant)

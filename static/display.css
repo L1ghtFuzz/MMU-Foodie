@@ -510,3 +510,16 @@ a:hover {
     .star-rating-input { font-size: 1.8em; }
     .btn { padding: 0.6rem 1rem; font-size: 0.95rem; }
 }
+
+.coordinates {
+    font-size: 0.9em; /* Slightly smaller text */
+    color: #777;      /* Muted color */
+    margin-top: 0.5em; /* Some spacing above */
+}
+
+.no-coordinates {
+    font-style: italic; /* Italicize the "No coordinates" message */
+    color: #999;
+    font-size: 0.9em;
+    margin-top: 0.5em;
+}
