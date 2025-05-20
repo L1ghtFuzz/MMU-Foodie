@@ -1,190 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}MMU Foodie{% endblock %}</title>
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <title>Admin Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
+{% extends "base.html" %}
 
-    /* Style for header*/
-    #TopLogo {
-      display: inline-block;
-      padding: 10px;
-      margin: 0px;
-      background-color: #f1f1f1;
-      text-align: left;
-      font-size: 30px;
-      padding: 0%;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      padding-left: 2%;
-      margin-top: 0.5rem;
-      margin-bottom: 10px;
-      cursor: pointer;
-      border-bottom: 1px black;
-    }
+{% block title %}Admin Dashboard{% endblock %}
 
-    #TopLogo ul,
-    #TopLogo li {
-      font-size: 30px;
-      display: inline-block;
-      vertical-align: middle;
-      padding: 0%;
-      color: black;
-      margin: 0%;
-    }
+{% block style %}
+<style>
+  .dashboard-container {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
 
-    .header {
-      background-color: #f1f1f1;
-      border-bottom: 1px black;
-      font-family: 'Roboto', sans-serif;
-      overflow: hidden;
-    }
+  .restaurant-card {
+    position: relative;
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.2s ease-in-out;
+  }
 
-    .top-bar {
-      background-color: #0050a2;
-      color: white;
-      margin-left: 2%;
-      margin-right: 2%;
-      display: flex;
-      flex-direction: row;
-      border-radius: 10px;
-      font-size: 0.9rem;
-    }
+  .restaurant-card:hover {
+    transform: translateY(-4px);
+  }
 
-    .blue-bar {
-      background-color: #0050a2;
-      padding: 10px 2%;
-      margin: 0 2%;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
+  .restaurant-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #333;
+  }
 
-    .nav {
-      background-color: #333;
-      padding: 10px;
-      display: flex;
-    }
+  .restaurant-card p {
+    margin: 0.3rem 0;
+    color: #555;
+  }
 
-    .nav a {
-      color: white;
-      margin-right: 20px;
-      text-decoration: none;
-    }
+  .button-container {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 10px;
+  }
 
-    .container {
-      padding: 30px;
-      display: grid;
-      grid-template-columns: repeat(minmax(250px, 1fr));
-      gap: 20px;
-    }
+  .button-container button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+  }
 
-    .restaurant-card {
-      position: relative;
-      background: white;
-      border: 2px solid black;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+  .button-container button:hover {
+    background-color: #f5f5f5;
+  }
 
-    .restaurant-card h3 {
-      margin: 0 0 10px;
-    }
+  .button-container img {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+{% endblock %}
 
-    .delete-button {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-    }
-
-    .delete-button img {
-      width: 24px;
-      height: 24px;
-    }
-
-  </style>
-</head>
-<body>
-
-  <header class="header">
-    <a id="TopLogo" href="/">
-      <ul>
-        <li><img src="https://www.mmu.edu.my/wp-content/themes/mmu2018/assets/images/logo-mmu2x.png" alt="MMU logo" width="150px"></li>
-        <li><b>MMU Foodie</b></li>
-      </ul>
-    </a>
-    
-    <div class="blue-bar">
-      <nav style="flex-grow: 1;">
-        <ul style="list-style: none; display: flex; gap: 20px; margin: 0; padding: 0; align-items: center;">
-          <a href="{{ url_for('index') }}" style="color: white; text-decoration: none;">Home</a>
-          <a href="{{ url_for('admin_dashboard') }}" style="color: white; text-decoration: none;">Admin Dashboard</a>
-          {% if current_user.is_authenticated %}
-          <a href="/logout" style="padding: 10px; display: block; color: white; text-decoration: none;">Logout</a>
-          {% else %}
-            <a href="/login" style="padding: 10px; display: block; color: white; text-decoration: none;">Login</a>
-          {% endif %}
-          
-        </ul>
-      </nav>
-
-      <!-- Login/Logout Dropdown -->
-      <div class="dropdown" style="position: relative;">
-        <button class="user-btn w3-xlarge" id="userDropdownBtn" style="background: none; border: none; color: white;">
-          <i class="fa-solid fa-circle-user"></i>
+{% block body %}
+<div class="dashboard-container">
+  {% for restaurant in restaurants %}
+  <div class="restaurant-card">
+    <div class="button-container">
+      <!-- Edit Button -->
+      <a href="{{ url_for('edit_restaurant', restaurant_id=restaurant.id) }}">
+        <button title="Edit">
+          <img src="{{ url_for('static', filename='edit-icon.png') }}" alt="Edit">
         </button>
-        <div id="dropdownContent" class="dropdown-content" style="display: none; position: absolute; right: 0; background-color: white; min-width: 200px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 2000;">
-          {% if current_user.is_authenticated %}
-            <div style="padding: 10px; border-bottom: 1px solid #ddd;">
-              <strong>{{ current_user.name }}</strong><br>
-              <span style="font-size: 0.9rem; color: #555;">{{ current_user.email }}</span>
-            </div>
-            <a href="/logout" style="padding: 10px; display: block; color: black; text-decoration: none;">Logout</a>
-          {% else %}
-            <a href="/login" style="padding: 10px; display: block; color: black; text-decoration: none;">Login</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </header>
+      </a>
 
-
-  <div class="container">
-    {% for restaurant in restaurants %}
-    <div class="restaurant-card">
-      <h3>{{ restaurant.name }}</h3>
-      <p>{{ restaurant.cuisine }}</p>
-      <p>Rating: {{ restaurant.rating }}</p>
+      <!-- Delete Button -->
       <form method="POST" action="{{ url_for('delete_restaurant', restaurant_id=restaurant.id) }}">
-        <button class="delete-button" type="submit" title="Delete">
+        <button type="submit" title="Delete">
           <img src="{{ url_for('static', filename='trash-icon.png') }}" alt="Delete">
         </button>
       </form>
     </div>
-    {% endfor %}
-  </div>
 
-</body>
-</html>
+    <h3>{{ restaurant.name }}</h3>
+    <p>Cuisine: {{ restaurant.cuisine }}</p>
+    <p>Rating: {{ restaurant.rating }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

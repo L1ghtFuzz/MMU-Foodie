@@ -4,21 +4,36 @@
 
 {% block style %}
 <style>
-  .restaurant-card {
+  a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+  color: #0050a2;
+}
+
+.restaurant-card {
   display: flex;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   padding: 1rem;
   margin-bottom: 1rem;
+  transition: box-shadow 0.3s ease-in-out;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.restaurant-card:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
 }
 
 .restaurant-image {
-  width: 150px;
-  height: 100px;
+  width: 210px;
+  height: 170px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 3px;
   margin-right: 1rem;
 }
 
@@ -30,15 +45,65 @@
 .restaurant-info p {
   margin: 0.3rem 0;
 }
+
+.category {
+  padding: 6px 10px;
+  margin: 4px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.category:hover {
+  background-color: #f0f0f0;
+  border-color: #aaa;
+}
+
+.category.active {
+  background-color: #0050a2;
+  color: white;
+  border-color: #0050a2;
+}
+
+.rating-container select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 0.9rem;
+  color: #333;
+  margin-top: 0.5rem;
+  width: 100%;
+  max-width: 150px;
+}
+
+.rating-container label {
+  display: block;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.filter-group {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="container">
   <div class="filters">
+    <h5><b>Filters</b></h5>
     <div class="filter-section">
 
-      <h3>Price</h3>
+      <div class="filter-group">
+      <h6><b>Price</b></h6>
       <div class="price-buttons segmented">
         <div class="price-buttons segmented">
           <button onclick="updateURLParam('price', '$')">$</button>
@@ -47,26 +112,26 @@
           <button onclick="updateURLParam('price', '$$$$')">$$$$</button>
         </div>
       </div>
-
-      <h3>Suggested</h3>
-      <div class="checkbox-option">
-        <label>
-          <span>Open Now</span>
-          <input type="checkbox">
-        </label>
       </div>
 
-      <div class="checkbox-option">
-        <label>
-          <span>Offers Delivery</span>
-          <input type="checkbox">
-        </label>
+
+      <div class="filter-group">
+        <h6><b>Suggested</b></h6>
+        <div class="checkbox-option">
+          <label>
+            <span>Open Now</span>
+            <input type="checkbox"><br>
+            <span>Offers Delivery</span>
+            <input type="checkbox">
+          </label>
+        </div>
       </div>
+
 
       <div class="see-more-container">
         <div class="container1">
-
-          <h3>Category</h3>
+          <div class="filter-group">
+          <h6><b>Category</b></h6>
           <button onclick="updateURLParam('category', 'Local')" class="category">Local</button>
           <button onclick="updateURLParam('category', 'Western')" class="category">Western</button>
           <button onclick="updateURLParam('category', 'Chinese')" class="category">Chinese</button>
@@ -79,12 +144,13 @@
           </span>
           <span class="see-more-btn">Show More</span>
 
+          </div>
         </div>
       </div>
 
       <div class="rating-container">
-        <div>
-          <h3>Ratings</h3>
+        <div class="filter-group">
+          <h6><b>Ratings</b></h6>
           <label>Min Rating: 
             <select onchange="updateURLParam('rating', this.value)">
               <option value="">--</option>
@@ -97,7 +163,7 @@
         </div>
       </div>
 
-      <button onclick="applyFilters()">Apply</button>
+    <button onclick="clearFilters()" style="margin-left: 0.5rem;">Clear</button>
 
       <ul id="results"></ul>
     </div>
@@ -105,17 +171,16 @@
 
   <div class="details">
     {% for restaurant in restaurants %}
-    <div class="restaurant-card">
-      <img src="{{ restaurant.image_url or url_for('static', filename='default.jpg') }}" alt="{{ restaurant.name }}" class="restaurant-image">
-      <div class="restaurant-info">
-        <h2>{{ restaurant.name }}</h2>
-        <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
-        <p><strong>Rating:</strong> {{ restaurant.rating }} / 5</p>
-        <p><strong>Price:</strong> {{ restaurant.price }}</p>
-        <!-- <p>{{ restaurant.description }}</p>
-        <a href="{{ restaurant.google_maps_link }}" target="_blank">View on Google Maps</a> -->
-      </div>
-    </div>
+        <a href="{{ url_for('display_restaurant', restaurant_id=restaurant.id) }}">        <div class="restaurant-card">
+          <img src="{{ restaurant.image_url or url_for('static', filename='default.jpg') }}" alt="{{ restaurant.name }}" class="restaurant-image">
+          <div class="restaurant-info">
+            <h2><b>{{ restaurant.name }}</b></h2>
+            <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+            <p><strong>Rating:</strong> {{ restaurant.avg_rating }} / 5</p>
+            <p><strong>Price:</strong> {{ restaurant.price }}</p>
+          </div>
+        </div>
+      </a>
     {% endfor %}
   </div>
 
@@ -124,51 +189,42 @@
   </div>
 </div>
 <script>
-  function updateURLParam(key, value) {
+    function updateURLParam(key, value) {
+      const url = new URL(window.location.href);
+      const params = url.searchParams;
+
+      let existing = params.get(key);
+      let values = existing ? existing.split(',') : [];
+
+      if (values.includes(value)) {
+        values = values.filter(v => v !== value);
+      } else {
+        values.push(value);
+      }
+
+      if (values.length > 0) {
+        params.set(key, values.join(','));
+      } else {
+        params.delete(key);
+      }
+
+      url.search = params.toString();
+      window.location.href = url.toString();
+    }
+
+    function clearFilters() {
     const url = new URL(window.location.href);
-    const params = url.searchParams;
+    url.search = '';
+    window.history.replaceState({}, '', url.toString());
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
 
-    // If value already exists, toggle it off
-    let existing = params.get(key);
-    let values = existing ? existing.split(',') : [];
+    priceButtons.forEach(btn => btn.classList.remove('active'));
+    categoryButtons.forEach(btn => btn.classList.remove('active'));
+    const ratingSelect = document.querySelector('select');
+    if (ratingSelect) ratingSelect.value = '';
 
-    if (values.includes(value)) {
-      values = values.filter(v => v !== value);
-    } else {
-      values.push(value);
-    }
-
-    if (values.length > 0) {
-      params.set(key, values.join(','));
-    } else {
-      params.delete(key);
-    }
-
-    // Update URL and reload
-    url.search = params.toString();
-    window.location.href = url.toString();
-  }
-
-  // Filters Apply Function
-  async function applyFilters() {
-    const prices = [...document.querySelectorAll('.price:checked')].map(el => el.value);
-    const categories = [...document.querySelectorAll('.category.active')].map(el => el.textContent.trim());
-    const rating = parseFloat(document.getElementById('rating').value) || 0;
-
-
-    console.log({ price: prices, category: categories, rating }); // DEBUG
-
-    const response = await fetch('/filter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ price: prices, category: categories, rating })
-    });
-
-    const data = await response.json();
-    console.log('Filtered Results:', data); // DEBUG
-
-    const results = document.getElementById('results');
-    results.innerHTML = data.map(r => `<li>${r.name} - ${r.price} - ${r.category} - ${r.rating}</li>`).join('');
+    document.getElementById('results').innerHTML = '';
+    window.location.reload();
   }
 
     // Price button
@@ -202,18 +258,26 @@
       "Show Less" : "Show More";
   })
 
-  // Script for Leaflet Map //
+  // Initialize the map
   const map = L.map('map').setView([2.927891727185679, 101.6418836043987], 15);
-  var osm = L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
+
+  // Add the tile layer
+  L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  })
-  osm.addTo(map);
+  }).addTo(map);
 
-  var popup = L.popup();
   var marker = L.marker([2.927891727185679, 101.6418836043987]).addTo(map);
   marker.bindPopup("<b>Multimedia University").openPopup();
 
+  // Loop through restaurants and add markers
+  {% for restaurant in restaurants %}
+    {% if restaurant.latitude and restaurant.longitude %}
+      L.marker([{{ restaurant.latitude }}, {{ restaurant.longitude }}])
+        .addTo(map)
+        .bindPopup("<b>{{ restaurant.name }}</b><br>{{ restaurant.cuisine }}<br>Rating: {{ restaurant.avg_rating }} / 5");
+    {% endif %}
+  {% endfor %}
 
 </script>
 <script src="{{ url_for('static', filename='script.js') }}"></script>

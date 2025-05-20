@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, flash, url_for
+from flask import Flask, render_template, request, redirect, session, jsonify, flash, url_for, current_app
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,7 +6,11 @@ from werkzeug.utils import secure_filename
 from flask_login import UserMixin, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
 from flask_login import LoginManager
-import re, os
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, Float # import float
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import func
+import re, os, uuid
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -24,19 +28,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Data Classes
-class Restaurant(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    address = db.Column(db.String(200))
-    phone = db.Column(db.String(20))
-    cuisine = db.Column(db.String(100))
-    price = db.Column(db.String(4))
-    google_maps_link = db.Column(db.String(300))
-    rating = db.Column(db.Integer)
-    description = db.Column(db.Text)
-    image_url = db.Column(db.String(300))
-
-
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -51,6 +42,55 @@ favourites = db.Table('favourites',
     db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
 )
 
+class Restaurant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
+    cuisine = db.Column(db.String(100))
+    price = db.Column(db.String(4))
+    google_maps_link = db.Column(db.String(300))
+    description = db.Column(db.Text)
+    image_url = db.Column(db.String(300))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    is_saved = db.Column(db.Boolean, default=False)
+    reviews = db.relationship('Review', backref='restaurant', lazy=True)
+    @property 
+    def average_rating(self):
+        reviews = self.reviews  # access the reviews using the backref
+        if reviews:
+            return sum(review.rating for review in reviews) / len(reviews)
+        return None
+    def __repr__(self):
+        return f'<Restaurant {self.name}>'
+
+class RestaurantImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(300), nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    restaurant = db.relationship('Restaurant', backref='images')
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(100))
+    def __repr__(self):
+        return f'<Review by {self.author or "Anonymous"} for Restaurant {self.restaurant_id}>'
+    
+
+
+@app.cli.command("init-db")
+def init_db_command():
+    """Clear existing data and create new tables."""
+    with app.app_context():
+        # db.drop_all()  # Optional: Drops all existing tables. Useful for a clean start in development.
+        db.create_all()
+    print("Database initialized (tables created).")
+
+
 # Routes
 @app.route("/base")
 def base():
@@ -58,24 +98,35 @@ def base():
 
 @app.route('/')
 def index():
-    price = request.args.get('price')  # like '1,2,3'
-    category = request.args.get('category')  # like 'Western,Chinese'
-    rating = request.args.get('rating', type=float)  # like 4.5
+    min_rating = request.args.get('rating', type=int)
+    price = request.args.get('price')
+    category = request.args.get('category')
 
-    query = Restaurant.query
+    query = db.session.query(
+        Restaurant,
+        func.avg(Review.rating).label('avg_rating')
+    ).outerjoin(Review).group_by(Restaurant.id)
 
+    # Apply rating filter
+    if min_rating:
+        query = query.having(func.avg(Review.rating) >= min_rating)
+
+    # Apply price filter
     if price:
-        price_list = price.split(',')
-        query = query.filter(Restaurant.price.in_(price_list))
+        query = query.filter(Restaurant.price == price)
 
+    # Apply cuisine/category filter
     if category:
-        category_list = category.split(',')
-        query = query.filter(Restaurant.cuisine.in_(category_list))
+        query = query.filter(Restaurant.cuisine == category)
 
-    if rating:
-        query = query.filter(Restaurant.rating >= rating)
+    results = query.all()
 
-    restaurants = query.all()
+    # Attach avg_rating to restaurant for template use
+    restaurants = []
+    for restaurant, avg_rating in results:
+        restaurant.avg_rating = round(avg_rating or 0, 1)
+        restaurants.append(restaurant)
+
     return render_template('index.html', restaurants=restaurants)
 
 @app.route("/admin-dashboard", methods=["GET", "POST"])
@@ -102,7 +153,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user, remember=True)
-            return redirect(url_for('admin-dashboard') if user.is_admin else url_for('home'))
+            return redirect(url_for('admin_dashboard') if user.is_admin else url_for('index'))
         else:
             flash('Invalid credentials', category='error')
             return redirect(url_for('login'))
@@ -156,89 +207,67 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
- #Filter Function#
-@app.route('/filter', methods=['POST'])
-def filter_restaurants():
-    filters = request.json
-    query = Restaurant.query
+# Restaurant Things
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    if 'price' in filters and filters['price']:
-        query = query.filter(Restaurant.price.in_(filters['price']))
-
-    if 'category' in filters and filters['category']:
-        query = query.filter(Restaurant.category.in_(filters['category']))
-
-    if 'rating' in filters:
-        query = query.filter(Restaurant.rating >= filters['rating'])
-
-    results = query.all()
-    return jsonify([
-        {
-            'name': r.name,
-            'price': r.price,
-            'category': r.category,
-            'rating': r.rating,
-            'image_url': r.image_url
-        } for r in results
-    ])
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 
 
 @app.route('/restaurant/<int:restaurant_id>')
 def display_restaurant(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
     return render_template('display.html', restaurant=restaurant)
 
-
-def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route('/add-restaurant', methods=['GET', 'POST'])
-@login_required
+@app.route('/form', methods=['GET', 'POST'])
+@login_required  
 def add_restaurant():
-    if not current_user.is_admin:
+    if not current_user.is_admin:  
         flash("Access denied. Admins only.")
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))  
 
     if request.method == 'POST':
-        # Gather form data
         name = request.form['name']
         address = request.form['address']
         phone = request.form['phone']
         cuisine = request.form['cuisine']
         google_maps_link = request.form['google_maps_link']
-        rating = int(request.form['rating'])
         description = request.form['description']
         price = request.form['price']
+        latitude = float(request.form['latitude'])
+        longitude = float(request.form['longitude'])
 
-        # Handle the image file upload
-        if 'image' in request.files:
-            image = request.files['image']
-            if image and allowed_file(image.filename):
-                filename = secure_filename(image.filename)
-                image_path = os.path.join('static/uploads', filename)
-                image.save(image_path)
-                image_url = url_for('static', filename=f'uploads/{filename}')
-            else:
-                image_url = None  # Handle no image or invalid file type
-            
-        else:
-            image_url = None  # Handle case when no image is uploaded
-
-        # Create the new restaurant
         new_restaurant = Restaurant(
             name=name,
             address=address,
             phone=phone,
             cuisine=cuisine,
             google_maps_link=google_maps_link,
-            rating=rating,
             description=description,
-            image_url=image_url,
-            price=price
+            price=price,
+            latitude=latitude,
+            longitude=longitude
         )
-
         db.session.add(new_restaurant)
+        db.session.commit()  # commit to get ID
+
+        images = request.files.getlist('images')
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        for image in images:
+            if image and allowed_file(image.filename):
+                try:
+                    original_filename = secure_filename(image.filename)
+                    unique_filename = f"{uuid.uuid4().hex}_{original_filename}"
+                    image_path = os.path.join(upload_folder, unique_filename)
+
+                    image.save(image_path)
+                    image_url = url_for('static', filename=f'uploads/{unique_filename}')
+                    db.session.add(RestaurantImage(image_url=image_url, restaurant_id=new_restaurant.id))
+                except Exception as e:
+                    flash(f"Error saving image {original_filename}: {str(e)}", "error")
+
         db.session.commit()
         flash("Restaurant Added Successfully!")
         return redirect(url_for('display_restaurant', restaurant_id=new_restaurant.id))
@@ -257,6 +286,70 @@ def delete_restaurant(restaurant_id):
     db.session.commit()
     flash("Restaurant deleted.", "success")
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/edit-restaurant/<int:restaurant_id>', methods=['GET', 'POST'])
+@login_required  
+def edit_restaurant(restaurant_id):
+    if not current_user.is_admin:  
+        flash("Access denied. Admins only.", category='error')
+        return redirect(url_for('index'))  
+    
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+    
+    if request.method == 'POST':
+        # Update the restaurant details with the form data
+        restaurant.name = request.form['name']
+        restaurant.address = request.form['address']
+        restaurant.phone = request.form['phone']
+        restaurant.cuisine = request.form['cuisine']
+        restaurant.google_maps_link = request.form['google_maps_link']
+        restaurant.description = request.form['description']
+        restaurant.price = request.form['price']
+        restaurant.latitude = float(request.form['latitude'])
+        restaurant.longitude = float(request.form['longitude'])
+
+        # Handle image uploads
+        images = request.files.getlist('images')
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        for image in images:
+            if image and allowed_file(image.filename):
+                try:
+                    original_filename = secure_filename(image.filename)
+                    unique_filename = f"{uuid.uuid4().hex}_{original_filename}"
+                    image_path = os.path.join(upload_folder, unique_filename)
+
+                    image.save(image_path)
+                    image_url = url_for('static', filename=f'uploads/{unique_filename}')
+                    db.session.add(RestaurantImage(image_url=image_url, restaurant_id=restaurant.id))
+                except Exception as e:
+                    flash(f"Error saving image {original_filename}: {str(e)}", "error")
+
+        db.session.commit()
+        flash("Restaurant details updated!", "success")
+        return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
+
+    return render_template('edit_restaurant.html', restaurant=restaurant)
+
+@app.route('/restaurant/<int:restaurant_id>/review', methods=['POST'])
+def submit_review(restaurant_id):
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+    rating = int(request.form['rating'])
+    text = request.form['text']
+    author = request.form.get('author')  # author
+    review = Review(restaurant_id=restaurant.id, rating=rating, text=text, author=author)
+    db.session.add(review)
+    db.session.commit()
+    flash('Your review has been submitted!')
+    return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
+
+@app.route('/restaurant/<int:restaurant_id>/save', methods=['POST'])
+def toggle_save(restaurant_id):
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+    restaurant.is_saved = not restaurant.is_saved
+    db.session.commit()
+    return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
 @app.route('/favourite/<int:id>')
 @login_required
