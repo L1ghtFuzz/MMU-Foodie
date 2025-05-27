@@ -23,6 +23,8 @@ class User(db.Model, UserMixin):
     notes = db.relationship('Note')
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
     is_admin = db.Column(db.Boolean, default=False)
+    favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
+    is_admin = db.Column(db.Boolean, default=False)
 
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
