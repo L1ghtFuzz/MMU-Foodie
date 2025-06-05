@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, jsonify, url_for, redirect
-from flask_login import login_required, current_user
+from flask_login import login_required
 from . import db
 from .models import Restaurant
 from flask import Flask, render_template, request, redirect, session, jsonify, flash, url_for
@@ -12,16 +12,16 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 import re, os
 from sqlalchemy.sql import func
+from sqlalchemy import or_
 
 views = Blueprint('views', __name__)
-
 user_favourites = set()
 user_past = set()
-user_reviews = {}
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    print("Loading home page")
     all_restaurants = db.session.query(Restaurant).all()
     return render_template('home.html', user=current_user, all_restaurants=all_restaurants, user_favourites=user_favourites, user_past=user_past)
 
@@ -31,44 +31,53 @@ def search():
     query = request.args.get('query', '').lower()
     results = []
     if query:
-        results = [r for r in db.session.query(Restaurant).all() if query in r['name'].lower()]
-    return render_template("home.html", user=current_user, results=results, query=query, all_restaurants=db.session.query(Restaurant).all()
-, user_favourites=user_favourites)
+        results = [r for r in db.session.query(Restaurant).all() if query in r.name.lower()]
+    return render_template("home.html", user=current_user, results=results, query=query, all_restaurants=db.session.query(Restaurant).all(), user_favourites=current_user.favourites)
 
 @views.route('/favourite/<int:id>')
 @login_required
 def favourite(id):
-    user_favourites.add(id)
-    flash("Added to favourites!", category='success')
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant not in current_user.favourites:
+        current_user.favourites.append(restaurant)
+        db.session.commit()
+        flash("Added to favourites!", category='success')
+    else:
+        flash("Already in favourites.", category='info')
     return redirect(url_for('views.home'))
 
 @views.route('/unfavourite/<int:id>')
 @login_required
 def unfavourite(id):
-    user_favourites.discard(id)
-    flash("Removed from favourites.", category='warning')
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant in current_user.favourites:
+        current_user.favourites.remove(restaurant)
+        db.session.commit()
+        flash("Removed from favourites.", category='warning')
     return redirect(url_for('views.favourites_page'))
 
 @views.route('/favourites')
 @login_required
 def favourites_page():
-    favourites = [r for r in db.session.query(Restaurant).all() if r.id in user_favourites]
-    return render_template('favourites.html', user=current_user, favourites=favourites)
+    return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
 
 @views.route('/mark-past/<int:id>')
 @login_required
 def mark_past(id):
-    user_past.add(id)
-    flash("Marked as visited.", category='info')
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant not in current_user.past:
+        current_user.past.append(restaurant)
+        db.session.commit()
+        flash("Marked as visited.", category='info')
+    else:
+        flash("Already marked as visited.", category='info')
     return redirect(url_for('views.home'))
 
 @views.route('/past')
 @login_required
 def past_page():
-    past_restaurants = [r for r in db.session.query(Restaurant).all() if r.id in user_past]
-    return render_template('past_restaurants.html', user=current_user, past_restaurants=past_restaurants)
+    return render_template('past_restaurants.html', user=current_user, past_restaurants=user_past)
 
-# Add Restaurant 
 @views.route('/restaurant/<int:restaurant_id>')
 def display_restaurant(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
@@ -86,7 +95,6 @@ def add_restaurant():
         return redirect(url_for('home'))
 
     if request.method == 'POST':
-        # Gather form data
         name = request.form['name']
         address = request.form['address']
         phone = request.form['phone']
@@ -96,7 +104,6 @@ def add_restaurant():
         description = request.form['description']
         price = request.form['price']
 
-        # Handle the image file upload
         if 'image' in request.files:
             image = request.files['image']
             if image and allowed_file(image.filename):
@@ -105,12 +112,10 @@ def add_restaurant():
                 image.save(image_path)
                 image_url = url_for('static', filename=f'uploads/{filename}')
             else:
-                image_url = None  # Handle no image or invalid file type
-            
+                image_url = None
         else:
-            image_url = None  # Handle case when no image is uploaded
+            image_url = None
 
-        # Create the new restaurant
         new_restaurant = Restaurant(
             name=name,
             address=address,
@@ -130,11 +135,51 @@ def add_restaurant():
 
     return render_template('form.html')
 
-# I can make a randomiser where it reaches for the one in db, using 'Restaurant.query.order_by(func.random()).first()' but needa change a lot
 @views.route('/random', methods=['GET', 'POST'])
 @login_required
 def random_restaurant():
     selected = None
+    # Define available cuisines and price ranges for the filter form
+    available_cuisines = ['Any', 'Italian', 'Mexican', 'Japanese', 'Indian', 'Chinese', 'American', 'Cafe', 'Dessert']
+    available_prices = ['Any', '$', '$$', '$$$']
+
+    # Initialize selected_cuisine and selected_price to 'Any' as default
+    # or to whatever the default value of your dropdowns should be on first load
+    selected_cuisine = 'Any'
+    selected_price = 'Any'
+
     if request.method == 'POST':
-        selected = Restaurant.query.order_by(func.random()).first()
-    return render_template("random.html", user=current_user, selected=selected)
+        # Get filter criteria from the form
+        cuisine_filter = request.form.get('cuisine_filter')
+        price_filter = request.form.get('price_filter')
+
+        # Store the selected filters to pass back to the template
+        selected_cuisine = cuisine_filter
+        selected_price = price_filter
+
+        # Start with a base query of all restaurants
+        query = Restaurant.query
+
+        # Apply cuisine filter if selected (and not 'Any')
+        if cuisine_filter and cuisine_filter != 'Any':
+            query = query.filter_by(cuisine=cuisine_filter)
+
+        # Apply price filter if selected (and not 'Any')
+        if price_filter and price_filter != 'Any':
+            query = query.filter_by(price=price_filter)
+
+        # Get a random restaurant from the filtered results
+        selected = query.order_by(func.random()).first()
+
+        if not selected:
+            flash("No restaurants found matching your criteria. Try different filters!", category='warning')
+
+    return render_template(
+        "random.html",
+        user=current_user,
+        selected=selected,
+        available_cuisines=available_cuisines,
+        available_prices=available_prices,
+        selected_cuisine=selected_cuisine, 
+        selected_price=selected_price      
+    )

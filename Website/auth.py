@@ -23,7 +23,7 @@ def login():
             return redirect(url_for('views.home'))
         else:
             flash('Invalid credentials', category='error')
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
 
     return render_template('login.html')
 

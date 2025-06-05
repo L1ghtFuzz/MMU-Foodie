@@ -8,6 +8,12 @@ favourites = db.Table(
     db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
 )
 
+past = db.Table(
+    'past',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
+)
+
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String(10000))
@@ -22,8 +28,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note')
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
-    is_admin = db.Column(db.Boolean, default=False)
-    favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
+    past = db.relationship('Restaurant', secondary='past', backref='visited_by')
     is_admin = db.Column(db.Boolean, default=False)
 
 class Restaurant(db.Model):

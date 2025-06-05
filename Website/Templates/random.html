@@ -1,26 +1,69 @@
 {% extends "base.html" %}
-
 {% block title %}Random Restaurant{% endblock %}
 
 {% block content %}
-<div class="card mt-4">
-  <div class="card-header bg-primary text-white">
-    <h4>We suggest:</h4>
-  </div>
-  <div class="card-body">
-    {% if selected %}
-      <h5 class="card-title">{{ selected.name }}</h5>
-      <p><img src="{{ url_for('static', filename=selected.image) }}" alt="{{ selected.name }}" class="img-fluid mb-3" style="max-height: 300px; border-radius: 10px;"></p>
-      <p class="card-text"><strong>Cuisine:</strong> {{ selected.cuisine }}</p>
-      <p class="card-text"><strong>Location:</strong> {{ selected.location }}</p>
-      <p class="card-text"><strong>Description:</strong> {{ selected.description }}</p>
-    {% else %}
-      <p>No restaurant selected yet. Click below to get a suggestion!</p>
-    {% endif %}
-  </div>
-</div>
+<h1 class="text-3xl font-bold mb-6 text-center">Find a Random Restaurant</h1>
 
-<form method="POST">
-  <button type="submit" class="btn btn-primary mt-3">🎲 Randomise</button>
-</form>
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <form method="POST" action="{{ url_for('views.random_restaurant') }}" class="space-y-4">
+        <div>
+            <label for="cuisine_filter" class="block text-sm font-medium text-gray-700">Cuisine Type:</label>
+            <select id="cuisine_filter" name="cuisine_filter"
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                {% for cuisine in available_cuisines %}
+                    <option value="{{ cuisine }}" {% if selected_cuisine == cuisine %}selected{% endif %}>{{ cuisine }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="price_filter" class="block text-sm font-medium text-gray-700">Price Range:</label>
+            <select id="price_filter" name="price_filter"
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                {% for price in available_prices %}
+                    <option value="{{ price }}" {% if selected_price == price %}selected{% endif %}>{{ price }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit"
+                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Find Random Restaurant
+        </button>
+    </form>
+
+    {% if selected %}
+        <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4 text-center">{{ selected.name }}</h2>
+            <div class="text-gray-700 space-y-2">
+                <p><strong>Cuisine:</strong> {{ selected.cuisine }}</p>
+                <p><strong>Price:</strong> {{ selected.price }}</p>
+                <p><strong>Address:</strong> {{ selected.address }}</p>
+                <p><strong>Phone:</strong> {{ selected.phone }}</p>
+                {% if selected.google_maps_link %}
+                    <p><strong>Google Maps:</strong> <a href="{{ selected.google_maps_link }}" target="_blank" class="text-blue-600 hover:underline">View Map</a></p>
+                {% endif %}
+                <p><strong>Rating:</strong> {{ selected.rating }}/5</p>
+                <p><strong>Description:</strong> {{ selected.description }}</p>
+                {% if selected.image_url %}
+                    <div class="mt-4 text-center">
+                        <img src="{{ selected.image_url }}" alt="{{ selected.name }}" class="max-w-full h-auto rounded-md shadow-sm mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/400x200/cccccc/333333?text=No+Image';" />
+                    </div>
+                {% endif %}
+            </div>
+            <div class="mt-6 flex justify-center space-x-4">
+                <a href="{{ url_for('views.favourite', id=selected.id) }}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                    Add to Favourites
+                </a>
+                <a href="{{ url_for('views.mark_past', id=selected.id) }}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Mark as Visited
+                </a>
+            </div>
+        </div>
+    {% elif request.method == 'POST' %}
+        <p class="mt-8 text-center text-gray-600">No restaurant found matching your criteria.</p>
+    {% endif %}
+</div>
 {% endblock %}
