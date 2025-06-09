@@ -142,13 +142,6 @@
       <input type="text" id="image_url" name="image_url" value="{{ restaurant.image_url }}">
     </div>
 
-    <button class="submit-btn" type="submit">Update Restaurant</button>
-  </form>
-
-  <div class="map-section">
-    <label style="display:block; margin-bottom:10px;">Click on the map to update coordinates:</label>
-    <div id="map"></div>
-
     <div class="form-group">
       <label for="latitude">Latitude</label>
       <input type="number" id="latitude" name="latitude" value="{{ restaurant.latitude }}" step="0.000001">
@@ -158,6 +151,13 @@
       <label for="longitude">Longitude</label>
       <input type="number" id="longitude" name="longitude" value="{{ restaurant.longitude }}" step="0.000001">
     </div>
+
+    <button class="submit-btn" type="submit">Update Restaurant</button>
+  </form>
+
+  <div class="map-section">
+    <label style="display:block; margin-bottom:10px;">Click on the map to update coordinates:</label>
+    <div id="map"></div>
   </div>
 </div>
 {% endblock %}

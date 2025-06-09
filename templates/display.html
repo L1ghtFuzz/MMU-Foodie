@@ -648,7 +648,7 @@
     <aside class="sidebar-column">
         <div class="sidebar-card save-card">
             <h3>Save to Favorites</h3>
-            <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
+            <form method="POST" action="{{ url_for('favourite', id=restaurant.id) }}">
                 <button type="submit" class="btn {% if restaurant.is_saved %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
                     {% if restaurant.is_saved %}✔ Saved{% else %}♡ Add to Saved{% endif %}
                 </button>

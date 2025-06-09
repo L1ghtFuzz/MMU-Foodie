@@ -1,285 +1,776 @@
-{% extends "base.html" %}
-
-{% block title %}MMU Foodie{% endblock %}
-
-{% block style %}
+{% extends "base.html" %} {% block title %}MMU Foodie{% endblock %} {% block
+style %}
 <style>
-  a {
-  text-decoration: none;
-  color: inherit;
-}
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
-a:hover {
-  text-decoration: none;
-  color: #0050a2;
-}
-
-.restaurant-card {
-  display: flex;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  transition: box-shadow 0.3s ease-in-out;
-  background-color: #fff;
-}
-
-.restaurant-card:hover {
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-.restaurant-image {
-  width: 210px;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 3px;
-  margin-right: 1rem;
-}
-
-.restaurant-info h2 {
-  margin-top: 0;
-  font-size: 1.2rem;
-}
-
-.restaurant-info p {
-  margin: 0.3rem 0;
-}
-
-.category {
-  padding: 6px 10px;
-  margin: 4px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.category:hover {
-  background-color: #f0f0f0;
-  border-color: #aaa;
-}
-
-.category.active {
-  background-color: #0050a2;
-  color: white;
-  border-color: #0050a2;
-}
-
-.rating-container select {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 0.9rem;
-  color: #333;
-  margin-top: 0.5rem;
-  width: 100%;
-  max-width: 150px;
-}
-
-.rating-container label {
-  display: block;
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.filter-group {
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-}
-
-</style>
-{% endblock %}
-
-{% block body %}
-<div class="container">
-  <div class="filters">
-    <h5><b>Filters</b></h5>
-    <div class="filter-section">
-
-      <div class="filter-group">
-      <h6><b>Price</b></h6>
-      <div class="price-buttons segmented">
-        <div class="price-buttons segmented">
-          <button onclick="updateURLParam('price', '$')">$</button>
-          <button onclick="updateURLParam('price', '$$')">$$</button>
-          <button onclick="updateURLParam('price', '$$$')">$$$</button>
-          <button onclick="updateURLParam('price', '$$$$')">$$$$</button>
-        </div>
-      </div>
-      </div>
-
-
-      <div class="filter-group">
-        <h6><b>Suggested</b></h6>
-        <div class="checkbox-option">
-          <label>
-            <span>Open Now</span>
-            <input type="checkbox"><br>
-            <span>Offers Delivery</span>
-            <input type="checkbox">
-          </label>
-        </div>
-      </div>
-
-
-      <div class="see-more-container">
-        <div class="container1">
-          <div class="filter-group">
-          <h6><b>Category</b></h6>
-          <button onclick="updateURLParam('category', 'Local')" class="category">Local</button>
-          <button onclick="updateURLParam('category', 'Western')" class="category">Western</button>
-          <button onclick="updateURLParam('category', 'Chinese')" class="category">Chinese</button>
-          <button onclick="updateURLParam('category', 'Fast Food')" class="category">Fast Food</button>
-          <span class="more-category">
-            <button onclick="updateURLParam('category', 'Japanese')" class="category">Japanese</button>
-            <button onclick="updateURLParam('category', 'Italian')" class="category">Italian</button>
-            <button onclick="updateURLParam('category', 'Korean')" class="category">Korean</button>
-            <button onclick="updateURLParam('category', 'French')" class="category">French</button>
-          </span>
-          <span class="see-more-btn">Show More</span>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="rating-container">
-        <div class="filter-group">
-          <h6><b>Ratings</b></h6>
-          <label>Min Rating: 
-            <select onchange="updateURLParam('rating', this.value)">
-              <option value="">--</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-    <button onclick="clearFilters()" style="margin-left: 0.5rem;">Clear</button>
-
-      <ul id="results"></ul>
-    </div>
-  </div>
-
-  <div class="details">
-    {% for restaurant in restaurants %}
-        <a href="{{ url_for('display_restaurant', restaurant_id=restaurant.id) }}">        <div class="restaurant-card">
-          <img src="{{ restaurant.image_url or url_for('static', filename='default.jpg') }}" alt="{{ restaurant.name }}" class="restaurant-image">
-          <div class="restaurant-info">
-            <h2><b>{{ restaurant.name }}</b></h2>
-            <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
-            <p><strong>Rating:</strong> {{ restaurant.avg_rating }} / 5</p>
-            <p><strong>Price:</strong> {{ restaurant.price }}</p>
-          </div>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-
-  <div class="map">
-    <div id="map"></div>
-  </div>
-</div>
-<script>
-    function updateURLParam(key, value) {
-      const url = new URL(window.location.href);
-      const params = url.searchParams;
-
-      let existing = params.get(key);
-      let values = existing ? existing.split(',') : [];
-
-      if (values.includes(value)) {
-        values = values.filter(v => v !== value);
-      } else {
-        values.push(value);
-      }
-
-      if (values.length > 0) {
-        params.set(key, values.join(','));
-      } else {
-        params.delete(key);
-      }
-
-      url.search = params.toString();
-      window.location.href = url.toString();
-    }
-
-    function clearFilters() {
-    const url = new URL(window.location.href);
-    url.search = '';
-    window.history.replaceState({}, '', url.toString());
-    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-
-    priceButtons.forEach(btn => btn.classList.remove('active'));
-    categoryButtons.forEach(btn => btn.classList.remove('active'));
-    const ratingSelect = document.querySelector('select');
-    if (ratingSelect) ratingSelect.value = '';
-
-    document.getElementById('results').innerHTML = '';
-    window.location.reload();
+  html,
+  body {
+    font-family: "Inter", sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto; 
+    background-color: #f8f9fa;
   }
 
-    // Price button
+  a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease-in-out;
+  }
+
+  a:hover {
+    color: #007bff;
+  }
+
+  /* Styling for Filter List */
+  .container,
+  .filters .details,
+  .map {
+    background-color: #f1f1f1;
+    padding-left: 10px;
+  }
+
+  .container {
+    padding-left: 10px;
+    display: flex;
+    height: calc(100vh - var(--navbar-height, 60px));
+    overflow: visible;
+    padding: 1rem;
+  }
+
+  .filters {
+    width: 15%;
+    flex: 0 0 250px;
+    overflow-y: auto;
+    padding-right: 1rem;
+    padding-left: 40px;
+    border-right: 1px solid #eee;
+  }
+
+  .filters::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .filters {
+    scrollbar-width: none;
+    scrollbar-color: transparent transparent;
+  }
+
+  .filter-group {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Price button Styling */
+  .price-buttons.segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    overflow: hidden;
+  }
+
+  .price-buttons.segmented button {
+    flex: 1 1 auto;
+    border: none;
+    padding: 8px 12px;
+    background-color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    outline: none;
+    transition: background-color 0.2s;
+    border-left: 1px solid #ccc;
+  }
+
+  .price-buttons.segmented button:first-child {
+    border-left: none;
+  }
+
+  .price-buttons.segmented button:hover {
+    background-color: #e9ecef;
+  }
+
+  .price-buttons.segmented button.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="checkbox"] {
+    margin-right: 8px;
+  }
+
+  .category {
+    display: inline-block;
+    padding: 8px 15px;
+    margin: 3px;
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    color: #495057;
+  }
+
+  .category:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  .category.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .see-more-btn {
+    color: #007bff;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    display: block;
+    text-align: left;
+    z-index: 11000;
+  }
+
+  .see-more-btn:hover {
+    text-decoration: underline;
+  }
+
+  .rating-container select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    color: #333;
+    margin-top: 0.5rem;
+    width: 100%;
+    max-width: 180px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236c757d' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+  }
+
+  .rating-container label {
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .details {
+    flex: 1;
+    overflow-y: auto;
+    width: 45%;
+    border-right: 0;
+  }
+
+  /* For WebKit browsers (Chrome, Safari, Edge) */
+  .details::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* For Firefox */
+  .details {
+    scrollbar-width: none;
+    scrollbar-color: transparent transparent;
+  }
+
+  .restaurant-card {
+    display: flex;
+    flex-direction: row;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  .restaurant-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .restaurant-image {
+    width: 210px;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .restaurant-info {
+    flex-grow: 1;
+  }
+
+  .restaurant-info h2 {
+    font-size: 1.4rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #212529;
+    font-weight: 700;
+  }
+
+  .restaurant-info p {
+    margin: 0.4rem 0;
+    font-size: 0.95rem;
+    color: #555;
+  }
+
+  .map {
+    width: 40%;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    background-color: transparent;
+    z-index: 1;
+  }
+
+  #map {
+    height: 100%;
+    width: 93%;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    z-index: 1;
+    position: relative;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background-color: #f1f1f1;
+    padding: 30px;
+    border: none;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 650px;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .close-button {
+    color: #888;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 30px;
+    font-weight: normal;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .close-button:hover,
+  .close-button:focus {
+    color: #333;
+    text-decoration: none;
+  }
+
+  #allCategoriesCheckboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 25px;
+  }
+
+  #allCategoriesCheckboxes label {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #allCategoriesCheckboxes label:hover {
+    background-color: #e9ecef;
+  }
+
+  #allCategoriesCheckboxes input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #007bff;
+    transform: scale(1.1);
+  }
+
+  #allCategoriesCheckboxes input[type="checkbox"]:checked + label {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  #applyCategoryFilterBtn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  
+  #applyCategoryFilterBtn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  button[onclick="clearFilters()"] {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  button[onclick="clearFilters()"]:hover {
+    background-color: #5a6268;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .price-buttons.segmented button[data-price].active {
+    background-color: #007bff;
+    color: white;
+  }
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="filters">
+        <h5><b>Filters</b></h5>
+        <div class="filter-section">
+
+            <div class="filter-group">
+                <h6><b>Price</b></h6>
+                <div class="price-buttons segmented">
+                    <div class="price-buttons segmented">
+                        <button onclick="updateURLParam('price', '$')" data-price="$">$</button>
+                        <button onclick="updateURLParam('price', '$$')" data-price="$$">$$</button>
+                        <button onclick="updateURLParam('price', '$$$')" data-price="$$$">$$$</button>
+                        <button onclick="updateURLParam('price', '$$$$')" data-price="$$$$">$$$$</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h6><b>Suggested</b></h6>
+                <div class="checkbox-option">
+                    <label>
+                        <span>Open Now</span>
+                        <input type="checkbox"><br>
+                        <span>Offers Delivery</span>
+                        <input type="checkbox">
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h6><b>Category</b></h6>
+                <div id="quick-categories">
+                    <button onclick="updateURLParam('category', 'Local')" class="category">Local</button>
+                    <button onclick="updateURLParam('category', 'Western')" class="category">Western</button>
+                    <button onclick="updateURLParam('category', 'Chinese')" class="category">Chinese</button>
+                    <button onclick="updateURLParam('category', 'Fast Food')" class="category">Fast Food</button>
+                </div>
+                <button id="showAllCategoriesBtn" class="see-more-btn">Show All</button>
+
+                <div id="categoryModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-button">&times;</span>
+                        <h5>Select Cuisines</h5>
+                        <div id="allCategoriesCheckboxes">
+                        </div>
+                        <button id="applyCategoryFilterBtn">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rating-container">
+                <div class="filter-group">
+                    <h6><b>Ratings</b></h6>
+                    <label>Min Rating:
+                        <select onchange="updateURLParam('rating', this.value)">
+                            <option value="">--</option>
+                            <option value="1">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h6><b>Distance</b></h6>
+                <label><input type="radio" name="distance" value="bird" checked onchange="updateDistanceFilter(this)"> Bird's-eye View</label><br>
+                <label><input type="radio" name="distance" value="8" onchange="updateDistanceFilter(this)"> Driving (8 km.)</label><br>
+                <label><input type="radio" name="distance" value="4" onchange="updateDistanceFilter(this)"> Biking (4 km.)</label><br>
+                <label><input type="radio" name="distance" value="2" onchange="updateDistanceFilter(this)"> Walking (2 km.)</label><br>
+                <label><input type="radio" name="distance" value="0.5" onchange="updateDistanceFilter(this)"> Within 4 blocks</label>
+            </div>
+
+            <button onclick="clearFilters()" style="margin-left: 0.5rem;">Clear</button>
+
+            <ul id="results"></ul>
+        </div>
+    </div>
+
+    <div class="details">
+        {% for restaurant in restaurants %}
+        <a href="{{ url_for('display_restaurant', restaurant_id=restaurant.id) }}"
+            class="restaurant-link" {# Add a class for easier selection in JS #}
+            data-latitude="{{ restaurant.latitude }}" {# Add latitude #}
+            data-longitude="{{ restaurant.longitude }}" {# Add longitude #}
+            data-name="{{ restaurant.name }}"> {# Add restaurant name #}
+            <div class="restaurant-card">
+                <img src="{{ restaurant.image_url or url_for('static', filename='default.jpg') }}" alt="{{ restaurant.name }}" class="restaurant-image">
+                <div class="restaurant-info">
+                    <h2><b>{{ restaurant.name }}</b></h2>
+                    <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+                    <p><strong>Rating:</strong>
+                        {% if restaurant.average_rating is not none %}
+                            {{ "%.1f" | format(restaurant.average_rating) }} / 5
+                        {% else %}
+                            No reviews yet
+                        {% endif %}
+                    </p>
+                    <p><strong>Price:</strong> {{ restaurant.price }}</p>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="map">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script>
+    function updateURLParam(key, value) {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        let existing = params.get(key);
+        let values = existing ? existing.split(',') : [];
+
+        // For price and rating, we want to replace, not toggle/add multiple
+        if (key === 'price' || key === 'rating' || key === 'distance') {
+            if (params.get(key) === value) { // If currently active, toggle off
+                params.delete(key);
+            } else {
+                params.set(key, value);
+            }
+        } else { // For categories, allow multiple selection/deselection
+            if (values.includes(value)) {
+                values = values.filter(v => v !== value);
+            } else {
+                values.push(value);
+            }
+
+            if (values.length > 0) {
+                params.set(key, values.join(','));
+            } else {
+                params.delete(key);
+            }
+        }
+
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+
+    // Get the modal
+    const modal = document.getElementById("categoryModal");
+    // Get the button that opens the modal
+    const btn = document.getElementById("showAllCategoriesBtn");
+    // Get the <span> element that closes the modal
+    const span = document.getElementsByClassName("close-button")[0];
+    // Get the apply button
+    const applyBtn = document.getElementById("applyCategoryFilterBtn");
+    // Container for checkboxes
+    const allCategoriesCheckboxes = document.getElementById("allCategoriesCheckboxes");
+
+    // All possible cuisine categories (you can get this from your backend or define it here)
+    const allCuisines = [
+        'Local', 'Western', 'Chinese', 'Fast Food', 'Japanese', 'Italian',
+        'Korean', 'French', 'Indian', 'Mediterranean', 'Thai', 'Vietnamese',
+        'Middle Eastern', 'Desserts', 'Cafes', 'Bakery', 'Seafood', 'Steakhouse'
+    ];
+
+    function populateCategoriesModal() {
+        allCategoriesCheckboxes.innerHTML = ''; // Clear previous
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        const activeCategories = params.get('category') ? params.get('category').split(',') : [];
+
+        allCuisines.forEach(cuisine => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = cuisine;
+            if (activeCategories.includes(cuisine)) {
+                checkbox.checked = true;
+            }
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(cuisine));
+            allCategoriesCheckboxes.appendChild(label);
+        });
+    }
+
+    // When the user clicks the button, open the modal, and populate it
+    btn.onclick = function() {
+        populateCategoriesModal();
+        modal.style.display = "flex"; // Use flex to center the modal
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Apply filters from modal
+    applyBtn.onclick = function() {
+        const selectedCuisines = [];
+        allCategoriesCheckboxes.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+            selectedCuisines.push(checkbox.value);
+        });
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        if (selectedCuisines.length > 0) {
+            params.set('category', selectedCuisines.join(','));
+        } else {
+            params.delete('category');
+        }
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+
+    // Initial setup for active categories on load for quick buttons
+    document.addEventListener('DOMContentLoaded', () => {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        // Price buttons active state
+        const activePrice = params.get('price');
+        if (activePrice) {
+            document.querySelectorAll('.price-buttons.segmented button').forEach(button => {
+                if (button.dataset.price === activePrice) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        // Category buttons active state
+        const activeCategories = params.get('category') ? params.get('category').split(',') : [];
+        document.querySelectorAll('#quick-categories .category').forEach(button => {
+            if (activeCategories.includes(button.textContent)) {
+                button.classList.add('active');
+            }
+        });
+
+        // Rating select active state
+        const activeRating = params.get('rating');
+        const ratingSelect = document.querySelector('.rating-container select');
+        if (ratingSelect && activeRating) {
+            ratingSelect.value = activeRating;
+        }
+
+        // Distance radio buttons active state
+        const activeDistance = params.get('distance');
+        if (activeDistance) {
+            document.querySelectorAll('input[name="distance"]').forEach(radio => {
+                if (radio.value === activeDistance) {
+                    radio.checked = true;
+                }
+            });
+        }
+    });
+
+
+    function clearFilters() {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, '', url.toString());
+        // No need to manually clear elements if page reloads
+        window.location.reload();
+    }
+
+    // Price button (updated to toggle properly)
     const priceButtons = document.querySelectorAll('.price-buttons.segmented button');
-
     priceButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        priceButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-      });
+        button.addEventListener('click', () => {
+            const currentPrice = new URL(window.location.href).searchParams.get('price');
+            const clickedPrice = button.dataset.price;
+
+            if (currentPrice === clickedPrice) {
+                updateURLParam('price', currentPrice); // This will remove it
+            } else {
+                updateURLParam('price', clickedPrice); // This will set it
+            }
+        });
     });
 
-    // Category Filter
+    // Category Filter (updated to toggle properly in JS)
     const categoryButtons = document.querySelectorAll('.category');
-
     categoryButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        button.classList.toggle('active');
-      });
+        button.addEventListener('click', () => {
+            // The updateURLParam function already handles toggling for 'category'
+        });
     });
 
-  //*Show More Show Less
-  const parentContainer = document.querySelector('.see-more-container');
-  parentContainer.addEventListener('click', event => {
-    const current = event.target;
-    const isSeeMoreBtn = current.className.includes('see-more-btn');
-    if (!isSeeMoreBtn) return;
-    const currentText = event.target.parentNode.querySelector('.more-category');
-    currentText.classList.toggle('more-category--show');
-    current.textContent = current.textContent.includes('Show More') ?
-      "Show Less" : "Show More";
-  })
 
-  // Initialize the map
-  const map = L.map('map').setView([2.927891727185679, 101.6418836043987], 15);
+    let userLat = 2.927891727185679;
+    let userLon = 101.6418836043987;
 
-  // Add the tile layer
-  L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(map);
+    window.onload = function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                userLat = position.coords.latitude;
+                userLon = position.coords.longitude;
 
-  var marker = L.marker([2.927891727185679, 101.6418836043987]).addTo(map);
-  marker.bindPopup("<b>Multimedia University").openPopup();
+                // Append lat/lon to URL if not already there
+                const url = new URL(window.location.href);
+                if (!url.searchParams.has('user_lat')) {
+                    url.searchParams.set('user_lat', userLat);
+                    url.searchParams.set('user_lon', userLon);
+                    window.location.href = url.toString();  // Reload with lat/lon
+                }
+            });
+        }
+    };
 
-  // Loop through restaurants and add markers
-  {% for restaurant in restaurants %}
+    function updateDistanceFilter(el) {
+        const value = el.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('distance', value);
+        window.location.href = url.toString();
+    }
+
+    // Initialize the map
+    const map = L.map('map').setView([2.927891727185679, 101.6418836043987], 15);
+
+    // Add the tile layer
+    L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Store the MMU marker in a globally accessible variable
+    let mmuMarker = L.marker([2.927891727185679, 101.6418836043987]).addTo(map);
+    mmuMarker.bindPopup("<b>Multimedia University").openPopup();
+
+    // Store the initial view for when no card is hovered
+    const initialMapView = {
+        center: map.getCenter(),
+        zoom: map.getZoom() // Store initial zoom too
+    };
+
+    let hoveredMarker = null; // To keep track of the marker for the currently hovered card
+
+    const restaurantLinks = document.querySelectorAll('.restaurant-link');
+
+    restaurantLinks.forEach(link => {
+        link.addEventListener('mouseover', () => {
+            const lat = parseFloat(link.dataset.latitude);
+            const lon = parseFloat(link.dataset.longitude);
+            const name = link.dataset.name;
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                // Remove previous hovered marker if exists
+                if (hoveredMarker) {
+                    map.removeLayer(hoveredMarker);
+                    hoveredMarker = null;
+                }
+                // Close the MMU popup if it's open, before moving the view
+                if (mmuMarker && mmuMarker.isPopupOpen()) {
+                    mmuMarker.closePopup();
+                }
+
+                // Create a new marker for the hovered restaurant
+                hoveredMarker = L.marker([lat, lon]).addTo(map);
+                hoveredMarker.bindPopup(`<b>${name}</b>`).openPopup();
+
+                // Center the map on the hovered restaurant's coordinates
+                map.setView([lat, lon], 15); // You can adjust the zoom level here
+            }
+        });
+
+        link.addEventListener('mouseout', () => {
+            // Remove the hovered marker and close its popup
+            if (hoveredMarker) {
+                map.removeLayer(hoveredMarker);
+                hoveredMarker = null;
+            }
+
+            // Reset the map view to the initial MMU location and zoom
+            map.setView(initialMapView.center, initialMapView.zoom);
+
+            // Open the MMU marker's popup again
+            if (mmuMarker) { // Ensure mmuMarker exists
+                mmuMarker.openPopup();
+            }
+        });
+    });
+
+    {% for restaurant in restaurants %}
     {% if restaurant.latitude and restaurant.longitude %}
-      L.marker([{{ restaurant.latitude }}, {{ restaurant.longitude }}])
+    L.marker([{{ restaurant.latitude }}, {{ restaurant.longitude }}])
         .addTo(map)
-        .bindPopup("<b>{{ restaurant.name }}</b><br>{{ restaurant.cuisine }}<br>Rating: {{ restaurant.avg_rating }} / 5");
+        .bindPopup("<b>{{ restaurant.name }}</b><br>{{ restaurant.cuisine }}<br>Rating: {{ "%.1f" | format(restaurant.average_rating or 0) }} / 5");
     {% endif %}
-  {% endfor %}
-
+    {% endfor %}
 </script>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
-<script src="{{ url_for('static', filename='data/point.js') }}"></script>
 {% endblock %}

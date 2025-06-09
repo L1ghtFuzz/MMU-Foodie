@@ -17,4 +17,4 @@ website/database.db
 # Ignore migration's pycache
 migrations/__pycache__/
 
-lydia's/
+.vscode/

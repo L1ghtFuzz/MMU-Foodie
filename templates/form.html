@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Add Restaurant {% endblock %}
+{% block title %}Add Restaurant{% endblock %}
 
 {% block style %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -12,11 +12,8 @@
     padding: 2rem;
   }
 
-  .form-section, .map-section {
-    flex: 1 1 45%;
-  }
-
   .form-section {
+    flex: 1 1 45%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -53,6 +50,7 @@
   }
 
   .map-section {
+    flex: 1 1 45%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -90,10 +88,10 @@
 {% endblock %}
 
 {% block body %}
-<div class="add-restaurant-container">
-  <div class="form-section">
-    <h1>Add a New Restaurant</h1>
-    <form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data">
+  <div class="add-restaurant-container">
+    <div class="form-section">
+      <h1>Add a New Restaurant</h1>
       <label>Name:</label>
       <input type="text" name="name" required>
 
@@ -113,30 +111,31 @@
       <input type="text" name="phone" required>
 
       <label>Google Maps Link:</label>
-      <input type="url" name="google_maps_link" required>
+      <input type="url" name="Maps_link" required>
 
       <label>Restaurant Image:</label>
       <input type="file" name="images" accept="image/*" multiple>
 
-      <button type="submit">Add Restaurant</button>
-    </form>
-  </div>
+      <div class="coords-inputs">
+        <input type="text" name="latitude" id="latitude" placeholder="Latitude" step="any" required>
+        <input type="text" name="longitude" id="longitude" placeholder="Longitude" step="any" required>
+      </div>
 
-  <div class="map-section">
-    <label>Click on the map to select coordinates:</label>
-    <div id="map"></div>
-    <div class="coords-inputs">
-      <input type="text" name="latitude" id="latitude" placeholder="Latitude" step="any" required>
-      <input type="text" name="longitude" id="longitude" placeholder="Longitude" step="any" required>
+      <button type="submit">Add Restaurant</button>
+    </div>
+
+    <div class="map-section">
+      <label>Click on the map to select coordinates:</label>
+      <div id="map"></div>
     </div>
   </div>
-</div>
+</form>
 {% endblock %}
 
 {% block script %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const map = L.map('map').setView([2.927574, 101.642040], 15); // Default Singapore
+  const map = L.map('map').setView([2.927574, 101.642040], 15);
 
   L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
     maxZoom: 19,
@@ -149,11 +148,9 @@
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
 
-    // Update input values
     document.getElementById('latitude').value = lat;
     document.getElementById('longitude').value = lng;
 
-    // Move marker
     if (marker) {
       marker.setLatLng([lat, lng]);
     } else {
