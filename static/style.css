@@ -16,7 +16,7 @@ body {
   font-family: "Roboto", sans-serif;
   overflow: visible;
   position: relative;
-  z-index: 10000;
+  z-index: 1000;
   transition: background-color 0.3s ease;
 }
 

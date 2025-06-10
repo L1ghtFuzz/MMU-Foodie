@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   /* === Global Resets & Base Styles === */
   *,
@@ -61,9 +62,9 @@
       background-color: #ffffff;
       padding: 25px 30px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
-  .sidebar-column .sidebar-card { 
+  .sidebar-column .sidebar-card {
       margin-bottom: 25px;
   }
   .sidebar-column .sidebar-card:last-child {
@@ -73,33 +74,33 @@
   /* === Restaurant Header & Details === */
   .restaurant-header {
       display: flex;
-      align-items: center; 
-      justify-content: space-between; 
-      flex-wrap: wrap; 
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 15px;
       margin-bottom: 20px;
       padding-bottom: 20px;
       border-bottom: 1px solid #e9ecef;
   }
   .restaurant-header h1 {
-      margin-bottom: 0; 
+      margin-bottom: 0;
   }
 
   .average-rating {
       color: #ffffff;
-      background-color: #ffc107; 
-      font-size: 1.1em; 
+      background-color: #ffc107;
+      font-size: 1.1em;
       font-weight: 700;
       padding: 8px 15px;
-      border-radius: 20px; 
+      border-radius: 20px;
       display: inline-flex;
       align-items: center;
-      white-space: nowrap; 
+      white-space: nowrap;
   }
-  .average-rating::before { 
+  .average-rating::before {
       content: '★';
       margin-right: 6px;
-      font-size: 1.1em; 
+      font-size: 1.1em;
   }
 
   .no-rating-notice {
@@ -108,16 +109,173 @@
       font-style: italic;
   }
 
-  .main-photo {
+    /* === Image Gallery Styles (Modified and New) === */
+    .main-photo-container {
+        position: relative;
+        width: 100%;
+        max-height: 450px; /* Match main-photo height */
+        overflow: hidden; /* Ensure button doesn't spill out if image is smaller */
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border: 1px solid #e9ecef;
+    }
+
+    .main-photo-container .main-photo {
+        width: 100%;
+        height: auto;
+        max-height: 450px; /* Ensure main photo adheres to max height */
+        object-fit: cover;
+        display: block; /* Remove extra space below image */
+        border-radius: 8px;
+    }
+
+    .see-all-photos-button {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+        color: white;
+        padding: 10px 15px;
+        border-radius: 20px;
+        border: none;
+        font-size: 0.9em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        z-index: 10; /* Ensure button is above image */
+    }
+
+    .see-all-photos-button:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .main-photo-placeholder {
+        height: 450px; /* Maintain consistent height even if no photo */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f0f0;
+        color: #888;
+        font-style: italic;
+    }
+
+   .restaurant-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Adjust minmax for desired size */
+      gap: 15px; /* Spacing between images */
+      margin-top: 25px;
+      margin-bottom: 25px;
+   }
+
+   .restaurant-gallery img {
       width: 100%;
-      height: auto;
-      max-height: 450px;
+      height: 120px; /* Fixed height for small images, adjust as needed */
+      object-fit: cover; /* Ensures images cover the area without distortion */
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+   }
+
+   .restaurant-gallery img:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+   }
+
+   .gallery-more-placeholder {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       background-color: #e9ecef;
+       border-radius: 8px;
+       height: 120px; /* Match restaurant-gallery img height */
+       font-size: 1.5em;
+       font-weight: bold;
+       color: #6c757d;
+       cursor: pointer;
+       transition: background-color 0.2s ease;
+       border: 1px solid #e9ecef;
+   }
+
+   .gallery-more-placeholder:hover {
+       background-color: #dee2e6;
+   }
+
+
+  /* Modal Styles */
+  .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+  }
+
+  .modal-content {
+      background-color: #fefefe;
+      margin: auto; /* Centering */
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%; /* Adjust width as needed */
+      max-width: 900px; /* Max width for larger screens */
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh; /* Max height for scrollable content */
+      overflow-y: auto; /* Enable vertical scrolling */
+  }
+
+  .modal-content h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #343a40;
+  }
+
+  .modal-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
+      gap: 15px;
+      padding: 10px;
+  }
+
+  .modal-gallery img {
+      width: 100%;
+      height: 150px; /* Fixed height for modal images */
       object-fit: cover;
       border-radius: 8px;
-      margin-bottom: 25px;
       border: 1px solid #e9ecef;
+      cursor: pointer; /* Indicate clickable if full size view is added later */
+      transition: transform 0.2s ease;
   }
-  .no-content-notice { 
+
+  .modal-gallery img:hover {
+      transform: scale(1.02);
+  }
+
+  .close-button {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1100; /* Ensure it's above everything */
+  }
+
+  .close-button:hover,
+  .close-button:focus {
+      color: #000;
+      text-decoration: none;
+  }
+
+  .no-content-notice {
       color: #6c757d;
       font-style: italic;
       padding: 20px;
@@ -132,7 +290,7 @@
 
   .status { font-weight: 600; margin-bottom: 8px; }
   .status.closed { color: #dc3545; }
-  .status.open { color: #28a745; } 
+  .status.open { color: #28a745; }
   .status-detail { color: #6c757d; font-weight: normal; font-size: 0.9em; }
 
   .address-info {
@@ -151,7 +309,7 @@
   .improve-listing-link {
       font-size: 0.9em;
       color: #6c757d;
-      margin-left: auto; 
+      margin-left: auto;
   }
   .improve-listing-link:hover { color: #007bff; }
 
@@ -161,15 +319,15 @@
       margin-top: 25px;
       border-top: 1px solid #e9ecef;
   }
-  .content-section:first-of-type { 
+  .content-section:first-of-type {
       border-top: none;
       margin-top: 0;
       padding-top: 0;
   }
-  .content-section h2 { 
-      margin-bottom: 15px; 
+  .content-section h2 {
+      margin-bottom: 15px;
   }
-  .content-section h3 { 
+  .content-section h3 {
       margin-bottom: 20px;
   }
 
@@ -184,7 +342,7 @@
       background-color: #e9ecef;
       color: #495057;
       padding: 8px 15px;
-      border-radius: 20px; 
+      border-radius: 20px;
       font-size: 0.9em;
   }
   .see-all-link {
@@ -203,7 +361,7 @@
   }
 
   /* === Enhanced Review Display Styling === */
-  .reviews-section h2 { 
+  .reviews-section h2 {
       padding-bottom: 10px;
       border-bottom: 2px solid #007bff;
       display: inline-block;
@@ -218,7 +376,7 @@
   .review-item {
       background-color: #fff;
       border: 1px solid #e9ecef;
-      padding: 20px 25px; 
+      padding: 20px 25px;
       margin-bottom: 20px;
       border-radius: 8px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.07);
@@ -238,7 +396,7 @@
   }
 
   .review-stars-display {
-      font-size: 1.2em; 
+      font-size: 1.2em;
       line-height: 1;
   }
   .review-stars-display .star.filled { color: #ffc107; }
@@ -251,7 +409,7 @@
   }
 
   /* === Enhanced Submit Review Form Styling === */
-  .submit-review-section h3 { 
+  .submit-review-section h3 {
       padding-bottom: 10px;
       border-bottom: 2px solid #007bff;
       display: inline-block;
@@ -262,14 +420,14 @@
       padding: 30px;
       border-radius: 8px;
       border: 1px solid #dee2e6;
-      margin-top: 10px; 
+      margin-top: 10px;
   }
 
   .form-group {
       margin-bottom: 20px;
   }
   .form-group:last-of-type {
-      margin-bottom: 25px; 
+      margin-bottom: 25px;
   }
 
   .review-form label {
@@ -285,7 +443,7 @@
       color: #6c757d;
   }
 
-  .form-control { 
+  .form-control {
       width: 100%;
       padding: 12px 15px;
       font-size: 1em;
@@ -308,27 +466,27 @@
   }
 
   /* Star Rating Input CSS */
-  .rating-group label { margin-bottom: 10px; } 
+  .rating-group label { margin-bottom: 10px; }
 
   .star-rating-input {
       display: inline-flex;
       flex-direction: row-reverse;
-      font-size: 2em; 
+      font-size: 2em;
       line-height: 1;
   }
   .star-rating-input input[type="radio"] { display: none; }
   .star-rating-input label {
-      color: #d1d1d1; 
+      color: #d1d1d1;
       cursor: pointer;
-      padding: 0 0.05em; 
+      padding: 0 0.05em;
       transition: color 0.2s ease-in-out;
-      font-weight: normal; 
+      font-weight: normal;
       margin-bottom: 0;
   }
   .star-rating-input input[type="radio"]:checked ~ label,
   .star-rating-input label:hover,
   .star-rating-input label:hover ~ label {
-      color: #ffc107; 
+      color: #ffc107;
   }
 
   /* === Buttons === */
@@ -341,10 +499,10 @@
       cursor: pointer;
       background-color: #007bff;
       border: 1px solid #007bff;
-      padding: 0.75rem 1.5rem; 
+      padding: 0.75rem 1.5rem;
       font-size: 1rem;
       line-height: 1.5;
-      border-radius: 0.3rem; 
+      border-radius: 0.3rem;
       transition: all 0.15s ease-in-out;
       text-decoration: none;
   }
@@ -379,7 +537,7 @@
       border-color: #1e7e34;
   }
 
-  .btn-outline-primary { 
+  .btn-outline-primary {
       color: #007bff;
       border-color: #007bff;
   }
@@ -388,13 +546,13 @@
       background-color: #007bff;
   }
 
-  .btn-block { 
+  .btn-block {
       display: block;
       width: 100%;
   }
 
-  .btn-submit-review { 
-      background-color: #28a745; 
+  .btn-submit-review {
+      background-color: #28a745;
       border-color: #28a745;
   }
   .btn-submit-review:hover {
@@ -415,7 +573,7 @@
       font-size: 0.95em;
   }
   .hours-table td {
-      padding: 10px 5px; 
+      padding: 10px 5px;
       border-bottom: 1px solid #e9ecef;
       color: #495057;
   }
@@ -425,7 +583,7 @@
   /* === Responsive Adjustments === */
   @media (max-width: 992px) {
       .container {
-          grid-template-columns: 1fr; 
+          grid-template-columns: 1fr;
       }
       .sidebar-column {
           margin-top: 30px;
@@ -439,7 +597,9 @@
           align-items: flex-start;
       }
       .average-rating { margin-top: 10px; font-size: 1em; }
-      .main-photo { max-height: 350px; }
+      .main-photo-container { max-height: 350px; } /* Adjust for smaller screens */
+      .main-photo-container .main-photo { max-height: 350px; }
+      .main-photo-placeholder { height: 350px; }
       h1 { font-size: 2em; }
       h2 { font-size: 1.6em; }
       h3 { font-size: 1.3em; }
@@ -450,7 +610,7 @@
       body { padding: 0 15px; }
       .container { margin-top: 20px; margin-bottom: 20px; gap: 20px; }
       .restaurant-main-content, .sidebar-card, .review-form { padding: 20px; }
-      .nav-tabs-container { gap: 10px; } 
+      .nav-tabs-container { gap: 10px; }
       .nav-tabs a { font-size: 0.9em; padding: 10px 5px; }
       .action-links .btn { width: 100%; margin-bottom: 10px; }
       .action-links .btn:last-child { margin-bottom: 0; }
@@ -459,16 +619,63 @@
   }
 
   .coordinates {
-      font-size: 0.9em; 
-      color: #777;      
-      margin-top: 0.5em; 
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 0.5em;
   }
 
   .no-coordinates {
-      font-style: italic; 
+      font-style: italic;
       color: #999;
       font-size: 0.9em;
       margin-top: 0.5em;
+  }
+
+  /* Styles for the Leaflet Map container */
+  #map {
+      height: 400px; /* Adjust height as needed */
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+  }
+
+  /* Styles for the full-size image modal */
+  #fullSizeImageModal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 2000; /* Higher than photoModal */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.9); /* Darker background */
+      justify-content: center;
+      align-items: center;
+  }
+
+  #fullSizeImage {
+      max-width: 95%; /* Limit maximum width */
+      max-height: 95%; /* Limit maximum height */
+      display: block; /* Remove extra space below image */
+      margin: auto; /* Center the image */
+      object-fit: contain; /* Ensure the whole image is visible */
+  }
+
+  .full-size-close-button {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2001;
+  }
+  .full-size-close-button:hover,
+  .full-size-close-button:focus {
+      color: #bbb;
+      text-decoration: none;
   }
 </style>
 {% endblock %}
@@ -476,15 +683,36 @@
 {% block body %}
 <div class="container">
     <div class="restaurant-main-content">
-        {% if restaurant.image_url %}
-            {% set main_photo = restaurant.image_url.split(',')[0] if restaurant.image_url and ',' in restaurant.image_url else restaurant.image_url %}
-            {% if main_photo %}
-                <img src="{{ main_photo }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+        {# Main Photo Section and "See all photos" button #}
+        <div class="main-photo-container">
+            {% if restaurant.images %}
+                <img src="{{ restaurant.images[0].image_url }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+                {% if restaurant.images | length > 1 %} {# Show button if there's more than just the main photo #}
+                <button class="see-all-photos-button" onclick="openPhotoModal()">
+                    See all photos ({{ restaurant.images | length }})
+                </button>
+                {% endif %}
             {% else %}
-                <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+                <div class="no-content-notice main-photo-placeholder"><p>No main photo uploaded yet.</p></div>
             {% endif %}
-        {% else %}
-            <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+        </div>
+
+        {# Small restaurant gallery (additional photos) #}
+        {% if restaurant.images | length > 1 %} {# Display small gallery only if there are more than 1 image (main + others) #}
+        <div class="restaurant-gallery">
+            {% for img in restaurant.images[1:4] %} {# Display next 3 images after the main one #}
+            <img src="{{ img.image_url }}" alt="Gallery photo of {{ restaurant.name }}">
+            {% endfor %}
+            {# Add a placeholder "More" div if there are more images than displayed in the main + small gallery #}
+            {% if restaurant.images | length > 4 %}
+                 <div class="gallery-more-placeholder" onclick="openPhotoModal()">
+                     +{{ restaurant.images | length - 4 }}
+                 </div>
+            {% endif %}
+        </div>
+        {% elif not restaurant.images %}
+        {# This case might not be needed if main-photo-placeholder handles the no-photo case well #}
+        <div class="no-content-notice"><p>No additional photos uploaded yet.</p></div>
         {% endif %}
 
         <div class="restaurant-header">
@@ -500,7 +728,7 @@
         <p class="address-info">{{ restaurant.address }}</p>
 
         <div class="info-row action-links">
-            {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Google Maps</a>{% endif %}
+            {# Removed Google Maps link as it will be replaced by Leaflet map #}
             {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
             <a href="{{ url_for('upload_photos', restaurant_id=restaurant.id) }}" class="improve-listing-link">Improve this listing</a>
         </div>
@@ -520,21 +748,11 @@
         </div>
 
         {% if restaurant.latitude is not none and restaurant.longitude is not none %}
-        <div class="content-section location-section map-section"> {# Added 'map-section' class for specific styling #}
+        <div class="content-section location-section map-section">
             <h3>Location Map:</h3>
-            <div class="map-container">
-                <iframe
-                    width="100%"
-                    height="400"
-                    frameborder="0"
-                    style="border:0"
-                    src="http://maps.google.com/maps?q={{ restaurant.latitude }},{{ restaurant.longitude }}&hl=en&z=14&output=embed"
-                    allowfullscreen>
-                </iframe>
-            </div>
+            <div id="map"></div> {# This is the new Leaflet map container #}
         </div>
         {% endif %}
-        {# END: INTERACTIVE MAP SECTION #}
 
         <div class="content-section reviews-section">
             <h2>User Reviews</h2>
@@ -594,8 +812,8 @@
         <div class="sidebar-card save-card">
             <h3>Save to Favorites</h3>
             <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
-                <button type="submit" class="btn {% if restaurant.is_saved %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
-                    {% if restaurant.is_saved %}✔ Saved{% else %}♡ Add to Saved{% endif %}
+                <button type="submit" class="btn {% if is_saved_by_user %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
+                    {% if is_saved_by_user %}✔ Saved{% else %}♡ Add to Saved{% endif %}
                 </button>
             </form>
         </div>
@@ -630,4 +848,82 @@
         </div>
     </aside>
 </div>
+
+<div id="photoModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closePhotoModal()">&times;</span>
+    <h2>All Photos for {{ restaurant.name }}</h2>
+    <div class="modal-gallery">
+      {% for img in restaurant.images %}
+        <img src="{{ img.image_url }}" alt="Photo of {{ restaurant.name }}" loading="lazy" onclick="openFullSizeImageModal('{{ img.image_url }}')">
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{# New Modal for Full Size Image #}
+<div id="fullSizeImageModal" class="modal">
+    <span class="full-size-close-button" onclick="closeFullSizeImageModal()">&times;</span>
+    <img id="fullSizeImage" src="" alt="Full size photo">
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    function openPhotoModal() {
+        document.getElementById('photoModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling of background
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Re-enable scrolling of background
+    }
+
+    // Close modal if clicking outside the modal content
+    window.onclick = function(event) {
+        const photoModal = document.getElementById('photoModal');
+        const fullSizeImageModal = document.getElementById('fullSizeImageModal');
+
+        if (event.target === photoModal) {
+            closePhotoModal();
+        }
+        if (event.target === fullSizeImageModal) {
+            closeFullSizeImageModal();
+        }
+    }
+
+    // New functions for full-size image modal
+    function openFullSizeImageModal(imageUrl) {
+        const fullSizeImageModal = document.getElementById('fullSizeImageModal');
+        const fullSizeImage = document.getElementById('fullSizeImage');
+
+        fullSizeImage.src = imageUrl;
+        fullSizeImageModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Keep background from scrolling
+    }
+
+    function closeFullSizeImageModal() {
+        document.getElementById('fullSizeImageModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Re-enable scrolling of background
+    }
+
+    // Leaflet Map Initialization
+    {% if restaurant.latitude is not none and restaurant.longitude is not none %}
+    const latitude = {{ restaurant.latitude }};
+    const longitude = {{ restaurant.longitude }};
+
+    const map = L.map('map').setView([latitude, longitude], 15); // Set initial view to restaurant coordinates
+
+    L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
+        attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    L.marker([latitude, longitude]).addTo(map)
+        .bindPopup("<b>{{ restaurant.name }}</b>").openPopup();
+    {% endif %}
+</script>
 {% endblock %}

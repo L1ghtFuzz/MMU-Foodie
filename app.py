@@ -12,8 +12,8 @@ import re, os, uuid, random
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-app.secret_key = 'your_secret_key'
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.root_path, 'instance', 'database.db')}"
+app.secret_key = 'odiajfiouwhaldiu213978yASd'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -184,6 +184,7 @@ def index():
     min_rating = request.args.get('rating', type=int)
     price = request.args.get('price')
     category_param = request.args.get('category')
+    open_now = request.args.get('open_now') # Get the 'open_now' parameter
 
     user_lat = request.args.get('user_lat', type=float)
     user_lon = request.args.get('user_lon', type=float)
@@ -206,11 +207,17 @@ def index():
         categories = category_param.split(',')
         query = query.filter(Restaurant.cuisine.in_(categories))
 
-    results = query.all()
+    all_restaurants = query.all() # Get all restaurants first to filter by open_now
     restaurants = []
 
-    for restaurant, avg_rating in results:
+    for restaurant, avg_rating in all_restaurants:
         restaurant.avg_rating = round(avg_rating or 0, 1)
+
+        # Filter by "Open Now"
+        if open_now == 'true':
+            status, _ = restaurant.get_status()
+            if status != "Open now":
+                continue # Skip if not open now
 
         if user_lat and user_lon and distance_limit and distance_limit != 'bird':
             if restaurant.latitude and restaurant.longitude:
@@ -363,7 +370,7 @@ def favourite(id):
         flash("Added to favourites!", category='success')
     else:
         flash("Already in favourites.", category='info')
-    return redirect(url_for('index')) # You might want to redirect to display_restaurant
+    return redirect(url_for('index'))
 
 @app.route('/unfavourite/<int:id>')
 @login_required
@@ -373,13 +380,11 @@ def unfavourite(id):
         current_user.favourites.remove(restaurant)
         db.session.commit()
         flash("Removed from favourites.", category='warning')
-    # MODIFIED: Redirect to the favourites_page which now correctly uses the relationship
     return redirect(url_for('favourites_page'))
 
 @app.route('/favourites')
 @login_required
 def favourites_page():
-    # MODIFIED: Retrieve favourites directly from the current_user's relationship
     return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
 
 @app.route('/mark-past/<int:id>')
@@ -395,11 +400,22 @@ def mark_past(id):
         flash("Already marked as visited.", category='info')
     return redirect(url_for('index')) # Or the page you want to redirect to
 
+# Inside your app.py
+
 @app.route('/past')
 @login_required
 def past_page():
-    # MODIFIED: Use the new 'past_visits' relationship
     return render_template('past_restaurants.html', user=current_user, past_restaurants=current_user.past_visits)
+
+@app.route('/unmark_past/<int:id>')
+@login_required
+def unmark_past(id):
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant in current_user.past_visits:
+        current_user.past_visits.remove(restaurant)
+        db.session.commit()
+        flash("Removed from visited restaurants.", "warning")
+    return redirect(url_for('past_page'))
 
 @app.route('/random', methods=['GET', 'POST'])
 @login_required
@@ -480,9 +496,17 @@ def display_restaurant(restaurant_id):
                 'close_time': None
             })
 
+    is_saved_by_user = False
+    # Check if the user is logged in before trying to access favourites
+    if current_user.is_authenticated:
+        # This is the most robust way to check for membership
+        # when 'current_user.favourites' is an InstrumentedList (list-like)
+        is_saved_by_user = restaurant in current_user.favourites
+
     return render_template('display.html', restaurant=restaurant,
                            status=status, status_detail=status_detail,
-                           operating_hours=full_operating_hours)
+                           operating_hours=full_operating_hours,
+                           is_saved_by_user=is_saved_by_user)
 
 
 @app.route('/form', methods=['GET', 'POST'])
@@ -738,6 +762,51 @@ def upload_photos(restaurant_id):
 
     return render_template('upload_photos.html', restaurant=restaurant)
 
+@app.route('/delete-image/<int:image_id>', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    if not current_user.is_admin:
+        flash("Access denied. Admins only.", category='error')
+        return redirect(url_for('index'))
+
+    image = RestaurantImage.query.get_or_404(image_id)
+    restaurant_id = image.restaurant_id
+
+    # Get the restaurant to update its main image_url if the deleted image was the main one
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+
+    try:
+        # Delete the image file from the server
+        # Construct the full path to the image file
+        filename = image.image_url.split('/')[-1]
+        image_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            flash(f"Image file '{filename}' deleted from server.", "info")
+        else:
+            flash(f"Image file '{filename}' not found on server.", "warning")
+
+        db.session.delete(image)
+        db.session.commit()
+
+        # If the deleted image was the main image_url for the restaurant, update it
+        if restaurant.image_url == image.image_url:
+            # Find another image for this restaurant to be the new main image
+            # Or set to default if no other images exist
+            remaining_images = RestaurantImage.query.filter_by(restaurant_id=restaurant.id).first()
+            if remaining_images:
+                restaurant.image_url = remaining_images.image_url
+            else:
+                restaurant.image_url = url_for('static', filename='default.jpg')
+            db.session.commit()
+            flash("Restaurant's main image updated.", "info")
+
+        flash("Image removed successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting image: {str(e)}", "error")
+
+    return redirect(url_for('display_restaurant', restaurant_id=restaurant_id))
 
 @app.route('/restaurant/<int:restaurant_id>/review', methods=['POST'])
 def submit_review(restaurant_id):
@@ -752,16 +821,24 @@ def submit_review(restaurant_id):
     return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
 @app.route('/restaurant/<int:restaurant_id>/save', methods=['POST'])
+@login_required # Add this decorator if you want only logged-in users to favorite
 def toggle_save(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
-    # This logic assumes 'is_saved' is a per-restaurant flag.
-    # If it's specific to the current user, you'd modify current_user.favourites
-    restaurant.is_saved = not restaurant.is_saved
-    db.session.commit()
-    if restaurant.is_saved:
-        flash("Added to saved restaurants!", "success")
+
+    # Check if the current restaurant is already in the user's favourites
+    if restaurant in current_user.favourites:
+        # If it's favourited, remove it
+        current_user.favourites.remove(restaurant)
+        flash("Removed from saved restaurants!", "info")
+        saved_status = False # For redirection logic
     else:
-        flash("Removed from saved restaurants.", "info")
+        # If not favourited, add it
+        current_user.favourites.append(restaurant)
+        flash("Added to saved restaurants!", "success")
+        saved_status = True # For redirection logic
+
+    db.session.commit()
+    # You might want to redirect back to the display_restaurant page with the updated status
     return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
 

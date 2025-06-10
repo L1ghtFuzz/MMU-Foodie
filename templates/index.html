@@ -404,9 +404,9 @@
                 <div class="checkbox-option">
                     <label>
                         <span>Open Now</span>
-                        <input type="checkbox"><br>
-                        <span>Offers Delivery</span>
-                        <input type="checkbox">
+                        <input type="checkbox" id="openNowCheckbox" onclick="updateURLParam('open_now', this.checked ? 'true' : '')"><br>
+                        <!-- <span>Offers Delivery</span>
+                        <input type="checkbox"> -->
                     </label>
                 </div>
             </div>
@@ -501,8 +501,8 @@
         let existing = params.get(key);
         let values = existing ? existing.split(',') : [];
 
-        // For price and rating, we want to replace, not toggle/add multiple
-        if (key === 'price' || key === 'rating' || key === 'distance') {
+        // For price, rating, distance, and open_now, either to replace or toggle off
+        if (key === 'price' || key === 'rating' || key === 'distance' || key === 'open_now') {
             if (params.get(key) === value) { // If currently active, toggle off
                 params.delete(key);
             } else {
@@ -537,7 +537,7 @@
     // Container for checkboxes
     const allCategoriesCheckboxes = document.getElementById("allCategoriesCheckboxes");
 
-    // All possible cuisine categories (you can get this from your backend or define it here)
+    // All possible cuisine categories 
     const allCuisines = [
         'Local', 'Western', 'Chinese', 'Fast Food', 'Japanese', 'Italian',
         'Korean', 'French', 'Indian', 'Mediterranean', 'Thai', 'Vietnamese',
@@ -545,7 +545,7 @@
     ];
 
     function populateCategoriesModal() {
-        allCategoriesCheckboxes.innerHTML = ''; // Clear previous
+        allCategoriesCheckboxes.innerHTML = ''; // Clear previous filters
         const url = new URL(window.location.href);
         const params = url.searchParams;
         const activeCategories = params.get('category') ? params.get('category').split(',') : [];
@@ -600,7 +600,7 @@
         window.location.href = url.toString();
     }
 
-    // Initial setup for active categories on load for quick buttons
+    // Initial setup for active categories and "Open Now" on load
     document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location.href);
         const params = url.searchParams;
@@ -638,6 +638,12 @@
                     radio.checked = true;
                 }
             });
+        }
+
+        // "Open Now" checkbox active state
+        const openNowCheckbox = document.getElementById('openNowCheckbox');
+        if (openNowCheckbox) {
+            openNowCheckbox.checked = params.get('open_now') === 'true';
         }
     });
 
@@ -720,10 +726,9 @@
         zoom: map.getZoom() // Store initial zoom too
     };
 
+
     let hoveredMarker = null; // To keep track of the marker for the currently hovered card
-
     const restaurantLinks = document.querySelectorAll('.restaurant-link');
-
     restaurantLinks.forEach(link => {
         link.addEventListener('mouseover', () => {
             const lat = parseFloat(link.dataset.latitude);
