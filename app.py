@@ -1,4 +1,3 @@
-import random
 from flask import Flask, render_template, request, redirect, flash, url_for, current_app
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, time
@@ -9,7 +8,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from sqlalchemy.sql import func
 from math import radians, cos, sin, sqrt, atan2
-import re, os, uuid
+import re, os, uuid, random
 
 
 app = Flask(__name__)
@@ -25,7 +24,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Data Classes
 class User(db.Model, UserMixin):
@@ -35,9 +34,16 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     first_name = db.Column(db.String(150))
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
+    # ADDED: Relationship for past visited restaurants
+    past_visits = db.relationship('Restaurant', secondary='past_visits', backref='visited_users')
     is_admin = db.Column(db.Boolean, default=False)
 
 favourites = db.Table('favourites',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
+)
+
+past_visits = db.Table('past_visits',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
 )
@@ -149,9 +155,10 @@ class Review(db.Model):
     def __repr__(self):
         return f'<Review by {self.author or "Anonymous"} for Restaurant {self.restaurant_id}>'
 
-user_favourites = set()
-user_past = set()
-user_reviews = {}
+# REMOVED: Global sets are no longer needed for persistent data
+# user_favourites = set()
+# user_past = set()
+# user_reviews = {}
 
 @app.cli.command("init-db")
 def init_db_command():
@@ -284,7 +291,7 @@ def sign_up():
             db.session.commit()
             login_user(new_user, remember=True)
             flash('Account created!', category='success')
-            return redirect(url_for('dashboard')) 
+            return redirect(url_for('index')) # Changed from dashboard to index
     return render_template("sign-up.html", user=current_user)
 
 
@@ -294,46 +301,154 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        # Store original values to determine what changed
+        original_username = current_user.username
+        original_email = current_user.email
+        original_first_name = current_user.first_name
+
+        new_username = request.form.get('username')
+        new_email = request.form.get('email')
+        new_first_name = request.form.get('firstName')
+
+        updated_fields = []
+
+        # Check for existing username (if changed)
+        if new_username and new_username != original_username:
+            user_by_username = User.query.filter_by(username=new_username).first()
+            if user_by_username and user_by_username.id != current_user.id: # Ensure it's not the current user's own existing username
+                flash('Username already exists. Please choose a different one.', category='error')
+                return redirect(url_for('profile'))
+            current_user.username = new_username
+            updated_fields.append('username')
+
+        # Check for existing email (if changed)
+        if new_email and new_email != original_email:
+            user_by_email = User.query.filter_by(email=new_email).first()
+            if user_by_email and user_by_email.id != current_user.id: # Ensure it's not the current user's own existing email
+                flash('Email already exists. Please use a different email address.', category='error')
+                return redirect(url_for('profile'))
+            current_user.email = new_email
+            updated_fields.append('email')
+
+        # Update first name (no uniqueness check needed)
+        if new_first_name != original_first_name:
+            current_user.first_name = new_first_name
+            updated_fields.append('first name')
+        
+        if updated_fields:
+            db.session.commit()
+            if len(updated_fields) == 1:
+                flash(f'{updated_fields[0].capitalize()} updated successfully!', category='success')
+            else:
+                flash(f'{", ".join(updated_fields).capitalize()} updated successfully!', category='success')
+        else:
+            flash('No changes detected.', category='info')
+
+        return redirect(url_for('profile'))
+    
+    return render_template('profile.html', user=current_user)
+
+
 @app.route('/favourite/<int:id>')
 @login_required
 def favourite(id):
-    user_favourites.add(id)
-    flash("Added to favourites!", category='success')
-    return redirect(url_for('index'))
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant not in current_user.favourites:
+        current_user.favourites.append(restaurant)
+        db.session.commit()
+        flash("Added to favourites!", category='success')
+    else:
+        flash("Already in favourites.", category='info')
+    return redirect(url_for('index')) # You might want to redirect to display_restaurant
 
 @app.route('/unfavourite/<int:id>')
 @login_required
 def unfavourite(id):
-    user_favourites.discard(id)
-    flash("Removed from favourites.", category='warning')
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant in current_user.favourites:
+        current_user.favourites.remove(restaurant)
+        db.session.commit()
+        flash("Removed from favourites.", category='warning')
+    # MODIFIED: Redirect to the favourites_page which now correctly uses the relationship
     return redirect(url_for('favourites_page'))
 
 @app.route('/favourites')
 @login_required
 def favourites_page():
-    favourites = [r for r in db.session.query(Restaurant).all() if r.id in user_favourites]
-    return render_template('favourites.html', user=current_user, favourites=favourites)
+    # MODIFIED: Retrieve favourites directly from the current_user's relationship
+    return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
 
 @app.route('/mark-past/<int:id>')
 @login_required
 def mark_past(id):
-    user_past.add(id)
-    flash("Marked as visited.", category='info')
-    return redirect(url_for('index'))
+    restaurant = Restaurant.query.get_or_404(id)
+    # MODIFIED: Use the new 'past_visits' relationship
+    if restaurant not in current_user.past_visits:
+        current_user.past_visits.append(restaurant)
+        db.session.commit()
+        flash("Marked as visited.", category='info')
+    else:
+        flash("Already marked as visited.", category='info')
+    return redirect(url_for('index')) # Or the page you want to redirect to
 
 @app.route('/past')
 @login_required
 def past_page():
-    past_restaurants = [r for r in db.session.query(Restaurant).all() if r.id in user_past]
-    return render_template('past_restaurants.html', user=current_user, past_restaurants=past_restaurants)
+    # MODIFIED: Use the new 'past_visits' relationship
+    return render_template('past_restaurants.html', user=current_user, past_restaurants=current_user.past_visits)
 
 @app.route('/random', methods=['GET', 'POST'])
 @login_required
 def random_restaurant():
     selected = None
+    # Define available cuisines and price ranges for the filter form
+    available_cuisines = ['Any', 'Italian', 'Mexican', 'Japanese', 'Indian', 'Chinese', 'American', 'Cafe', 'Dessert']
+    available_prices = ['Any', '$', '$$', '$$$']
+
+    # Initialize selected_cuisine and selected_price to 'Any' as default
+    # or to whatever the default value of your dropdowns should be on first load
+    selected_cuisine = 'Any'
+    selected_price = 'Any'
+
     if request.method == 'POST':
-        selected = Restaurant.query.order_by(func.random()).first()
-    return render_template("random.html", user=current_user, selected=selected)
+        # Get filter criteria from the form
+        cuisine_filter = request.form.get('cuisine_filter')
+        price_filter = request.form.get('price_filter')
+
+        # Store the selected filters to pass back to the template
+        selected_cuisine = cuisine_filter
+        selected_price = price_filter
+
+        # Start with a base query of all restaurants
+        query = Restaurant.query
+
+        # Apply cuisine filter if selected (and not 'Any')
+        if cuisine_filter and cuisine_filter != 'Any':
+            query = query.filter_by(cuisine=cuisine_filter)
+
+        # Apply price filter if selected (and not 'Any')
+        if price_filter and price_filter != 'Any':
+            query = query.filter_by(price=price_filter)
+
+        # Get a random restaurant from the filtered results
+        selected = query.order_by(func.random()).first()
+
+        if not selected:
+            flash("No restaurants found matching your criteria. Try different filters!", category='warning')
+
+    return render_template(
+        "random.html",
+        user=current_user,
+        selected=selected,
+        available_cuisines=available_cuisines,
+        available_prices=available_prices,
+        selected_cuisine=selected_cuisine, 
+        selected_price=selected_price      
+    )
 
 # Restaurant Things
 def allowed_file(filename):
@@ -425,7 +540,7 @@ def add_restaurant():
                     close_time = request.form.get(close_time_key)
                     if not open_time or not close_time: # Basic validation
                         flash(f"Please provide both open and close times for {day} or mark as closed.", "warning")
-                        # You might want to handle this more robustly, e.g., redirect back to form
+                        # You might want to handle this more robustly, e.e.g., redirect back to form
                         return redirect(url_for('add_restaurant'))
 
 
