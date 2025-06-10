@@ -117,6 +117,29 @@
       margin-bottom: 25px;
       border: 1px solid #e9ecef;
   }
+   /* New styles for the image gallery */
+  .restaurant-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Adjust minmax for desired size */
+      gap: 15px; /* Spacing between images */
+      margin-top: 25px;
+      margin-bottom: 25px;
+  }
+
+  .restaurant-gallery img {
+      width: 100%;
+      height: 120px; /* Fixed height for small images, adjust as needed */
+      object-fit: cover; /* Ensures images cover the area without distortion */
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  .restaurant-gallery img:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+  }
+  
   .no-content-notice { 
       color: #6c757d;
       font-style: italic;
@@ -476,15 +499,29 @@
 {% block body %}
 <div class="container">
     <div class="restaurant-main-content">
+        {# Main Photo Section #}
         {% if restaurant.image_url %}
-            {% set main_photo = restaurant.image_url.split(',')[0] if restaurant.image_url and ',' in restaurant.image_url else restaurant.image_url %}
-            {% if main_photo %}
-                <img src="{{ main_photo }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+            {# The existing logic for the main photo might display one image if it's a single URL #}
+            {# If restaurant.image_url actually contains multiple comma-separated, you might need to adjust #}
+            {# For simplicity, we assume image_url is the primary one, and other images are in restaurant.images #}
+            {% set main_photo_display = restaurant.image_url %}
+            {% if main_photo_display %}
+                <img src="{{ main_photo_display }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
             {% else %}
-                <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+                <div class="no-content-notice"><p>No main photo uploaded yet.</p></div>
             {% endif %}
         {% else %}
-            <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+            <div class="no-content-notice"><p>No main photo uploaded yet.</p></div>
+        {% endif %}
+
+                {% if restaurant.images %}
+        <div class="restaurant-gallery">
+            {% for img in restaurant.images[:3] %} {# Limit to first 3 images #}
+            <img src="{{ img.image_url }}" alt="Gallery photo of {{ restaurant.name }}">
+            {% endfor %}
+        </div>
+        {% elif not restaurant.image_url %}
+        <div class="no-content-notice"><p>No additional photos uploaded yet.</p></div>
         {% endif %}
 
         <div class="restaurant-header">
