@@ -1,222 +1,633 @@
 {% extends "base.html" %}
 
-{% block title %}IDK{% endblock %}
-
 {% block style %}
 <style>
+  /* === Global Resets & Base Styles === */
+  *,
+  *::before,
+  *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+  }
+
   body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9fafa;
-    color: #0a0101;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
-    line-height: 1.6;
-  }
-
-  a {
-    color: #d62828;
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
+      font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa; /* Lighter, more neutral background */
+      color: #495057; /* Softer default text color */
+      line-height: 1.6;
+      font-size: 16px; /* Base font size */
+      margin: 0; /* Remove default body margin */
   }
 
   .container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
+      max-width: 1200px;
+      margin: 30px auto; /* Centering the main content area */
+      padding: 0 20px; /* Padding on the sides */
+      display: grid;
+      grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Flexible columns */
+      gap: 30px; /* Increased gap for better separation */
   }
 
-  h2,
-  h3,
-  h4 {
-    color: #090808;
-    margin-top: 20px;
+  /* === Typography === */
+  h1, h2, h3, h4, h5, h6 {
+      color: #343a40; /* Darker grey for headings */
+      font-weight: 700; /* Bolder headings */
+      line-height: 1.3;
+      margin-bottom: 0.75em; /* Consistent bottom margin */
+  }
+  h1 { font-size: 2.25em; margin-top: 0; } /* Main page title */
+  h2 { font-size: 1.75em; } /* Section titles */
+  h3 { font-size: 1.4em; } /* Sub-section titles */
+  h4 { font-size: 1.1em; }
+
+  p {
+      margin-bottom: 1em;
   }
 
-  .nav-tabs {
-    display: flex;
-    gap: 20px;
-    border-bottom: 2px solid #333;
-    margin-bottom: 20px;
+  a {
+      color: #007bff; /* Professional blue for links */
+      text-decoration: none;
+      transition: color 0.2s ease-in-out;
+  }
+  a:hover {
+      color: #0056b3;
+      text-decoration: underline;
   }
 
-  .nav-tabs a {
-    color: #000000;
-    font-weight: bold;
-    padding-bottom: 5px;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.3s;
+  /* === Main Content & Sidebar Structure === */
+  .restaurant-main-content,
+  .sidebar-card {
+      background-color: #ffffff;
+      padding: 25px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+  }
+  .sidebar-column .sidebar-card { 
+      margin-bottom: 25px;
+  }
+  .sidebar-column .sidebar-card:last-child {
+      margin-bottom: 0;
   }
 
-  .nav-tabs a.active {
-    border-bottom: 2px solid #d62828;
+  /* === Restaurant Header & Details === */
+  .restaurant-header {
+      display: flex;
+      align-items: center; 
+      justify-content: space-between; 
+      flex-wrap: wrap; 
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+  }
+  .restaurant-header h1 {
+      margin-bottom: 0; 
   }
 
-  .closed {
-    color: #ff4d4d;
-    font-weight: bold;
+  .average-rating {
+      color: #ffffff;
+      background-color: #ffc107; 
+      font-size: 1.1em; 
+      font-weight: 700;
+      padding: 8px 15px;
+      border-radius: 20px; 
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap; 
+  }
+  .average-rating::before { 
+      content: '★';
+      margin-right: 6px;
+      font-size: 1.1em; 
   }
 
-  .info-row {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-    flex-wrap: wrap;
+  .no-rating-notice {
+      font-size: 0.9em;
+      color: #6c757d;
+      font-style: italic;
   }
 
-  .features ul {
-    list-style: none;
-    padding: 0;
+  .main-photo {
+      width: 100%;
+      height: auto;
+      max-height: 450px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+  }
+  .no-content-notice { 
+      color: #6c757d;
+      font-style: italic;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border: 1px dashed #d1d9e0;
+      border-radius: 4px;
+      text-align: center;
+      margin-bottom: 20px;
+  }
+  .no-content-notice p { margin-bottom: 0; }
+
+
+  .status { font-weight: 600; margin-bottom: 8px; }
+  .status.closed { color: #dc3545; }
+  .status.open { color: #28a745; } 
+  .status-detail { color: #6c757d; font-weight: normal; font-size: 0.9em; }
+
+  .address-info {
+      color: #495057;
+      margin-bottom: 20px;
+      font-size: 1.05em;
   }
 
-  .features li {
-    margin-bottom: 5px;
+  .action-links {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      align-items: center;
+  }
+  .improve-listing-link {
+      font-size: 0.9em;
+      color: #6c757d;
+      margin-left: auto; 
+  }
+  .improve-listing-link:hover { color: #007bff; }
+
+  /* === Content Sections (About, Features, etc.) === */
+  .content-section {
+      padding-top: 25px;
+      margin-top: 25px;
+      border-top: 1px solid #e9ecef;
+  }
+  .content-section:first-of-type { 
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0;
+  }
+  .content-section h2 { 
+      margin-bottom: 15px; 
+  }
+  .content-section h3 { 
+      margin-bottom: 20px;
+  }
+
+  .features-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+  }
+  .features-list li {
+      background-color: #e9ecef;
+      color: #495057;
+      padding: 8px 15px;
+      border-radius: 20px; 
+      font-size: 0.9em;
+  }
+  .see-all-link {
+      font-weight: 600;
+      font-size: 0.9em;
+      display: inline-block;
+      margin-top: 15px;
   }
 
   .map-image {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin-top: 10px;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 10px;
+      border: 1px solid #dee2e6;
   }
 
-  .save-card {
-    background-color: #1e1e2f;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    margin-bottom: 30px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  /* === Enhanced Review Display Styling === */
+  .reviews-section h2 { 
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+      display: inline-block;
   }
 
-  .save-card h3 {
-    margin-bottom: 10px;
-    color: #fff;
+  .reviews-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
   }
 
-  .save-card button {
-    background-color: #d62828;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
+  .review-item {
+      background-color: #fff;
+      border: 1px solid #e9ecef;
+      padding: 20px 25px; 
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.07);
   }
 
+  .review-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+  }
+
+  .review-author {
+      font-weight: 700;
+      color: #343a40;
+      font-size: 1.05em;
+  }
+
+  .review-stars-display {
+      font-size: 1.2em; 
+      line-height: 1;
+  }
+  .review-stars-display .star.filled { color: #ffc107; }
+  .review-stars-display .star.empty { color: #d1d1d1; }
+
+  .review-text {
+      color: #495057;
+      font-size: 1em;
+      line-height: 1.7;
+  }
+
+  /* === Enhanced Submit Review Form Styling === */
+  .submit-review-section h3 { 
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+      display: inline-block;
+  }
+
+  .review-form {
+      background-color: #f8f9fa;
+      padding: 30px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      margin-top: 10px; 
+  }
+
+  .form-group {
+      margin-bottom: 20px;
+  }
+  .form-group:last-of-type {
+      margin-bottom: 25px; 
+  }
+
+  .review-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.95em;
+  }
+  .optional-text {
+      font-weight: normal;
+      font-size: 0.9em;
+      color: #6c757d;
+  }
+
+  .form-control { 
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1em;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  .form-control::placeholder { color: #6c757d; opacity: 1; }
+  .form-control:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  .review-form textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+  }
+
+  /* Star Rating Input CSS */
+  .rating-group label { margin-bottom: 10px; } 
+
+  .star-rating-input {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      font-size: 2em; 
+      line-height: 1;
+  }
+  .star-rating-input input[type="radio"] { display: none; }
+  .star-rating-input label {
+      color: #d1d1d1; 
+      cursor: pointer;
+      padding: 0 0.05em; 
+      transition: color 0.2s ease-in-out;
+      font-weight: normal; 
+      margin-bottom: 0;
+  }
+  .star-rating-input input[type="radio"]:checked ~ label,
+  .star-rating-input label:hover,
+  .star-rating-input label:hover ~ label {
+      color: #ffc107; 
+  }
+
+  /* === Buttons === */
+  .btn {
+      display: inline-block;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #007bff;
+      border: 1px solid #007bff;
+      padding: 0.75rem 1.5rem; 
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: 0.3rem; 
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+  }
+  .btn:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+      color: #fff;
+      text-decoration: none;
+  }
+  .btn:focus {
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+  }
+
+  .btn-outline {
+      color: #007bff;
+      background-color: transparent;
+      border-color: #007bff;
+  }
+  .btn-outline:hover {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+  }
+
+  .btn-success {
+      background-color: #28a745;
+      border-color: #28a745;
+  }
+  .btn-success:hover {
+      background-color: #1e7e34;
+      border-color: #1e7e34;
+  }
+
+  .btn-outline-primary { 
+      color: #007bff;
+      border-color: #007bff;
+  }
+  .btn-outline-primary:hover {
+      color: #fff;
+      background-color: #007bff;
+  }
+
+  .btn-block { 
+      display: block;
+      width: 100%;
+  }
+
+  .btn-submit-review { 
+      background-color: #28a745; 
+      border-color: #28a745;
+  }
+  .btn-submit-review:hover {
+      background-color: #1e7e34;
+      border-color: #1e7e34;
+  }
+
+  /* === Sidebar Cards === */
+  .save-card h3, .hours-card h3 {
+      font-size: 1.2em;
+      margin-bottom: 15px;
+      color: #343a40;
+  }
   .hours-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    color: #000000;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.95em;
+  }
+  .hours-table td {
+      padding: 10px 5px; 
+      border-bottom: 1px solid #e9ecef;
+      color: #495057;
+  }
+  .hours-table tr:last-child td { border-bottom: none; }
+  .hours-table strong { color: #007bff; }
+
+  /* === Responsive Adjustments === */
+  @media (max-width: 992px) {
+      .container {
+          grid-template-columns: 1fr; 
+      }
+      .sidebar-column {
+          margin-top: 30px;
+      }
   }
 
-  .hours-table td {
-    padding: 8px 0;
-    border-bottom: 1px solid #444;
+  @media (max-width: 768px) {
+      body { font-size: 15px; }
+      .restaurant-header {
+          flex-direction: column;
+          align-items: flex-start;
+      }
+      .average-rating { margin-top: 10px; font-size: 1em; }
+      .main-photo { max-height: 350px; }
+      h1 { font-size: 2em; }
+      h2 { font-size: 1.6em; }
+      h3 { font-size: 1.3em; }
+      .nav-tabs a { padding: 12px 8px; font-size: 0.95em; }
+  }
+
+  @media (max-width: 576px) {
+      body { padding: 0 15px; }
+      .container { margin-top: 20px; margin-bottom: 20px; gap: 20px; }
+      .restaurant-main-content, .sidebar-card, .review-form { padding: 20px; }
+      .nav-tabs-container { gap: 10px; } 
+      .nav-tabs a { font-size: 0.9em; padding: 10px 5px; }
+      .action-links .btn { width: 100%; margin-bottom: 10px; }
+      .action-links .btn:last-child { margin-bottom: 0; }
+      .star-rating-input { font-size: 1.8em; }
+      .btn { padding: 0.6rem 1rem; font-size: 0.95rem; }
+  }
+
+  .coordinates {
+      font-size: 0.9em; 
+      color: #777;      
+      margin-top: 0.5em; 
+  }
+
+  .no-coordinates {
+      font-style: italic; 
+      color: #999;
+      font-size: 0.9em;
+      margin-top: 0.5em;
   }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="nav-tabs">
-  <a class="active" href="#">Overview</a>
-  <a href="#">Hours</a>
-  <a href="#">Location</a>
-  <a href="#">Reviews</a>
-</div>
-
 <div class="container">
-  <!-- Left side -->
-  <div>
-    <h2>{{ restaurant.name }}</h2>
-    <p class="closed">
-      Closed now <span style="color: #888">• Opens at 12:00 PM</span>
-    </p>
-    <p>{{ restaurant.address }}</p>
+    <div class="restaurant-main-content">
+        {% if restaurant.image_url %}
+            {% set main_photo = restaurant.image_url.split(',')[0] if restaurant.image_url and ',' in restaurant.image_url else restaurant.image_url %}
+            {% if main_photo %}
+                <img src="{{ main_photo }}" alt="Photo of {{ restaurant.name }}" class="main-photo">
+            {% else %}
+                <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+            {% endif %}
+        {% else %}
+            <div class="no-content-notice"><p>No photo uploaded yet.</p></div>
+        {% endif %}
 
-    <div class="info-row website-phone">
-      <a href="{{ restaurant.google_maps_link }}" target="_blank">Website</a>
-      <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
-      <span style="color: #888">Improve this listing</span>
+        <div class="restaurant-header">
+            <h1>{{ restaurant.name }}</h1>
+            {% if restaurant.average_rating is not none %}
+                <span class="average-rating">★ {{ '%.1f'|format(restaurant.average_rating) }}</span>
+            {% else %}
+                <span class="no-rating-notice">(No reviews yet)</span>
+            {% endif %}
+        </div>
+
+        <p class="status {{ 'open' if status == 'Open now' else 'closed' }}">{{ status }} <span class="status-detail">• {{ status_detail }}</span></p>
+        <p class="address-info">{{ restaurant.address }}</p>
+
+        <div class="info-row action-links">
+            {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Google Maps</a>{% endif %}
+            {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
+            <a href="{{ url_for('upload_photos', restaurant_id=restaurant.id) }}" class="improve-listing-link">Improve this listing</a>
+        </div>
+
+        <div class="content-section about-section">
+            <h2>About {{ restaurant.name }}</h2>
+            <p>{{ restaurant.description or 'No detailed description provided.' }}</p>
+        </div>
+
+        <div class="content-section features-section">
+            <h3>Features</h3>
+            <ul class="features-list">
+                <li>Lunch, Dinner</li> {# static for now #}
+                {% if restaurant.cuisine %}<li>{{ restaurant.cuisine }}</li>{% endif %}
+            </ul>
+            <a href="#" class="see-all-link">See all features</a>
+        </div>
+
+        {% if restaurant.latitude is not none and restaurant.longitude is not none %}
+        <div class="content-section location-section map-section"> {# Added 'map-section' class for specific styling #}
+            <h3>Location Map:</h3>
+            <div class="map-container">
+                <iframe
+                    width="100%"
+                    height="400"
+                    frameborder="0"
+                    style="border:0"
+                    src="http://maps.google.com/maps?q={{ restaurant.latitude }},{{ restaurant.longitude }}&hl=en&z=14&output=embed"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+        {% endif %}
+        {# END: INTERACTIVE MAP SECTION #}
+
+        <div class="content-section reviews-section">
+            <h2>User Reviews</h2>
+            {% if restaurant.reviews %}
+                <ul class="reviews-list">
+                    {% for review in restaurant.reviews %}
+                        <li class="review-item">
+                            <div class="review-item-header">
+                                <strong class="review-author">{{ review.author or "Anonymous User" }}</strong>
+                                <div class="review-stars-display">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= review.rating %}<span class="star filled">★</span>
+                                        {% else %}<span class="star empty">☆</span>{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="review-text">{{ review.text }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-content-notice">This restaurant hasn't been reviewed yet. Be the first!</p>
+            {% endif %}
+        </div>
+
+        <div class="content-section submit-review-section">
+            <h3>Write a Review for {{ restaurant.name }}</h3>
+            <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}" class="review-form">
+                <div class="form-group">
+                    <label for="author">Your Name <span class="optional-text">(Optional)</span>:</label>
+                    <input type="text" id="author" name="author" class="form-control" placeholder="e.g., Alex P.">
+                </div>
+
+                <div class="form-group rating-group">
+                    <label>Your Rating:</label>
+                    <div class="star-rating-input">
+                        {# stars are listed from 5 to 1 #}
+                        <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars - Excellent">☆</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Very Good">☆</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average">☆</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars - Poor">☆</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star - Terrible">☆</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="text">Your Review:</label>
+                    <textarea name="text" id="text" rows="5" class="form-control" required placeholder="Share your experience... What did you like or dislike?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit-review">Post Review</button>
+            </form>
+        </div>
     </div>
 
-    <h2>About</h2>
-    <p>{{ restaurant.description or 'No description provided.' }}</p>
+    <aside class="sidebar-column">
+        <div class="sidebar-card save-card">
+            <h3>Save to Favorites</h3>
+            <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
+                <button type="submit" class="btn {% if restaurant.is_saved %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
+                    {% if restaurant.is_saved %}✔ Saved{% else %}♡ Add to Saved{% endif %}
+                </button>
+            </form>
+        </div>
 
-    <div class="features">
-      <h4>Features</h4>
-      <ul>
-        <li>Lunch, Dinner</li>
-        <li>{{ restaurant.cuisine }}</li>
-      </ul>
-      <a href="#" style="color: black; font-weight: bold">See all features</a>
-    </div>
-
-    <h2>Location</h2>
-    <img
-      class="map-image"
-      src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address|urlencode }}&zoom=15&size=600x300&key=YOUR_GOOGLE_MAPS_API_KEY"
-      alt="Map"
-    />
-
-    <h2>Photos</h2>
-    <p>No photos uploaded yet.</p>
-  </div>
-
-  <!-- Right side -->
-  <aside>
-    <div class="save-card">
-      <h3>Save this restaurant</h3>
-      <button>♡ Save</button>
-    </div>
-
-    <div>
-      <h3>Hours</h3>
-      <p class="closed">Closed now • Opens at 12:00 PM</p>
-      <table class="hours-table">
-        <tr>
-          <td>Sunday</td>
-          <td>12:00 PM - 8:30 PM</td>
-        </tr>
-        <tr>
-          <td>Monday</td>
-          <td>12:00 PM - 8:30 PM</td>
-        </tr>
-        <tr>
-          <td>Tuesday</td>
-          <td><strong>12:00 PM - 8:30 PM</strong></td>
-        </tr>
-        <tr>
-          <td>Wednesday</td>
-          <td>12:00 PM - 8:30 PM</td>
-        </tr>
-        <tr>
-          <td>Thursday</td>
-          <td>12:00 PM - 8:30 PM</td>
-        </tr>
-        <tr>
-          <td>Friday</td>
-          <td>Closed</td>
-        </tr>
-        <tr>
-          <td>Saturday</td>
-          <td>12:00 PM - 8:30 PM</td>
-        </tr>
-      </table>
-    </div>
-  </aside>
+        <div class="sidebar-card hours-card">
+            <h3>Opening Hours</h3>
+            <p class="status {{ 'open' if status == 'Open now' else 'closed' }}">
+                {{ status }} <span class="status-detail">• {{ status_detail }}</span>
+            </p>
+            <table class="hours-table">
+                {% if restaurant.is_24_hours %}
+                <tr>
+                    <td colspan="2">Open 24 Hours, 7 Days a Week</td>
+                </tr>
+                {% else %}
+                    {% for oh in operating_hours %}
+                    <tr>
+                        <td>{{ oh.day }}</td>
+                        <td>
+                            {% if oh.open_time == 'Closed' %}
+                                Closed
+                            {% elif oh.open_time == '00:00' and oh.close_time == '00:00' %}
+                                24 Hours
+                            {% else %}
+                                {{ oh.open_time }} - {{ oh.close_time }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </table>
+        </div>
+    </aside>
 </div>
 {% endblock %}
-
-<!-- Flash alert popup -->
-{% with messages = get_flashed_messages() %} {% if messages %}
-<script>
-  alert("{{ messages[0] }}");
-</script>
-{% endif %} 
-{% endwith %} 
-

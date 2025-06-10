@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Visited Restaurants{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Visited Restaurants</h2>
+  {% if past_restaurants %}
+    {% for restaurant in past_restaurants %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ restaurant.name }}</h5>
+          <p class="card-text"><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+          <p class="card-text"><strong>Location:</strong> {{ restaurant.location }}</p>
+          <p class="card-text">{{ restaurant.description }}</p>
+          <form method="POST" class="mt-3">
+  <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
+
+  <label for="review">Your Review:</label>
+  <textarea name="review" class="form-control mb-2" rows="3" required></textarea>
+
+  <label for="rating">Rating:</label>
+    <select name="rating" class="form-control mb-2" required>
+     <option value="">-- Choose a rating --</option>
+      <option value="1">⭐</option>
+      <option value="2">⭐⭐</option>
+     <option value="3">⭐⭐⭐</option>
+     <option value="4">⭐⭐⭐⭐</option>
+     <option value="5">⭐⭐⭐⭐⭐</option>
+    </select>
+
+     <button type="submit" class="mt-2 px-4 py-2 text-black rounded hover:bg-blue-700"
+     style="background-color: rgb(44, 243, 243);">
+     Submit Review
+      </button>
+  </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>You haven't marked any restaurants as visited yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

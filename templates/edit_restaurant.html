@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% if restaurant %}Edit Restaurant{% else %}Add Restaurant{% endif %}{% endblock %}
+{% block title %}Add Restaurant{% endblock %}
 
 {% block style %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -131,7 +131,7 @@
       font-weight: normal;
   }
 
-  /* 24 Hours checkbox styling */
+    /* 24 Hours checkbox styling */
   .twentyfour-hours-option {
       margin-bottom: 1.5rem;
       display: flex;
@@ -408,10 +408,6 @@
   });
 
   // Initial state for 24-hour checkbox (e.g., if restaurant was already set to 24h)
-  // This requires a new field in the restaurant model or derived from operating hours.
-  // For now, let's assume if any day is '00:00' to '00:00', it implies 24h,
-  // but it's better to store a boolean flag for 'is_24_hours' in the Restaurant.
-  // For pre-filling the form in edit mode:
   {% if restaurant and restaurant.is_24_hours %}
       allWeek24hCheckbox.checked = true;
       apply24HoursAllWeek();

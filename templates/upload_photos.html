@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Photos for {{ restaurant.name }}{% endblock %}
+
+{% block style %}
+<style>
+    .upload-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+    .upload-container h1 {
+        margin-bottom: 20px;
+        color: #343a40;
+    }
+    .upload-container p {
+        margin-bottom: 30px;
+        color: #6c757d;
+    }
+    .form-group {
+        margin-bottom: 25px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 1.1em;
+    }
+    .file-input {
+        display: block;
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        font-size: 1em;
+        line-height: 1.5;
+        cursor: pointer;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .file-input:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .btn-upload {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .btn-upload:hover {
+        background-color: #0056b3;
+    }
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="upload-container">
+    <h1>Upload New Photos for {{ restaurant.name }}</h1>
+    <p>Help improve this listing by adding more images of the restaurant.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="images">Select Photos:</label>
+            <input type="file" id="images" name="images" accept="image/*" multiple class="file-input" required>
+        </div>
+        <button type="submit" class="btn-upload">Upload Photos</button>
+    </form>
+    <a href="{{ url_for('display_restaurant', restaurant_id=restaurant.id) }}" class="back-link">Back to Restaurant</a>
+</div>
+{% endblock %}
