@@ -1,96 +1,159 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Restaurant{% endblock %}
+{% block title %}Add Restaurant{% endblock %}
 
 {% block style %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-  .edit-container {
+  .add-restaurant-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-wrap: wrap;
     gap: 2rem;
     padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex-wrap: wrap;
   }
 
-  .edit-form, .map-section {
-    background-color: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    padding: 2rem;
-    flex: 1;
-    min-width: 320px;
-    max-width: 500px;
+  .form-section {
+    flex: 1 1 45%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  .edit-form h2 {
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    color: #333;
-    text-align: center;
+  .form-section label {
+    font-weight: 500;
   }
 
   .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1.2rem;
-  }
-
-  .form-group label {
-    margin-bottom: 6px;
-    color: #555;
-    font-size: 0.95rem;
-  }
-
-  .form-group input,
-  .form-group textarea {
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    background-color: #f9f9f9;
-    transition: border-color 0.2s ease;
-  }
-
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #007bff;
-  }
-
-  textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
-
-  .submit-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    width: 100%;
-    cursor: pointer;
-    transition: background-color 0.25s ease;
-    margin-top: 1rem;
-  }
-
-  .submit-btn:hover {
-    background-color: #0056b3;
-  }
-
-  #map {
-    height: 300px;
-    border-radius: 12px;
     margin-bottom: 1rem;
   }
 
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .form-section button {
+    padding: 0.7rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .form-section button:hover {
+    background-color: #0056b3;
+  }
+
+  .map-section {
+    flex: 1 1 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #map {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .coords-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .coords-inputs input {
+    flex: 1;
+    padding: 0.4rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* New styles for operating hours */
+  .operating-hours-section {
+      border: 1px solid #dee2e6;
+      padding: 1.5rem;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      margin-top: 2rem;
+  }
+  .operating-hours-section h2 {
+      margin-bottom: 1.5rem;
+      color: #343a40;
+  }
+  .day-hours-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 1rem;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 5px;
+  }
+  .day-hours-group label {
+      min-width: 80px; /* Align day names */
+      font-weight: 600;
+  }
+  .day-hours-group input[type="time"] {
+      flex: 1;
+      max-width: 120px;
+  }
+  .day-hours-group .closed-checkbox {
+      margin-left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+  }
+  .day-hours-group .closed-checkbox input[type="checkbox"] {
+      width: auto;
+      margin-top: 2px;
+  }
+  .day-hours-group .closed-checkbox label {
+      margin-bottom: 0;
+      font-weight: normal;
+  }
+
+    /* 24 Hours checkbox styling */
+  .twentyfour-hours-option {
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #007bff;
+      background-color: #eaf5ff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: 1px solid #cceeff;
+  }
+  .twentyfour-hours-option input[type="checkbox"] {
+      width: auto; /* Override form-control width */
+      height: 20px; /* Make checkbox larger */
+      width: 20px;
+      margin-right: 5px;
+  }
+
   @media (max-width: 768px) {
-    .edit-container {
+    .add-restaurant-container {
       flex-direction: column;
     }
   }
@@ -98,89 +161,257 @@
 {% endblock %}
 
 {% block body %}
-<div class="edit-container">
-  <form class="edit-form" method="POST" action="{{ url_for('edit_restaurant', restaurant_id=restaurant.id) }}">
-    <h2>Edit Restaurant: {{ restaurant.name }}</h2>
+<form method="POST" enctype="multipart/form-data">
+  <div class="add-restaurant-container">
+    <div class="form-section">
+      <h1>{% if restaurant %}Edit Restaurant{% else %}Add a New Restaurant{% endif %}</h1>
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" class="form-control" required value="{{ restaurant.name if restaurant else '' }}">
+      </div>
 
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" value="{{ restaurant.name }}" required>
+      <div class="form-group">
+        <label for="cuisine">Cuisine:</label>
+        <input type="text" id="cuisine" name="cuisine" class="form-control" required value="{{ restaurant.cuisine if restaurant else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="3" class="form-control" required>{{ restaurant.description if restaurant else '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price (e.g., $$, $$$):</label>
+        <input type="text" id="price" name="price" class="form-control" required value="{{ restaurant.price if restaurant else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" class="form-control" required value="{{ restaurant.address if restaurant else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" class="form-control" required value="{{ restaurant.phone if restaurant else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="Maps_link">Google Maps Link:</label>
+        <input type="url" id="Maps_link" name="Maps_link" class="form-control" required value="{{ restaurant.Maps_link if restaurant else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="images">Restaurant Image:</label>
+        <input type="file" id="images" name="images" accept="image/*" multiple class="form-control">
+      </div>
+
+      <div class="coords-inputs form-group">
+        <input type="text" name="latitude" id="latitude" placeholder="Latitude" step="any" required class="form-control" value="{{ restaurant.latitude if restaurant else '' }}">
+        <input type="text" name="longitude" id="longitude" placeholder="Longitude" step="any" required class="form-control" value="{{ restaurant.longitude if restaurant else '' }}">
+      </div>
+
+      <div class="operating-hours-section">
+          <h2>Operating Hours</h2>
+          <div class="twentyfour-hours-option">
+              <input type="checkbox" id="all_week_24h" name="all_week_24h">
+              <label for="all_week_24h">Open 24 Hours (All Week)</label>
+          </div>
+
+          {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+          {% for day in days %}
+          <div class="day-hours-group" data-day="{{ day | lower }}">
+              <label for="{{ day | lower }}_open">{{ day }}:</label>
+              <input type="time" id="{{ day | lower }}_open" name="{{ day | lower }}_open" class="form-control time-input open-time"
+                     value="{{ operating_hours_data[day].open_time if operating_hours_data and day in operating_hours_data and operating_hours_data[day].open_time != 'Closed' and operating_hours_data[day].open_time != '00:00' else '' }}"
+                     {% if operating_hours_data and day in operating_hours_data and (operating_hours_data[day].open_time == 'Closed' or operating_hours_data[day].open_time == '00:00') %}disabled{% endif %}>
+              <span>-</span>
+              <input type="time" id="{{ day | lower }}_close" name="{{ day | lower }}_close" class="form-control time-input close-time"
+                     value="{{ operating_hours_data[day].close_time if operating_hours_data and day in operating_hours_data and operating_hours_data[day].close_time != '00:00' else '' }}"
+                     {% if operating_hours_data and day in operating_hours_data and (operating_hours_data[day].open_time == 'Closed' or operating_hours_data[day].open_time == '00:00') %}disabled{% endif %}>
+              <div class="closed-checkbox">
+                  <input type="checkbox" id="{{ day | lower }}_closed" name="{{ day | lower }}_closed" class="closed-toggle"
+                         {% if operating_hours_data and day in operating_hours_data and operating_hours_data[day].open_time == 'Closed' %}checked{% endif %}>
+                  <label for="{{ day | lower }}_closed">Closed</label>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+
+
+      <button type="submit">{% if restaurant %}Update Restaurant{% else %}Add Restaurant{% endif %}</button>
     </div>
 
-    <div class="form-group">
-      <label for="address">Address</label>
-      <input type="text" id="address" name="address" value="{{ restaurant.address }}">
+    <div class="map-section">
+      <label>Click on the map to select coordinates:</label>
+      <div id="map"></div>
     </div>
-
-    <div class="form-group">
-      <label for="phone">Phone</label>
-      <input type="text" id="phone" name="phone" value="{{ restaurant.phone }}">
-    </div>
-
-    <div class="form-group">
-      <label for="cuisine">Cuisine</label>
-      <input type="text" id="cuisine" name="cuisine" value="{{ restaurant.cuisine }}">
-    </div>
-
-    <div class="form-group">
-      <label for="price">Price</label>
-      <input type="text" id="price" name="price" value="{{ restaurant.price }}">
-    </div>
-
-    <div class="form-group">
-      <label for="google_maps_link">Google Maps Link</label>
-      <input type="text" id="google_maps_link" name="google_maps_link" value="{{ restaurant.google_maps_link }}">
-    </div>
-
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" name="description">{{ restaurant.description }}</textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="image_url">Image URL</label>
-      <input type="text" id="image_url" name="image_url" value="{{ restaurant.image_url }}">
-    </div>
-
-    <div class="form-group">
-      <label for="latitude">Latitude</label>
-      <input type="number" id="latitude" name="latitude" value="{{ restaurant.latitude }}" step="0.000001">
-    </div>
-
-    <div class="form-group">
-      <label for="longitude">Longitude</label>
-      <input type="number" id="longitude" name="longitude" value="{{ restaurant.longitude }}" step="0.000001">
-    </div>
-
-    <button class="submit-btn" type="submit">Update Restaurant</button>
-  </form>
-
-  <div class="map-section">
-    <label style="display:block; margin-bottom:10px;">Click on the map to update coordinates:</label>
-    <div id="map"></div>
   </div>
-</div>
+</form>
 {% endblock %}
 
 {% block script %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const map = L.map('map').setView([{{ restaurant.latitude or 2.927574 }}, {{ restaurant.longitude or 101.642040 }}], 15);
+  const map = L.map('map').setView([2.927574, 101.642040], 15); // Default to Cyberjaya
+
+  // If editing, set map view to restaurant's coordinates
+  const initialLat = document.getElementById('latitude').value;
+  const initialLng = document.getElementById('longitude').value;
+  if (initialLat && initialLng) {
+      map.setView([initialLat, initialLng], 15);
+      L.marker([initialLat, initialLng]).addTo(map);
+  }
+
 
   L.tileLayer('https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=e001824582174c60bd8de623bc429bb6', {
-    maxZoom: 19
+    maxZoom: 19,
+    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
-  let marker = L.marker([{{ restaurant.latitude or 2.927574 }}, {{ restaurant.longitude or 101.642040 }}]).addTo(map);
+  let marker;
 
-  map.on('click', function (e) {
+  map.on('click', function(e) {
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
 
     document.getElementById('latitude').value = lat;
     document.getElementById('longitude').value = lng;
 
-    marker.setLatLng([lat, lng]);
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng]).addTo(map);
+    }
   });
+
+  // Script for handling operating hours checkboxes and autofill
+  const allWeek24hCheckbox = document.getElementById('all_week_24h');
+  const dayHoursGroups = document.querySelectorAll('.day-hours-group');
+
+  function toggleTimeInputs(group) {
+      const closedCheckbox = group.querySelector('.closed-toggle');
+      const openTimeInput = group.querySelector('.open-time');
+      const closeTimeInput = group.querySelector('.close-time');
+
+      if (closedCheckbox.checked) {
+          openTimeInput.disabled = true;
+          closeTimeInput.disabled = true;
+          openTimeInput.value = '';
+          closeTimeInput.value = '';
+      } else {
+          openTimeInput.disabled = false;
+          closeTimeInput.disabled = false;
+      }
+  }
+
+  function apply24HoursAllWeek() {
+      if (allWeek24hCheckbox.checked) {
+          dayHoursGroups.forEach(group => {
+              const openTimeInput = group.querySelector('.open-time');
+              const closeTimeInput = group.querySelector('.close-time');
+              const closedCheckbox = group.querySelector('.closed-toggle');
+
+              openTimeInput.value = '00:00';
+              closeTimeInput.value = '00:00';
+              openTimeInput.disabled = true;
+              closeTimeInput.disabled = true;
+              closedCheckbox.checked = false; // Uncheck closed if 24h
+              closedCheckbox.disabled = true;
+          });
+      } else {
+          dayHoursGroups.forEach(group => {
+              const openTimeInput = group.querySelector('.open-time');
+              const closeTimeInput = group.querySelector('.close-time');
+              const closedCheckbox = group.querySelector('.closed-toggle');
+
+              openTimeInput.value = ''; // Clear values, allow manual entry
+              closeTimeInput.value = '';
+              openTimeInput.disabled = false;
+              closeTimeInput.disabled = false;
+              closedCheckbox.disabled = false;
+              toggleTimeInputs(group); // Apply individual closed state if pre-checked
+          });
+      }
+  }
+
+  function autofillHours(changedInput) {
+      // Only autofill if all_week_24h is NOT checked
+      if (allWeek24hCheckbox.checked) return;
+
+      const group = changedInput.closest('.day-hours-group');
+      const isClosed = group.querySelector('.closed-toggle').checked;
+
+      // Don't autofill if the current day is marked closed
+      if (isClosed) return;
+
+      const inputClass = changedInput.classList.contains('open-time') ? 'open-time' : 'close-time';
+      const value = changedInput.value;
+
+      if (value) { // Only autofill if a value is entered
+          dayHoursGroups.forEach(otherGroup => {
+              // Don't autofill the day that was just changed
+              if (otherGroup === group) return;
+
+              const otherClosedCheckbox = otherGroup.querySelector('.closed-toggle');
+              // Don't autofill if the other day is marked closed
+              if (otherClosedCheckbox.checked) return;
+
+              const otherInput = otherGroup.querySelector(`.${inputClass}`);
+              if (otherInput && !otherInput.value) { // Only autofill if the other input is empty
+                  otherInput.value = value;
+              }
+          });
+      }
+  }
+
+
+  // Event Listeners
+  allWeek24hCheckbox.addEventListener('change', apply24HoursAllWeek);
+
+  dayHoursGroups.forEach(group => {
+      const closedCheckbox = group.querySelector('.closed-toggle');
+      const openTimeInput = group.querySelector('.open-time');
+      const closeTimeInput = group.querySelector('.close-time');
+
+      closedCheckbox.addEventListener('change', () => {
+          toggleTimeInputs(group);
+          // If a day is manually closed, ensure 24h checkbox is unchecked
+          if (closedCheckbox.checked && allWeek24hCheckbox.checked) {
+              allWeek24hCheckbox.checked = false;
+              apply24HoursAllWeek(); // Reset all to manual control
+          }
+      });
+
+      openTimeInput.addEventListener('input', (event) => {
+          autofillHours(event.target);
+          // If a time is manually entered, ensure 24h checkbox is unchecked
+          if (allWeek24hCheckbox.checked) {
+              allWeek24hCheckbox.checked = false;
+              apply24HoursAllWeek(); // Reset all to manual control
+              // Then re-apply the value that was just typed
+              openTimeInput.value = event.target.value;
+          }
+      });
+      closeTimeInput.addEventListener('input', (event) => {
+          autofillHours(event.target);
+          // If a time is manually entered, ensure 24h checkbox is unchecked
+          if (allWeek24hCheckbox.checked) {
+              allWeek24hCheckbox.checked = false;
+              apply24HoursAllWeek(); // Reset all to manual control
+              // Then re-apply the value that was just typed
+              closeTimeInput.value = event.target.value;
+          }
+      });
+
+      // Initial state on page load for individual days
+      toggleTimeInputs(group);
+  });
+
+  // Initial state for 24-hour checkbox (e.g., if restaurant was already set to 24h)
+  {% if restaurant and restaurant.is_24_hours %}
+      allWeek24hCheckbox.checked = true;
+      apply24HoursAllWeek();
+  {% endif %}
+
 </script>
 {% endblock %}

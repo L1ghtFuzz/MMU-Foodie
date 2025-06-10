@@ -55,45 +55,15 @@
       text-decoration: underline;
   }
 
-  /* === Navigation Tabs === */
-  .nav-tabs {
-      background-color: #ffffff;
-      border-bottom: 1px solid #dee2e6;
-      padding: 0 20px; /* Padding inside the nav bar */
-      margin-bottom: 30px; /* Space below nav */
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-  .nav-tabs-container { /* If you want to constrain nav-tabs width */
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      gap: 25px;
-  }
-  .nav-tabs a { /* Using .nav-tabs-container a if you add the wrapper */
-      display: inline-block; /* Or flex item if using .nav-tabs-container */
-      padding: 15px 10px; /* More clickable area */
-      color: #495057;
-      font-weight: 600;
-      border-bottom: 3px solid transparent;
-      transition: border-color 0.2s ease, color 0.2s ease;
-      margin-bottom: -1px; /* Align with parent border */
-  }
-  .nav-tabs a.active,
-  .nav-tabs a:hover {
-      color: #007bff;
-      border-bottom-color: #007bff;
-      text-decoration: none;
-  }
-
   /* === Main Content & Sidebar Structure === */
   .restaurant-main-content,
   .sidebar-card {
       background-color: #ffffff;
-      padding: 25px 30px; /* More padding */
+      padding: 25px 30px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer, more professional shadow */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
   }
-  .sidebar-column .sidebar-card { /* Space between cards in sidebar */
+  .sidebar-column .sidebar-card { 
       margin-bottom: 25px;
   }
   .sidebar-column .sidebar-card:last-child {
@@ -103,33 +73,33 @@
   /* === Restaurant Header & Details === */
   .restaurant-header {
       display: flex;
-      align-items: center; /* Vertically align name and rating */
-      justify-content: space-between; /* Pushes rating to the right if space allows */
-      flex-wrap: wrap; /* Allow wrapping */
+      align-items: center; 
+      justify-content: space-between; 
+      flex-wrap: wrap; 
       gap: 15px;
-      margin-bottom: 20px; /* Space below header */
+      margin-bottom: 20px;
       padding-bottom: 20px;
       border-bottom: 1px solid #e9ecef;
   }
   .restaurant-header h1 {
-      margin-bottom: 0; /* Override default h1 margin */
+      margin-bottom: 0; 
   }
 
   .average-rating {
       color: #ffffff;
-      background-color: #ffc107; /* Gold background */
-      font-size: 1.1em; /* Adjust size */
+      background-color: #ffc107; 
+      font-size: 1.1em; 
       font-weight: 700;
       padding: 8px 15px;
-      border-radius: 20px; /* Pill shape */
+      border-radius: 20px; 
       display: inline-flex;
       align-items: center;
-      white-space: nowrap; /* Prevent wrapping of stars and number */
+      white-space: nowrap; 
   }
-  .average-rating::before { /* Star symbol */
+  .average-rating::before { 
       content: '★';
       margin-right: 6px;
-      font-size: 1.1em; /* Match font size or slightly larger */
+      font-size: 1.1em; 
   }
 
   .no-rating-notice {
@@ -147,7 +117,7 @@
       margin-bottom: 25px;
       border: 1px solid #e9ecef;
   }
-  .no-content-notice { /* Used for "no photo", "no reviews" */
+  .no-content-notice { 
       color: #6c757d;
       font-style: italic;
       padding: 20px;
@@ -162,7 +132,7 @@
 
   .status { font-weight: 600; margin-bottom: 8px; }
   .status.closed { color: #dc3545; }
-  .status.open { color: #28a745; } /* You'd need to add this class dynamically */
+  .status.open { color: #28a745; } 
   .status-detail { color: #6c757d; font-weight: normal; font-size: 0.9em; }
 
   .address-info {
@@ -181,7 +151,7 @@
   .improve-listing-link {
       font-size: 0.9em;
       color: #6c757d;
-      margin-left: auto; /* Pushes to the right if space */
+      margin-left: auto; 
   }
   .improve-listing-link:hover { color: #007bff; }
 
@@ -191,15 +161,15 @@
       margin-top: 25px;
       border-top: 1px solid #e9ecef;
   }
-  .content-section:first-of-type { /* E.g., if 'About' is the first section after the header */
+  .content-section:first-of-type { 
       border-top: none;
       margin-top: 0;
       padding-top: 0;
   }
-  .content-section h2 { /* Section titles */
-      margin-bottom: 15px; /* More space below section titles */
+  .content-section h2 { 
+      margin-bottom: 15px; 
   }
-  .content-section h3 { /* Sub-section titles like "Write a review" */
+  .content-section h3 { 
       margin-bottom: 20px;
   }
 
@@ -214,7 +184,7 @@
       background-color: #e9ecef;
       color: #495057;
       padding: 8px 15px;
-      border-radius: 20px; /* Pill shape */
+      border-radius: 20px; 
       font-size: 0.9em;
   }
   .see-all-link {
@@ -233,7 +203,7 @@
   }
 
   /* === Enhanced Review Display Styling === */
-  .reviews-section h2 { /* "User Reviews" title */
+  .reviews-section h2 { 
       padding-bottom: 10px;
       border-bottom: 2px solid #007bff;
       display: inline-block;
@@ -248,7 +218,7 @@
   .review-item {
       background-color: #fff;
       border: 1px solid #e9ecef;
-      padding: 20px 25px; /* More padding */
+      padding: 20px 25px; 
       margin-bottom: 20px;
       border-radius: 8px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.07);
@@ -268,7 +238,7 @@
   }
 
   .review-stars-display {
-      font-size: 1.2em; /* Size of displayed stars */
+      font-size: 1.2em; 
       line-height: 1;
   }
   .review-stars-display .star.filled { color: #ffc107; }
@@ -276,12 +246,12 @@
 
   .review-text {
       color: #495057;
-      font-size: 1em; /* Standardize review text size */
+      font-size: 1em;
       line-height: 1.7;
   }
 
   /* === Enhanced Submit Review Form Styling === */
-  .submit-review-section h3 { /* "Write a Review" title */
+  .submit-review-section h3 { 
       padding-bottom: 10px;
       border-bottom: 2px solid #007bff;
       display: inline-block;
@@ -289,17 +259,17 @@
 
   .review-form {
       background-color: #f8f9fa;
-      padding: 30px; /* More padding */
+      padding: 30px;
       border-radius: 8px;
       border: 1px solid #dee2e6;
-      margin-top: 10px; /* Space from heading */
+      margin-top: 10px; 
   }
 
   .form-group {
       margin-bottom: 20px;
   }
   .form-group:last-of-type {
-      margin-bottom: 25px; /* More space before button */
+      margin-bottom: 25px; 
   }
 
   .review-form label {
@@ -315,7 +285,7 @@
       color: #6c757d;
   }
 
-  .form-control { /* Shared by input and textarea */
+  .form-control { 
       width: 100%;
       padding: 12px 15px;
       font-size: 1em;
@@ -338,27 +308,27 @@
   }
 
   /* Star Rating Input CSS */
-  .rating-group label { margin-bottom: 10px; } /* More space for star input group */
+  .rating-group label { margin-bottom: 10px; } 
 
   .star-rating-input {
       display: inline-flex;
       flex-direction: row-reverse;
-      font-size: 2em; /* Size of the interactive stars */
+      font-size: 2em; 
       line-height: 1;
   }
   .star-rating-input input[type="radio"] { display: none; }
   .star-rating-input label {
-      color: #d1d1d1; /* Empty star color */
+      color: #d1d1d1; 
       cursor: pointer;
-      padding: 0 0.05em; /* Fine-tune spacing */
+      padding: 0 0.05em; 
       transition: color 0.2s ease-in-out;
-      font-weight: normal; /* Override general label bolding */
+      font-weight: normal; 
       margin-bottom: 0;
   }
   .star-rating-input input[type="radio"]:checked ~ label,
   .star-rating-input label:hover,
   .star-rating-input label:hover ~ label {
-      color: #ffc107; /* Filled star color */
+      color: #ffc107; 
   }
 
   /* === Buttons === */
@@ -371,10 +341,10 @@
       cursor: pointer;
       background-color: #007bff;
       border: 1px solid #007bff;
-      padding: 0.75rem 1.5rem; /* Slightly larger buttons */
+      padding: 0.75rem 1.5rem; 
       font-size: 1rem;
       line-height: 1.5;
-      border-radius: 0.3rem; /* Slightly more rounded */
+      border-radius: 0.3rem; 
       transition: all 0.15s ease-in-out;
       text-decoration: none;
   }
@@ -409,7 +379,7 @@
       border-color: #1e7e34;
   }
 
-  .btn-outline-primary { /* For save button if not saved */
+  .btn-outline-primary { 
       color: #007bff;
       border-color: #007bff;
   }
@@ -418,13 +388,13 @@
       background-color: #007bff;
   }
 
-  .btn-block { /* For buttons that take full width of parent */
+  .btn-block { 
       display: block;
       width: 100%;
   }
 
-  .btn-submit-review { /* Customizations for the review submit button */
-      background-color: #28a745; /* Green color for submit */
+  .btn-submit-review { 
+      background-color: #28a745; 
       border-color: #28a745;
   }
   .btn-submit-review:hover {
@@ -445,42 +415,17 @@
       font-size: 0.95em;
   }
   .hours-table td {
-      padding: 10px 5px; /* More vertical padding */
+      padding: 10px 5px; 
       border-bottom: 1px solid #e9ecef;
       color: #495057;
   }
   .hours-table tr:last-child td { border-bottom: none; }
   .hours-table strong { color: #007bff; }
 
-  /* === Flash Messages === */
-  .flashes-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1050;
-      width: auto;
-      max-width: 380px;
-  }
-  .alert {
-      padding: 1rem 1.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid transparent;
-      border-radius: 0.3rem;
-      color: #fff;
-      opacity: 1;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-      font-size: 0.95em;
-  }
-  .alert-success { background-color: #28a745; border-color: #1e7e34; }
-  .alert-danger  { background-color: #dc3545; border-color: #b02a37; }
-  .alert-info    { background-color: #17a2b8; border-color: #117a8b; }
-  .alert-warning { background-color: #ffc107; border-color: #d39e00; color: #212529; }
-
-
   /* === Responsive Adjustments === */
   @media (max-width: 992px) {
       .container {
-          grid-template-columns: 1fr; /* Single column for tablet and below */
+          grid-template-columns: 1fr; 
       }
       .sidebar-column {
           margin-top: 30px;
@@ -488,7 +433,7 @@
   }
 
   @media (max-width: 768px) {
-      body { font-size: 15px; } /* Slightly smaller base font for mobile */
+      body { font-size: 15px; }
       .restaurant-header {
           flex-direction: column;
           align-items: flex-start;
@@ -502,10 +447,10 @@
   }
 
   @media (max-width: 576px) {
-      body { padding: 0 15px; } /* Reduce side padding on very small screens */
+      body { padding: 0 15px; }
       .container { margin-top: 20px; margin-bottom: 20px; gap: 20px; }
       .restaurant-main-content, .sidebar-card, .review-form { padding: 20px; }
-      .nav-tabs-container { gap: 10px; } /* Or .nav-tabs if not using wrapper */
+      .nav-tabs-container { gap: 10px; } 
       .nav-tabs a { font-size: 0.9em; padding: 10px 5px; }
       .action-links .btn { width: 100%; margin-bottom: 10px; }
       .action-links .btn:last-child { margin-bottom: 0; }
@@ -514,13 +459,13 @@
   }
 
   .coordinates {
-      font-size: 0.9em; /* Slightly smaller text */
-      color: #777;      /* Muted color */
-      margin-top: 0.5em; /* Some spacing above */
+      font-size: 0.9em; 
+      color: #777;      
+      margin-top: 0.5em; 
   }
 
   .no-coordinates {
-      font-style: italic; /* Italicize the "No coordinates" message */
+      font-style: italic; 
       color: #999;
       font-size: 0.9em;
       margin-top: 0.5em;
@@ -551,13 +496,13 @@
             {% endif %}
         </div>
 
-        <p class="status closed">Closed now <span class="status-detail">• Opens at 12:00 PM</span></p>
-        <p class="address-info">{{ restaurant.address }}</p> 
+        <p class="status {{ 'open' if status == 'Open now' else 'closed' }}">{{ status }} <span class="status-detail">• {{ status_detail }}</span></p>
+        <p class="address-info">{{ restaurant.address }}</p>
 
-        <div class="info-row action-links"> 
+        <div class="info-row action-links">
             {% if restaurant.Maps_link %}<a href="{{ restaurant.Maps_link }}" target="_blank" class="btn btn-outline">View on Google Maps</a>{% endif %}
             {% if restaurant.phone %}<a href="tel:{{ restaurant.phone }}" class="btn btn-outline">Call {{ restaurant.phone }}</a>{% endif %}
-            <a href="#" class="improve-listing-link">Improve this listing</a>
+            <a href="{{ url_for('upload_photos', restaurant_id=restaurant.id) }}" class="improve-listing-link">Improve this listing</a>
         </div>
 
         <div class="content-section about-section">
@@ -583,7 +528,7 @@
                     height="400"
                     frameborder="0"
                     style="border:0"
-                    src="https://maps.google.com/maps?q={{ restaurant.latitude }},{{ restaurant.longitude }}&hl=en&z=14&output=embed"
+                    src="http://maps.google.com/maps?q={{ restaurant.latitude }},{{ restaurant.longitude }}&hl=en&z=14&output=embed"
                     allowfullscreen>
                 </iframe>
             </div>
@@ -648,7 +593,7 @@
     <aside class="sidebar-column">
         <div class="sidebar-card save-card">
             <h3>Save to Favorites</h3>
-            <form method="POST" action="{{ url_for('favourite', id=restaurant.id) }}">
+            <form method="POST" action="{{ url_for('toggle_save', restaurant_id=restaurant.id) }}">
                 <button type="submit" class="btn {% if restaurant.is_saved %}btn-success{% else %}btn-outline-primary{% endif %} btn-block">
                     {% if restaurant.is_saved %}✔ Saved{% else %}♡ Add to Saved{% endif %}
                 </button>
@@ -657,41 +602,32 @@
 
         <div class="sidebar-card hours-card">
             <h3>Opening Hours</h3>
-            <p class="status closed">Currently Closed <span class="status-detail">• Opens at 12:00 PM</span></p>
+            <p class="status {{ 'open' if status == 'Open now' else 'closed' }}">
+                {{ status }} <span class="status-detail">• {{ status_detail }}</span>
+            </p>
             <table class="hours-table">
-                <tr><td>Sunday</td><td>12:00 PM - 8:30 PM</td></tr>
-                <tr><td>Monday</td><td>12:00 PM - 8:30 PM</td></tr>
-                <tr><td>Tuesday</td><td><strong>12:00 PM - 8:30 PM</strong></td></tr>
-                <tr><td>Wednesday</td><td>12:00 PM - 8:30 PM</td></tr>
-                <tr><td>Thursday</td><td>12:00 PM - 8:30 PM</td></tr>
-                <tr><td>Friday</td><td>Closed</td></tr>
-                <tr><td>Saturday</td><td>12:00 PM - 8:30 PM</td></tr>
+                {% if restaurant.is_24_hours %}
+                <tr>
+                    <td colspan="2">Open 24 Hours, 7 Days a Week</td>
+                </tr>
+                {% else %}
+                    {% for oh in operating_hours %}
+                    <tr>
+                        <td>{{ oh.day }}</td>
+                        <td>
+                            {% if oh.open_time == 'Closed' %}
+                                Closed
+                            {% elif oh.open_time == '00:00' and oh.close_time == '00:00' %}
+                                24 Hours
+                            {% else %}
+                                {{ oh.open_time }} - {{ oh.close_time }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
             </table>
         </div>
     </aside>
 </div>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flashes-container">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category or 'info' }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-    <script>
-        // flash messages
-        document.addEventListener('DOMContentLoaded', (event) => {
-            setTimeout(function() {
-                const flashesContainer = document.querySelector('.flashes-container');
-                if (flashesContainer) {
-                    flashesContainer.style.transition = 'opacity 0.5s ease-out';
-                    flashesContainer.style.opacity = '0';
-                    setTimeout(function() { flashesContainer.style.display = 'none'; }, 500); // fade out
-                }
-            }, 5000); // 5 seconds
-        });
-    </script>
-  {% endif %}
-{% endwith %}
-
 {% endblock %}

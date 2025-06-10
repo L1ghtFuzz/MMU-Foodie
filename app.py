@@ -1,7 +1,7 @@
 import random
 from flask import Flask, render_template, request, redirect, flash, url_for, current_app
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, time
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import UserMixin, login_user, login_required, logout_user, current_user
@@ -21,7 +21,7 @@ migrate = Migrate(app, db)
 # Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'  # Optional
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -49,7 +49,7 @@ class Restaurant(db.Model):
     phone = db.Column(db.String(20))
     cuisine = db.Column(db.String(100))
     price = db.Column(db.String(4))
-    Maps_link = db.Column(db.String(300)) # Ensure this is 'Maps_link'
+    Maps_link = db.Column(db.String(300))
     description = db.Column(db.Text)
     image_url = db.Column(db.String(300))
     latitude = db.Column(db.Float)
@@ -57,14 +57,83 @@ class Restaurant(db.Model):
     is_saved = db.Column(db.Boolean, default=False)
     reviews = db.relationship('Review', backref='restaurant', lazy=True)
     images = db.relationship('RestaurantImage', backref='restaurant', cascade='all, delete-orphan')
+    operating_hours = db.relationship('OperatingHour', backref='restaurant', lazy=True, cascade='all, delete-orphan')
+    is_24_hours = db.Column(db.Boolean, default=False)
+
     @property
     def average_rating(self):
-        reviews = self.reviews  # access the reviews using the backref
+        reviews = self.reviews
         if reviews:
             return sum(review.rating for review in reviews) / len(reviews)
         return None
+
+    def get_status(self):
+        now = datetime.now()
+        current_day = now.strftime('%A') 
+        current_time = now.time()
+
+        if self.is_24_hours:
+            return "Open now", "24 Hours"
+
+        today_hours = None
+        for oh in self.operating_hours:
+            if oh.day_of_week == current_day:
+                today_hours = oh
+                break
+
+        if not today_hours or today_hours.open_time == 'Closed':
+            days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            current_day_index = days_of_week_ordered.index(current_day)
+
+            for i in range(1, 8): 
+                next_day_index = (current_day_index + i) % 7
+                next_day_name = days_of_week_ordered[next_day_index]
+                next_day_hours = next((oh for oh in self.operating_hours if oh.day_of_week == next_day_name), None)
+
+                if next_day_hours and next_day_hours.open_time != 'Closed':
+                    next_open_time_str = next_day_hours.open_time
+                    # Convert to time object
+                    next_open_time = datetime.strptime(next_open_time_str, '%H:%M').time()
+                    return "Closed now", f"Opens {next_day_name} at {next_open_time.strftime('%I:%M %p')}"
+            return "Closed now", "No upcoming opening hours." 
+
+        open_time_obj = datetime.strptime(today_hours.open_time, '%H:%M').time()
+        close_time_obj = datetime.strptime(today_hours.close_time, '%H:%M').time()
+
+        if open_time_obj <= current_time <= close_time_obj:
+            return "Open now", f"Closes at {close_time_obj.strftime('%I:%M %p')}"
+        elif current_time < open_time_obj:
+            return "Closed now", f"Opens at {open_time_obj.strftime('%I:%M %p')}"
+        else: 
+            days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            current_day_index = days_of_week_ordered.index(current_day)
+
+            for i in range(1, 8):
+                next_day_index = (current_day_index + i) % 7
+                next_day_name = days_of_week_ordered[next_day_index]
+                next_day_hours = next((oh for oh in self.operating_hours if oh.day_of_week == next_day_name), None)
+
+                if next_day_hours and next_day_hours.open_time != 'Closed':
+                    next_open_time_str = next_day_hours.open_time
+                    next_open_time = datetime.strptime(next_open_time_str, '%H:%M').time()
+                    return "Closed now", f"Opens {next_day_name} at {next_open_time.strftime('%I:%M %p')}"
+            return "Closed now", "No upcoming opening hours."
+
     def __repr__(self):
         return f'<Restaurant {self.name}>'
+
+
+class OperatingHour(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    day_of_week = db.Column(db.String(10), nullable=False) 
+    open_time = db.Column(db.String(5)) 
+    close_time = db.Column(db.String(5)) 
+
+    __table_args__ = (db.UniqueConstraint('restaurant_id', 'day_of_week', name='uq_restaurant_day'),)
+
+    def __repr__(self):
+        return f'<OperatingHour {self.day_of_week}: {self.open_time}-{self.close_time} for R:{self.restaurant_id}>'
 
 class RestaurantImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -99,25 +168,22 @@ def base():
 @app.route('/')
 @app.route('/index')
 def index():
-
     query = db.session.query(Restaurant, func.avg(Review.rating).label('avg_rating')) \
-                      .outerjoin(Review).group_by(Restaurant.id)  
+                      .outerjoin(Review).group_by(Restaurant.id)
     search_term = request.args.get('search')
     if search_term:
-        # Filter restaurants by name (case-insensitive)
         query = query.filter(Restaurant.name.ilike(f'%{search_term}%'))
 
     min_rating = request.args.get('rating', type=int)
     price = request.args.get('price')
-    category_param = request.args.get('category') 
+    category_param = request.args.get('category')
 
     user_lat = request.args.get('user_lat', type=float)
     user_lon = request.args.get('user_lon', type=float)
     distance_limit = request.args.get('distance')
 
     def haversine(lat1, lon1, lat2, lon2):
-        from math import radians, cos, sin, sqrt, atan2
-        R = 6371 
+        R = 6371
         dlat = radians(lat2 - lat1)
         dlon = radians(lon2 - lon1)
         a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
@@ -129,9 +195,9 @@ def index():
         query = query.having(func.avg(Review.rating) >= min_rating)
     if price:
         query = query.filter(Restaurant.price == price)
-    if category_param: 
-        categories = category_param.split(',') 
-        query = query.filter(Restaurant.cuisine.in_(categories)) 
+    if category_param:
+        categories = category_param.split(',')
+        query = query.filter(Restaurant.cuisine.in_(categories))
 
     results = query.all()
     restaurants = []
@@ -143,7 +209,7 @@ def index():
             if restaurant.latitude and restaurant.longitude:
                 distance_km = haversine(user_lat, user_lon, restaurant.latitude, restaurant.longitude)
                 if distance_km > float(distance_limit):
-                    continue  
+                    continue
 
         restaurants.append(restaurant)
 
@@ -156,7 +222,7 @@ def index():
 def admin_dashboard():
     if not current_user.is_admin:
         flash("Access denied. Admins only.", category='error')
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
 
     restaurants = Restaurant.query.all()
     return render_template("admin-dashboard.html", user=current_user, restaurants=restaurants)
@@ -168,7 +234,6 @@ def login():
         identifier = request.form['identifier']
         password = request.form['password']
 
-        # Allow login using either username or email
         user = User.query.filter(
             (User.username == identifier) | (User.email == identifier)
         ).first()
@@ -219,9 +284,9 @@ def sign_up():
             db.session.commit()
             login_user(new_user, remember=True)
             flash('Account created!', category='success')
-            return redirect(url_for('dashboard'))
-
+            return redirect(url_for('dashboard')) 
     return render_template("sign-up.html", user=current_user)
+
 
 @app.route('/logout')
 @login_required
@@ -280,13 +345,36 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 @app.route('/restaurant/<int:restaurant_id>')
 def display_restaurant(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
-    return render_template('display.html', restaurant=restaurant)
+    status, status_detail = restaurant.get_status()
+
+    # Prepare operating hours for display
+    operating_hours_display = {oh.day_of_week: {'open_time': oh.open_time, 'close_time': oh.close_time} for oh in restaurant.operating_hours}
+    days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    full_operating_hours = []
+    for day in days_of_week_ordered:
+        if day in operating_hours_display:
+            full_operating_hours.append({
+                'day': day,
+                'open_time': operating_hours_display[day]['open_time'],
+                'close_time': operating_hours_display[day]['close_time']
+            })
+        else:
+            full_operating_hours.append({
+                'day': day,
+                'open_time': 'Closed', 
+                'close_time': None
+            })
+
+    return render_template('display.html', restaurant=restaurant,
+                           status=status, status_detail=status_detail,
+                           operating_hours=full_operating_hours)
+
 
 @app.route('/form', methods=['GET', 'POST'])
 @login_required
 def add_restaurant():
     if not current_user.is_admin:
-        flash("Access denied. Admins only.")
+        flash("Access denied. Admins only.", "error")
         return redirect(url_for('index'))
 
     if request.method == 'POST':
@@ -299,6 +387,7 @@ def add_restaurant():
         price = request.form['price']
         latitude = float(request.form['latitude'])
         longitude = float(request.form['longitude'])
+        is_24_hours = 'all_week_24h' in request.form 
 
         new_restaurant = Restaurant(
             name=name,
@@ -309,19 +398,51 @@ def add_restaurant():
             description=description,
             price=price,
             latitude=latitude,
-            longitude=longitude
+            longitude=longitude,
+            is_24_hours=is_24_hours 
         )
         db.session.add(new_restaurant)
-        db.session.commit()  # commit to get ID
+        db.session.commit() 
 
-        print("DEBUG - request.files:", request.files)
-        print("DEBUG - images from form:", request.files.getlist('images'))
+        days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        for day in days_of_week:
+            open_time = None
+            close_time = None
 
+            if is_24_hours:
+                open_time = '00:00'
+                close_time = '00:00'
+            else:
+                closed_key = f"{day.lower()}_closed"
+                open_time_key = f"{day.lower()}_open"
+                close_time_key = f"{day.lower()}_close"
+
+                if request.form.get(closed_key):
+                    open_time = 'Closed'
+                    close_time = None
+                else:
+                    open_time = request.form.get(open_time_key)
+                    close_time = request.form.get(close_time_key)
+                    if not open_time or not close_time: # Basic validation
+                        flash(f"Please provide both open and close times for {day} or mark as closed.", "warning")
+                        # You might want to handle this more robustly, e.g., redirect back to form
+                        return redirect(url_for('add_restaurant'))
+
+
+            new_operating_hour = OperatingHour(
+                restaurant_id=new_restaurant.id,
+                day_of_week=day,
+                open_time=open_time,
+                close_time=close_time
+            )
+            db.session.add(new_operating_hour)
+
+        # Handle initial image uploads for add restaurant
         images = request.files.getlist('images')
         upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
 
-        first_image_url = None # Initialize a variable to store the first image URL
+        first_image_url = None
 
         for image in images:
             if image and allowed_file(image.filename):
@@ -346,10 +467,10 @@ def add_restaurant():
             new_restaurant.image_url = url_for('static', filename='default.jpg')
 
         db.session.commit()
-        flash("Restaurant Added Successfully!")
+        flash("Restaurant Added Successfully!", "success")
         return redirect(url_for('display_restaurant', restaurant_id=new_restaurant.id))
 
-    return render_template('form.html')
+    return render_template('form.html', operating_hours_data={})
 
 @app.route("/delete-restaurant/<int:restaurant_id>", methods=["POST"])
 @login_required
@@ -374,7 +495,7 @@ def edit_restaurant(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
 
     if request.method == 'POST':
-        # Update the restaurant details with the form data
+        # Update restaurant details
         restaurant.name = request.form['name']
         restaurant.address = request.form['address']
         restaurant.phone = request.form['phone']
@@ -384,13 +505,42 @@ def edit_restaurant(restaurant_id):
         restaurant.price = request.form['price']
         restaurant.latitude = float(request.form['latitude'])
         restaurant.longitude = float(request.form['longitude'])
+        restaurant.is_24_hours = 'all_week_24h' in request.form 
 
-        # Handle image uploads
+        # Handle operating hours update
+        days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        for day in days_of_week:
+            operating_hour = OperatingHour.query.filter_by(restaurant_id=restaurant.id, day_of_week=day).first()
+            if not operating_hour:
+                operating_hour = OperatingHour(restaurant_id=restaurant.id, day_of_week=day)
+                db.session.add(operating_hour)
+
+            if restaurant.is_24_hours: 
+                operating_hour.open_time = '00:00'
+                operating_hour.close_time = '00:00'
+            else: 
+                closed_key = f"{day.lower()}_closed"
+                open_time_key = f"{day.lower()}_open"
+                close_time_key = f"{day.lower()}_close"
+
+                if request.form.get(closed_key):
+                    operating_hour.open_time = 'Closed'
+                    operating_hour.close_time = None
+                else:
+                    open_time = request.form.get(open_time_key)
+                    close_time = request.form.get(close_time_key)
+                    if not open_time or not close_time:
+                        flash(f"Please provide both open and close times for {day} or mark as closed.", "warning")
+                        return redirect(url_for('edit_restaurant', restaurant_id=restaurant.id))
+                    operating_hour.open_time = open_time
+                    operating_hour.close_time = close_time
+
+        # Handle image uploads for edit restaurant (can add new ones, but existing are not deleted via this form)
         images = request.files.getlist('images')
         upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
 
-        first_image_url = None
+        first_image_url_from_upload = None
 
         for image in images:
             if image and allowed_file(image.filename):
@@ -400,43 +550,103 @@ def edit_restaurant(restaurant_id):
                     image_path = os.path.join(upload_folder, unique_filename)
 
                     image.save(image_path)
-                    image_url = url_for('static', filename=f'uploads/{unique_filename}')
-                    db.session.add(RestaurantImage(image_url=image_url, restaurant_id=restaurant.id))
+                    new_image_url = url_for('static', filename=f'uploads/{unique_filename}')
+                    db.session.add(RestaurantImage(image_url=new_image_url, restaurant_id=restaurant.id))
 
-                    if not first_image_url:
-                        first_image_url = image_url
+                    if not first_image_url_from_upload:
+                        first_image_url_from_upload = new_image_url # Keep track of the first new upload
 
                 except Exception as e:
                     flash(f"Error saving image {original_filename}: {str(e)}", "error")
 
-        if first_image_url:
-            restaurant.image_url = first_image_url
-        elif not restaurant.image_url:
-             restaurant.image_url = url_for('static', filename='default.jpg')
+        # Update the main restaurant image_url if a new one was uploaded and existing was default
+        if first_image_url_from_upload and restaurant.image_url == url_for('static', filename='default.jpg'):
+            restaurant.image_url = first_image_url_from_upload
+        # If no main image exists and new images were uploaded, set the first new one as main
+        elif not restaurant.image_url and first_image_url_from_upload:
+            restaurant.image_url = first_image_url_from_upload
+
 
         db.session.commit()
         flash("Restaurant details updated!", "success")
         return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
+    
+    # For GET request, prepare operating hours data to pre-fill the form
+    operating_hours_data = {oh.day_of_week: oh for oh in restaurant.operating_hours}
+    # Ensure all days are represented for the template, even if no data exists yet
+    days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    for day in days_of_week_ordered:
+        if day not in operating_hours_data:
+            operating_hours_data[day] = OperatingHour(day_of_week=day, open_time='', close_time='') # Default empty
 
-    return render_template('edit_restaurant.html', restaurant=restaurant)
+    return render_template('edit_restaurant.html', restaurant=restaurant, operating_hours_data=operating_hours_data)
+
+
+# NEW ROUTE FOR UPLOADING ADDITIONAL PHOTOS
+@app.route('/upload_photos/<int:restaurant_id>', methods=['GET', 'POST'])
+@login_required 
+def upload_photos(restaurant_id):
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+
+    if request.method == 'POST':
+        images = request.files.getlist('images') 
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        os.makedirs(upload_folder, exist_ok=True) 
+
+        uploaded_count = 0
+        for image in images:
+            if image and allowed_file(image.filename):
+                try:
+                    original_filename = secure_filename(image.filename)
+                    unique_filename = f"{uuid.uuid4().hex}_{original_filename}"
+                    image_path = os.path.join(upload_folder, unique_filename)
+
+                    image.save(image_path)
+                    image_url = url_for('static', filename=f'uploads/{unique_filename}')
+                    
+                    # Add new image to the RestaurantImage table
+                    db.session.add(RestaurantImage(image_url=image_url, restaurant_id=restaurant.id))
+                    uploaded_count += 1
+
+                except Exception as e:
+                    flash(f"Error saving image {image.filename}: {str(e)}", "error")
+            elif image and not allowed_file(image.filename):
+                flash(f"File {image.filename} is not allowed. Only PNG, JPG, JPEG are supported.", "warning")
+
+        if uploaded_count > 0:
+            db.session.commit()
+            flash(f"Successfully uploaded {uploaded_count} new photo(s)!", "success")
+        else:
+            flash("No new photos were uploaded or selected.", "info")
+
+        return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
+
+    return render_template('upload_photos.html', restaurant=restaurant)
+
 
 @app.route('/restaurant/<int:restaurant_id>/review', methods=['POST'])
 def submit_review(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
     rating = int(request.form['rating'])
     text = request.form['text']
-    author = request.form.get('author')  # author
+    author = request.form.get('author')
     review = Review(restaurant_id=restaurant.id, rating=rating, text=text, author=author)
     db.session.add(review)
     db.session.commit()
-    flash('Your review has been submitted!')
+    flash('Your review has been submitted!', "success")
     return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
 @app.route('/restaurant/<int:restaurant_id>/save', methods=['POST'])
 def toggle_save(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
+    # This logic assumes 'is_saved' is a per-restaurant flag.
+    # If it's specific to the current user, you'd modify current_user.favourites
     restaurant.is_saved = not restaurant.is_saved
     db.session.commit()
+    if restaurant.is_saved:
+        flash("Added to saved restaurants!", "success")
+    else:
+        flash("Removed from saved restaurants.", "info")
     return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
 

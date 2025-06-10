@@ -7,18 +7,17 @@ body {
   color: black;
   background-color: #f1f1f1;
   font-family: sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Style for header*/
 .header {
   background-color: #f1f1f1;
-  border-bottom: 1px black; /* This border is missing a style, e.g., 'solid' */
+  border-bottom: 1px black;
   font-family: "Roboto", sans-serif;
   overflow: visible;
   position: relative;
   z-index: 10000;
-  transition: background-color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease;
 }
 
 #TopLogo {
@@ -35,8 +34,8 @@ body {
   margin-top: 0.5rem;
   margin-bottom: 10px;
   cursor: pointer;
-  border-bottom: 1px black; /* This border is missing a style, e.g., 'solid' */
-  transition: background-color 0.3s ease; /* Smooth transition */
+  border-bottom: 1px black;
+  transition: background-color 0.3s ease;
 }
 
 #TopLogo ul,
@@ -47,11 +46,11 @@ body {
   padding: 0%;
   color: black;
   margin: 0%;
-  transition: color 0.3s ease; /* Smooth transition */
+  transition: color 0.3s ease;
 }
 
 .table {
-  border: black; /* This border is missing a style, e.g., 'solid' */
+  border: black;
   border-radius: 10px;
 }
 
@@ -67,7 +66,7 @@ body {
   position: relative;
   z-index: 2000;
   overflow: visible;
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .blue-bar {
@@ -80,10 +79,10 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  transition: background-color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease;
 }
 
-.blue-bar ul { /* Added from base.html to ensure nav links transition */
+.blue-bar ul {
     list-style: none;
     display: flex;
     gap: 20px;
@@ -92,7 +91,7 @@ body {
     align-items: center;
 }
 
-.blue-bar a { /* Added from base.html to ensure nav links transition */
+.blue-bar a {
     color: white;
     text-decoration: none;
     font-weight: bold;
@@ -101,10 +100,10 @@ body {
 
 
 .search-container {
-  position: relative; /* For positioning the icon inside */
-  flex-grow: 1; /* Allows it to take available space */
-  max-width: 350px; /* Max width for larger screens */
-  margin: 0 20px; /* Spacing from other elements */
+  position: relative;
+  flex-grow: 1;
+  max-width: 350px;
+  margin: 0 20px;
 }
 
 .search-container form {
@@ -113,25 +112,25 @@ body {
 }
 
 .search-input {
-  width: 100%; /* Fill the container */
-  padding: 10px 15px; /* More padding for better feel */
-  padding-left: 40px; /* Space for the icon */
-  border: 1px solid rgba(255, 255, 255, 0.5); /* Lighter border */
-  border-radius: 25px; /* Fully rounded corners */
-  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
-  color: white; /* Text color */
+  width: 100%;
+  padding: 10px 15px;
+  padding-left: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 25px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
   font-size: 1rem;
-  outline: none; /* Remove outline on focus */
+  outline: none;
   transition: all 0.3s ease;
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Placeholder text color */
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-input:focus {
-  background-color: white; /* White background on focus */
-  color: #333; /* Darker text on focus */
+  background-color: white;
+  color: #333;
   border-color: white;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
@@ -141,13 +140,13 @@ body {
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.7); /* Icon color */
-  pointer-events: none; /* Make icon unclickable, so input receives clicks */
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
   transition: color 0.3s ease;
 }
 
 .search-input:focus + .search-icon {
-  color: #0050a2; /* Change icon color on focus */
+  color: #0050a2;
 }
 
 .dropdown {
@@ -163,14 +162,14 @@ body {
   min-width: 200px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 10002;
-  transition: background-color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease;
 }
 
 .dropdown:hover .dropdown-content {
   display: block;
 }
 
-.dropdown-content a { /* Added to style links within dropdown */
+.dropdown-content a {
     color: black;
     padding: 12px 16px;
     text-decoration: none;
@@ -182,41 +181,40 @@ body {
   background-color: #ddd;
 }
 
-/* Dark Mode Styles */
 body.dark-mode {
-    background-color: #333; /* Dark background */
-    color: #f1f1f1; /* Light text */
+    background-color: #222;
+    color: #f1f1f1;
 }
 
 body.dark-mode .header {
-    background-color: #222; /* Darker header background */
+    background-color: #222;
     border-bottom-color: #555;
 }
 
 body.dark-mode #TopLogo {
-    background-color: #222; /* Darker TopLogo background */
+    background-color: #222;
 }
 
 body.dark-mode #TopLogo ul,
 body.dark-mode #TopLogo li {
-    color: #f1f1f1; /* Light text for logo */
+    color: #f1f1f1;
 }
 
 body.dark-mode .top-bar {
-    background-color: #1a1a1a; /* Even darker blue bar */
+    background-color: #1a1a1a;
     color: #f1f1f1;
 }
 
 body.dark-mode .blue-bar {
-    background-color: #1a1a1a; /* Even darker blue bar */
+    background-color: #1a1a1a;
 }
 
 body.dark-mode .blue-bar a {
-    color: #ADD8E6; /* Light blue for links in dark mode */
+    color: #ADD8E6;
 }
 
 body.dark-mode .search-input {
-    background-color: rgba(255, 255, 255, 0.1); /* Darker semi-transparent background */
+    background-color: rgba(255, 255, 255, 0.1);
     color: #f1f1f1;
     border-color: rgba(255, 255, 255, 0.3);
 }
@@ -226,7 +224,7 @@ body.dark-mode .search-input::placeholder {
 }
 
 body.dark-mode .search-input:focus {
-    background-color: #555; /* Darker background on focus */
+    background-color: #555;
     color: #f1f1f1;
     border-color: #777;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
@@ -237,7 +235,7 @@ body.dark-mode .search-icon {
 }
 
 body.dark-mode .search-input:focus + .search-icon {
-    color: #ADD8E6; /* Light blue icon on focus */
+    color: #ADD8E6;
 }
 
 body.dark-mode .dropdown-content {
@@ -253,40 +251,37 @@ body.dark-mode .dropdown-content a:hover {
     background-color: #666;
 }
 
-/* Style for the dark mode toggle button */
 #darkModeToggle {
     background: none;
     border: none;
-    color: white; /* Default color for the icon */
+    color: white;
     cursor: pointer;
-    margin-right: 10px; /* Space between toggle and dropdown */
+    margin-right: 10px;
     transition: color 0.3s ease;
 }
 
 body.dark-mode #darkModeToggle {
-    color: #f1f1f1; /* Ensures icon is visible in dark mode */
+    color: #f1f1f1;
 }
 
-/* --- Media Queries for Responsive Layout --- */
 @media (max-width: 768px) {
   .blue-bar {
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align items to the start */
+    flex-direction: column;
+    align-items: flex-start;
     padding-top: 10px;
     padding-bottom: 10px;
   }
 
   .search-container {
-    width: calc(100% - 40px); /* Full width minus padding */
-    margin: 10px 20px; /* Adjust margin */
-    order: -1; /* Place search bar at the top of the flex column */
+    width: calc(100% - 40px);
+    margin: 10px 20px;
+    order: -1;
   }
 
   .search-container form {
     width: 100%;
   }
 
-  /* Adjust nav and dropdown if needed for vertical stacking */
   .blue-bar nav {
     width: 100%;
     margin-left: 0;
@@ -295,144 +290,139 @@ body.dark-mode #darkModeToggle {
   }
 
   .blue-bar nav ul {
-    flex-direction: column; /* Stack navigation links vertically */
+    flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
   .dropdown {
-    width: 100%; /* Take full width on small screens */
-    text-align: right; /* Keep dropdown button to the right */
+    width: 100%;
+    text-align: right;
   }
 
-  #darkModeToggle { /* Adjust position for small screens */
+  #darkModeToggle {
     margin-top: 10px;
-    margin-left: auto; /* Push to the right */
-    margin-right: 20px; /* Align with dropdown button */
+    margin-left: auto;
+    margin-right: 20px;
   }
 
   .container {
-    flex-direction: column; /* Stack filters, details, and map vertically */
-    height: auto; /* Allow container to grow vertically as needed */
-    padding: 0.5rem; /* Adjust padding for smaller screens */
+    flex-direction: column;
+    height: auto;
+    padding: 0.5rem;
   }
 
   .filters {
-    width: 100%; /* Full width for filters */
-    flex: none; /* Remove fixed flex basis */
-    padding: 1rem; /* Adjust padding for full width */
-    border-right: none; /* Remove vertical border */
-    border-bottom: 1px solid #eee; /* Add horizontal border */
+    width: 100%;
+    flex: none;
+    padding: 1rem;
+    border-right: none;
+    border-bottom: 1px solid #eee;
     margin-bottom: 1rem;
   }
 
-  /* Make filter options lay out horizontally within filters for a compact look */
   .filter-group {
     display: flex;
-    flex-wrap: wrap; /* Allow items to wrap to the next line */
-    gap: 10px; /* Space between filter items */
-    justify-content: flex-start; /* Align items to the start */
-    border-bottom: none; /* Remove individual group borders */
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+    border-bottom: none;
     padding-bottom: 0;
-    margin-bottom: 0.5rem; /* Smaller margin for compacted groups */
+    margin-bottom: 0.5rem;
     align-items: center;
   }
 
   .filter-group h6 {
-    flex-basis: 100%; /* Make heading take full width */
-    margin-bottom: 5px; /* Adjust margin below heading */
+    flex-basis: 100%;
+    margin-bottom: 5px;
     text-align: left;
   }
 
-  /* Adjust price buttons for smaller screens */
   .price-buttons.segmented {
-    width: 100%; /* Make price buttons take full width */
-    justify-content: space-around; /* Distribute buttons evenly */
+    width: 100%;
+    justify-content: space-around;
     margin-bottom: 0.5rem;
   }
 
   .price-buttons.segmented button {
-    flex: 1; /* Allow buttons to grow and shrink */
-    min-width: unset; /* Override any min-width */
+    flex: 1;
+    min-width: unset;
   }
 
-  /* Adjust category buttons for horizontal layout */
   .category {
-    flex: 0 0 auto; /* Don't grow, take content width */
+    flex: 0 0 auto;
     min-width: fit-content;
   }
 
   .see-more-container {
-    flex-wrap: wrap; /* Allow the 'Show More' button to wrap */
+    flex-wrap: wrap;
     margin-bottom: 0.5rem;
   }
 
   .see-more-btn {
-    flex-basis: 100%; /* Make 'Show More' take full width on its own line */
+    flex-basis: 100%;
     text-align: left;
     margin-top: 5px;
   }
 
   .more-category {
     flex-basis: 100%;
-    display: flex; /* Make sure hidden categories also flex horizontally when shown */
+    display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 5px;
   }
 
   .more-category--show {
-    display: flex; /* Ensure it overrides 'none' and uses flex */
+    display: flex;
   }
 
   .rating-container select {
-    width: auto; /* Auto width for smaller screens */
-    max-width: none; /* Remove max-width constraint */
+    width: auto;
+    max-width: none;
   }
 
   .details {
-    width: 100%; /* Full width for restaurant list */
+    width: 100%;
     padding-right: 0;
     border-right: none;
   }
 
   .map {
-    width: 100%; /* Full width for map */
-    height: 300px; /* Give map a fixed height on smaller screens */
+    width: 100%;
+    height: 300px;
     margin-top: 1rem;
     padding: 0;
   }
 
   #map {
-    height: 100%; /* Map fills its container */
-    width: 100%; /* Map fills its container */
+    height: 100%;
+    width: 100%;
   }
 
-  /* Adjust restaurant card layout for smaller screens */
   .restaurant-card {
-    flex-direction: column; /* Stack image and info vertically */
-    align-items: center; /* Center items */
+    flex-direction: column;
+    align-items: center;
     text-align: center;
   }
 
   .restaurant-image {
-    width: 100%; /* Full width image */
-    height: 200px; /* Fixed height for image */
-    margin-right: 0; /* Remove right margin */
-    margin-bottom: 1rem; /* Add bottom margin */
+    width: 100%;
+    height: 200px;
+    margin-right: 0;
+    margin-bottom: 1rem;
   }
 }
 
-/* Even smaller screens (e.g., typical mobile portrait) if needed */
 @media (max-width: 480px) {
   .filters {
-    padding-left: 15px; /* Reduce padding even further */
+    padding-left: 15px;
   }
   .filter-group {
-    flex-direction: column; /* Stack filter groups if they become too cramped */
+    flex-direction: column;
     align-items: flex-start;
   }
   .price-buttons.segmented button {
-    flex: 1 1 45%; /* Allow 2 buttons per line */
+    flex: 1 1 45%;
   }
 }
