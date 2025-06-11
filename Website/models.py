@@ -1,3 +1,4 @@
+# Website/models.py
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -30,6 +31,7 @@ class User(db.Model, UserMixin):
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
     past = db.relationship('Restaurant', secondary='past', backref='visited_by')
     is_admin = db.Column(db.Boolean, default=False)
+    collections = db.relationship('Collection', backref='owner', lazy=True)
 
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +40,7 @@ class Restaurant(db.Model):
     phone = db.Column(db.String(20))
     cuisine = db.Column(db.String(100))
     price = db.Column(db.String(4))
-    google_maps_link = db.Column(db.String(300))
+    Maps_link = db.Column(db.String(300))
     rating = db.Column(db.Integer)
     description = db.Column(db.Text)
     image_url = db.Column(db.String(300))
@@ -49,3 +51,15 @@ class Review(db.Model):
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
     content = db.Column(db.Text)
     rating = db.Column(db.Integer)
+
+collection_restaurants = db.Table(
+    'collection_restaurants',
+    db.Column('collection_id', db.Integer, db.ForeignKey('collection.id')),
+    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
+)
+
+class Collection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Link to the User who owns the collection
+    restaurants = db.relationship('Restaurant', secondary=collection_restaurants, backref='collections')

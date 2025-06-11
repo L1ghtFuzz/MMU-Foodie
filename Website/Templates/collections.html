@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}My Collections{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">My Restaurant Collections</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <div class="card-header">Create New Collection</div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('views.collections') }}">
+                <div class="form-group">
+                    <label for="collection_name">Collection Name:</label>
+                    <input type="text" class="form-control" id="collection_name" name="collection_name" required>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Create Collection</button>
+            </form>
+        </div>
+    </div>
+
+    <h2 class="mt-5 mb-3">Your Existing Collections:</h2>
+    {% if user.collections %}
+        <div class="list-group">
+            {% for collection in user.collections %}
+                <a href="{{ url_for('views.collection_detail', collection_id=collection.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    {{ collection.name }}
+                    <span class="badge bg-primary rounded-pill">{{ collection.restaurants|length }} restaurants</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">You haven't created any collections yet. Use the form above to get started!</p>
+    {% endif %}
+
+</div>
+{% endblock %}

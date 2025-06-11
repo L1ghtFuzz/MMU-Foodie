@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ collection.name }} - Collection{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ collection.name }}</h1>
+    <p class="text-muted">Restaurants in this collection:</p>
+
+    {% if collection.restaurants %}
+        <div class="row">
+            {% for restaurant in collection.restaurants %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if restaurant.image_url %}
+                        <img src="{{ restaurant.image_url }}" class="card-img-top" alt="{{ restaurant.name }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='images/default_restaurant.jpg') }}" class="card-img-top" alt="Default Restaurant Image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ restaurant.name }}</h5>
+                            <p class="card-text"><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+                            <p class="card-text"><strong>Rating:</strong> {{ restaurant.rating }} / 5</p>
+                            <p class="card-text"><small class="text-muted">{{ restaurant.description | truncate(100) }}</small></p>
+                            <a href="{{ url_for('views.display_restaurant', restaurant_id=restaurant.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">This collection is empty. Add some restaurants to it!</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url_for('views.collections') }}" class="btn btn-secondary">&larr; Back to My Collections</a>
+    </div>
+</div>
+{% endblock %}

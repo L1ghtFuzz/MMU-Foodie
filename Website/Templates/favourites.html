@@ -11,7 +11,37 @@
         <strong>{{ r.name }}</strong><br>
         <small>{{ r.cuisine }} - {{ r.location }}</small><br>
         <em>{{ r.description }}</em><br>
-        <a href="/unfavourite/{{ r.id }}" class="btn btn-sm btn-outline-danger mt-1">Unfavourite</a>
+        
+        <div class="mt-2">
+            <a href="/unfavourite/{{ r.id }}" class="btn btn-sm btn-outline-danger">Unfavourite</a>
+            <a href="/mark-past/{{ r.id }}" class="btn btn-sm btn-outline-secondary ml-2">✅ Visited</a>
+        </div>
+
+        {# Add to Collection Form #}
+        <div class="border-top border-gray-200 pt-3 mt-3">
+            <h6 class="text-sm font-semibold text-gray-800 mb-2">Add to Collection(s):</h6>
+            <form method="POST" action="{{ url_for('views.add_restaurant_to_collections') }}" class="d-flex flex-column">
+                <input type="hidden" name="restaurant_id" value="{{ r.id }}">
+                
+                {% if user.collections %} {# Check if the user has any collections (requires 'user' to be passed from view) #}
+                    <div class="form-group flex-grow-1">
+                        {% for collection in user.collections %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ collection.id }}" id="fav-coll-{{ r.id }}-{{ collection.id }}"
+                                {% if r in collection.restaurants %}checked disabled{% endif %}>
+                                <label class="form-check-label" for="fav-coll-{{ r.id }}-{{ collection.id }}">
+                                    {{ collection.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm mt-2">Add to Selected</button>
+                {% else %}
+                    <p class="text-muted text-sm">No collections yet. <a href="{{ url_for('views.collections') }}">Create one!</a></p>
+                {% endif %}
+            </form>
+        </div>
+        {# End Add to Collection Form #}
       </li>
     {% endfor %}
   </ul>

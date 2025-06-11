@@ -36,11 +36,10 @@
       {% if current_user.is_authenticated %}
         <a class="nav-item nav-link" id="home" href="/">Home</a>
         <a class="nav-item nav-link" href="/favourites">Favourites</a>
-        {% if current_user.is_authenticated and current_user.is_admin %}
-        <a class="nav-item nav-link" href="/form">beanz</a>
-        {% endif %}
-        <a class="nav-item nav-link" href="{{ url_for('views.random_restaurant') }}">Random?</a>
-        <a class="nav-item nav-link" href="{{ url_for('views.past_page') }}">Visited</a>
+        <a class="nav-item nav-link" href="{{ url_for('views.random_restaurant') }}">Surprise me</a>
+        <a class="nav-item nav-link" href="/notes">Notes</a> 
+        <a class="nav-link" href="{{ url_for('views.past_restaurants') }}">Past Restaurants</a>
+        <a class="nav-link" href="{{ url_for('views.collections') }}">My Collections</a>
       {% endif %}
     </div>
     <div class="navbar-nav ml-auto">

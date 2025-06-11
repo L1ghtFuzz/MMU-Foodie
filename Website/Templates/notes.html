@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Your Notes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Notes</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="note">New Note:</label>
+            <textarea class="form-control" id="note" name="note" placeholder="Write your note here..." rows="5"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Add Note</button>
+    </form>
+
+    <div class="notes-list mt-4">
+        <h2>Saved Notes:</h2>
+        {% if notes %}
+            <ul class="list-group">
+                {% for note in notes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ note.data }}
+                        <small class="text-muted">{{ note.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">No notes yet. Add one above!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

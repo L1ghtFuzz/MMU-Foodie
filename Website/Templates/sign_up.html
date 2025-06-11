@@ -93,11 +93,29 @@
     <p>Please fill in this form to create an account.</p>
     <hr>
 
+    {# Flash Messages - START #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                    {# If you have Bootstrap, you can add a dismiss button here #}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {# Flash Messages - END #}
+
     <label for="email"><b>Email</b></label>
     <input type="email" placeholder="Enter Email" name="email" id="email" required>
 
     <label for="firstName"><b>First Name</b></label>
     <input type="text" placeholder="Enter First Name" name="firstName" id="firstName" required>
+
+    {# ADDED USERNAME FIELD HERE #}
+    <label for="username"><b>Username</b></label>
+    <input type="text" placeholder="Enter Username" name="username" id="username" required>
+    {# END USERNAME FIELD #}
 
     <label for="password1"><b>Password</b></label>
     <input
