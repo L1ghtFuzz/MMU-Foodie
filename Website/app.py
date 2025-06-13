@@ -265,7 +265,9 @@ def favourite(id):
         current_user.favourites.append(restaurant)
         db.session.commit()
         flash("Added to favourites!", category='success')
-    return redirect(url_for('/')) 
+    else:
+        flash("Already in favourites.", category='info')
+    return redirect(url_for('views.home'))
 
 @app.route('/unfavourite/<int:id>')
 @login_required
@@ -275,14 +277,12 @@ def unfavourite(id):
         current_user.favourites.remove(restaurant)
         db.session.commit()
         flash("Removed from favourites.", category='warning')
-    return redirect(url_for('favourites_page'))
+    return redirect(url_for('views.favourites_page'))
 
 @app.route('/favourites')
 @login_required
 def favourites_page():
     return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
-
-
 
 if __name__ == '__main__':
     with app.app_context():
