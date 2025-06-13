@@ -77,7 +77,9 @@
             <li><a href="/admin-dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a></li>
           {% else %}
             <li><a href="/favourites" style="color: white; text-decoration: none;">Favourites</a></li>
-            <li><a href="/random" style="color: white; text-decoration: none;">Randomizer</a></li>
+            <li><a href="{{ url_for('random_restaurant') }}" style="color: white; text-decoration: none;">Randomizer</a></li>
+            <li><a href="{{ url_for('past_restaurants') }}" style="color: white; text-decoration: none;">Past Restaurant</a></li>
+            <li><a href="{{ url_for('collections') }}" style="color: white; text-decoration: none;">My Collections</a></li>
           {% endif %}
       </ul>
     </nav>

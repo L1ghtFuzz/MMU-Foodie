@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Favourites{% endblock %}
+
+{% block title %}My Collections{% endblock %}
 
 {% block style %}
   <style>
@@ -197,6 +198,76 @@
         border-radius: 0.2rem;
     }
 
+    /* Specific to collections page */
+    .message-alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        position: relative;
+    }
+    .message-alert.alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    .message-alert.alert-info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+    .message-alert .close-button {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.5rem;
+        color: inherit;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .collection-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    .collection-item {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .collection-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+    .collection-item a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+    .collection-item a:hover {
+        text-decoration: none;
+    }
+    .collection-item span.collection-count {
+        background-color: #007bff;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.85em;
+    }
+    .text-muted {
+        color: #6c757d !important;
+    }
+
     /* Card styling for collections and past restaurants */
     .card {
         background-color: #ffffff;
@@ -242,81 +313,52 @@
         padding-right: 15px;
         margin-bottom: 30px;
     }
-    .text-muted {
-        color: #6c757d !important;
-    }
 
-    /* Styles for Favourites page (reusing review styles for list items) */
-    .favourite-list {
-        list-style: none;
-        padding: 0;
-        margin-top: 20px;
+    /* Form check and inline styles for favourites */
+    .form-check {
+        position: relative;
+        display: block;
+        padding-left: 1.25rem;
+        margin-bottom: 0.125rem;
     }
-
-    .favourite-item {
-        background-color: #fff;
-        border: 1px solid #e9ecef;
-        padding: 20px 25px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.07);
-    }
-    .favourite-item small {
-        color: #6c757d;
-        font-size: 0.9em;
-    }
-    .favourite-item em {
-        color: #495057;
-        font-style: normal;
-    }
-
-    .favourite-actions {
-        margin-top: 10px;
-    }
-    .favourite-actions .btn + .btn {
-        margin-left: 0.5rem;
-    }
-
-    .collection-add-section {
-        border-top: 1px solid #e9ecef;
-        padding-top: 15px;
-        margin-top: 15px;
-    }
-    .collection-add-section h6 {
-        font-size: 0.9em;
-        font-weight: 600;
-        color: #343a40;
-        margin-bottom: 10px;
-    }
-    .collection-add-form {
-        display: flex;
-        flex-direction: column;
-    }
-    .collection-checkbox-group {
-        flex-grow: 1;
-        margin-bottom: 10px;
-    }
-    .collection-checkbox-item {
+    .form-check-inline {
         display: inline-flex;
         align-items: center;
         padding-left: 0;
         margin-right: 0.75rem;
     }
-    .collection-checkbox-input {
-        position: relative;
+    .form-check-input {
+        position: absolute;
         margin-top: 0.3rem;
         margin-left: -1.25rem;
     }
-    .collection-checkbox-label {
+    .form-check-label {
         margin-bottom: 0;
         padding-left: 0.25rem;
     }
-    .collection-add-form .btn {
-        margin-top: 10px;
+    .border-top {
+        border-top: 1px solid #e9ecef !important;
     }
-    .no-collections-text {
-        font-size: 0.9em;
-        color: #6c757d;
+    .pt-3 {
+        padding-top: 1rem !important;
+    }
+    .mt-3 {
+        margin-top: 1rem !important;
+    }
+    .mb-2 {
+        margin-bottom: 0.5rem !important;
+    }
+    .d-flex {
+        display: flex !important;
+    }
+    .flex-column {
+        flex-direction: column !important;
+    }
+    .flex-grow-1 {
+        flex-grow: 1 !important;
+    }
+    .ml-2 {
+        margin-left: 0.5rem !important;
     }
 
     @media (max-width: 992px) {
@@ -347,51 +389,48 @@
 {% block body %}
 <div class="container">
     <div class="restaurant-main-content">
-        <h2>Your Favourite Restaurants</h2>
+        <h1>My Restaurant Collections</h1>
 
-        {% if favourites %}
-          <ul class="favourite-list">
-            {% for r in favourites %}
-              <li class="favourite-item">
-                <strong>{{ r.name }}</strong><br>
-                <small>{{ r.cuisine }} - {{ r.location }}</small><br>
-                <em>{{ r.description }}</em><br>
-                
-                <div class="favourite-actions">
-                    <a href="/unfavourite/{{ r.id }}" class="btn btn-sm btn-outline-danger">Unfavourite</a>
-                    <a href="/mark-past/{{ r.id }}" class="btn btn-sm btn-outline-secondary">✅ Visited</a>
-                </div>
-
-                {# Add to Collection Form #}
-                <div class="collection-add-section">
-                    <h6>Add to Collection(s):</h6>
-                    <form method="POST" action="{{ url_for('add_restaurant_to_collections') }}" class="collection-add-form">
-                        <input type="hidden" name="restaurant_id" value="{{ r.id }}">
-                        
-                        {% if user.collections %}
-                            <div class="collection-checkbox-group">
-                                {% for collection in user.collections %}
-                                    <div class="collection-checkbox-item">
-                                        <input class="collection-checkbox-input" type="checkbox" name="collection_ids" value="{{ collection.id }}" id="fav-coll-{{ r.id }}-{{ collection.id }}"
-                                        {% if r in collection.restaurants %}checked disabled{% endif %}>
-                                        <label class="collection-checkbox-label" for="fav-coll-{{ r.id }}-{{ collection.id }}">
-                                            {{ collection.name }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm">Add to Selected</button>
-                        {% else %}
-                            <p class="no-collections-text">No collections yet. <a href="{{ url_for('collections') }}">Create one!</a></p>
-                        {% endif %}
-                    </form>
-                </div>
-                {# End Add to Collection Form #}
-              </li>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="message-alert alert-{{ category }}">
+                {{ message }}
+                <button type="button" class="close-button" onclick="this.parentElement.style.display='none';">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
             {% endfor %}
-          </ul>
+          {% endif %}
+        {% endwith %}
+
+        <div class="content-section">
+            <h3>Create New Collection</h3>
+            <div>
+                <form method="POST" action="{{ url_for('collections') }}">
+                    <div class="form-group">
+                        <label for="collection_name">Collection Name:</label>
+                        <input type="text" class="form-control" id="collection_name" name="collection_name" required>
+                    </div>
+                    <button type="submit" class="btn">Create Collection</button>
+                </form>
+            </div>
+        </div>
+
+        <h2>Your Existing Collections:</h2>
+        {% if user.collections %}
+            <ul class="collection-list">
+                {% for collection in user.collections %}
+                    <li class="collection-item">
+                        <a href="{{ url_for('collection_detail', collection_id=collection.id) }}">
+                            {{ collection.name }}
+                        </a>
+                        <span class="collection-count">{{ collection.restaurants|length }} restaurants</span>
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
-          <p class="no-content-notice">You haven’t favourited any restaurants yet.</p>
+            <p class="text-muted">You haven't created any collections yet. Use the form above to get started!</p>
         {% endif %}
     </div>
 </div>

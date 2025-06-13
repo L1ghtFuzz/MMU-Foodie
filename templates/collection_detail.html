@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Favourites{% endblock %}
+
+{% block title %}{{ collection.name }} - Collection{% endblock %}
 
 {% block style %}
   <style>
@@ -245,78 +246,8 @@
     .text-muted {
         color: #6c757d !important;
     }
-
-    /* Styles for Favourites page (reusing review styles for list items) */
-    .favourite-list {
-        list-style: none;
-        padding: 0;
+    .back-button-container {
         margin-top: 20px;
-    }
-
-    .favourite-item {
-        background-color: #fff;
-        border: 1px solid #e9ecef;
-        padding: 20px 25px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.07);
-    }
-    .favourite-item small {
-        color: #6c757d;
-        font-size: 0.9em;
-    }
-    .favourite-item em {
-        color: #495057;
-        font-style: normal;
-    }
-
-    .favourite-actions {
-        margin-top: 10px;
-    }
-    .favourite-actions .btn + .btn {
-        margin-left: 0.5rem;
-    }
-
-    .collection-add-section {
-        border-top: 1px solid #e9ecef;
-        padding-top: 15px;
-        margin-top: 15px;
-    }
-    .collection-add-section h6 {
-        font-size: 0.9em;
-        font-weight: 600;
-        color: #343a40;
-        margin-bottom: 10px;
-    }
-    .collection-add-form {
-        display: flex;
-        flex-direction: column;
-    }
-    .collection-checkbox-group {
-        flex-grow: 1;
-        margin-bottom: 10px;
-    }
-    .collection-checkbox-item {
-        display: inline-flex;
-        align-items: center;
-        padding-left: 0;
-        margin-right: 0.75rem;
-    }
-    .collection-checkbox-input {
-        position: relative;
-        margin-top: 0.3rem;
-        margin-left: -1.25rem;
-    }
-    .collection-checkbox-label {
-        margin-bottom: 0;
-        padding-left: 0.25rem;
-    }
-    .collection-add-form .btn {
-        margin-top: 10px;
-    }
-    .no-collections-text {
-        font-size: 0.9em;
-        color: #6c757d;
     }
 
     @media (max-width: 992px) {
@@ -347,52 +278,37 @@
 {% block body %}
 <div class="container">
     <div class="restaurant-main-content">
-        <h2>Your Favourite Restaurants</h2>
+        <h1>{{ collection.name }}</h1>
+        <p class="text-muted">Restaurants in this collection:</p>
 
-        {% if favourites %}
-          <ul class="favourite-list">
-            {% for r in favourites %}
-              <li class="favourite-item">
-                <strong>{{ r.name }}</strong><br>
-                <small>{{ r.cuisine }} - {{ r.location }}</small><br>
-                <em>{{ r.description }}</em><br>
-                
-                <div class="favourite-actions">
-                    <a href="/unfavourite/{{ r.id }}" class="btn btn-sm btn-outline-danger">Unfavourite</a>
-                    <a href="/mark-past/{{ r.id }}" class="btn btn-sm btn-outline-secondary">✅ Visited</a>
-                </div>
-
-                {# Add to Collection Form #}
-                <div class="collection-add-section">
-                    <h6>Add to Collection(s):</h6>
-                    <form method="POST" action="{{ url_for('add_restaurant_to_collections') }}" class="collection-add-form">
-                        <input type="hidden" name="restaurant_id" value="{{ r.id }}">
-                        
-                        {% if user.collections %}
-                            <div class="collection-checkbox-group">
-                                {% for collection in user.collections %}
-                                    <div class="collection-checkbox-item">
-                                        <input class="collection-checkbox-input" type="checkbox" name="collection_ids" value="{{ collection.id }}" id="fav-coll-{{ r.id }}-{{ collection.id }}"
-                                        {% if r in collection.restaurants %}checked disabled{% endif %}>
-                                        <label class="collection-checkbox-label" for="fav-coll-{{ r.id }}-{{ collection.id }}">
-                                            {{ collection.name }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
+        {% if collection.restaurants %}
+            <div class="row">
+                {% for restaurant in collection.restaurants %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            {% if restaurant.image_url %}
+                            <img src="{{ restaurant.image_url }}" class="card-img-top" alt="{{ restaurant.name }}">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/default_restaurant.jpg') }}" class="card-img-top" alt="Default Restaurant Image">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ restaurant.name }}</h5>
+                                <p class="card-text"><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+                                <p class="card-text"><strong>Rating:</strong> {{ restaurant.rating }} / 5</p>
+                                <p class="card-text"><small class="text-muted">{{ restaurant.description | truncate(100) }}</small></p>
+                                <a href="{{ url_for('display_restaurant', restaurant_id=restaurant.id) }}" class="btn">View Details</a>
                             </div>
-                            <button type="submit" class="btn btn-success btn-sm">Add to Selected</button>
-                        {% else %}
-                            <p class="no-collections-text">No collections yet. <a href="{{ url_for('collections') }}">Create one!</a></p>
-                        {% endif %}
-                    </form>
-                </div>
-                {# End Add to Collection Form #}
-              </li>
-            {% endfor %}
-          </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
-          <p class="no-content-notice">You haven’t favourited any restaurants yet.</p>
+            <p class="text-muted">This collection is empty. Add some restaurants to it!</p>
         {% endif %}
+
+        <div class="content-section back-button-container">
+            <a href="{{ url_for('collections') }}" class="btn btn-secondary">&larr; Back to My Collections</a>
+        </div>
     </div>
 </div>
 {% endblock %}

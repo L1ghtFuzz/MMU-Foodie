@@ -9,7 +9,9 @@ from flask_login import LoginManager
 from sqlalchemy.sql import func
 from math import radians, cos, sin, sqrt, atan2
 import re, os, uuid, random
+import pytz
 
+malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.root_path, 'instance', 'database.db')}"
@@ -35,18 +37,27 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     favourites = db.relationship('Restaurant', secondary='favourites', backref='liked_by')
     # ADDED: Relationship for past visited restaurants
-    past_visits = db.relationship('Restaurant', secondary='past_visits', backref='visited_users')
+    past = db.relationship('Restaurant', secondary='past', backref='visited_by')
     is_admin = db.Column(db.Boolean, default=False)
+    collections = db.relationship('Collection', backref='owner', lazy=True)
 
-favourites = db.Table('favourites',
+favourites = db.Table(
+    'favourites',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
 )
 
-past_visits = db.Table('past_visits',
+past = db.Table(
+    'past',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
 )
+
+class Note(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(db.String(10000))
+    date = db.Column(db.DateTime(timezone=True), default=func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,7 +86,7 @@ class Restaurant(db.Model):
 
     def get_status(self):
         now = datetime.now()
-        current_day = now.strftime('%A') 
+        current_day = now.strftime('%A')
         current_time = now.time()
 
         if self.is_24_hours:
@@ -91,7 +102,7 @@ class Restaurant(db.Model):
             days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
             current_day_index = days_of_week_ordered.index(current_day)
 
-            for i in range(1, 8): 
+            for i in range(1, 8):
                 next_day_index = (current_day_index + i) % 7
                 next_day_name = days_of_week_ordered[next_day_index]
                 next_day_hours = next((oh for oh in self.operating_hours if oh.day_of_week == next_day_name), None)
@@ -101,7 +112,7 @@ class Restaurant(db.Model):
                     # Convert to time object
                     next_open_time = datetime.strptime(next_open_time_str, '%H:%M').time()
                     return "Closed now", f"Opens {next_day_name} at {next_open_time.strftime('%I:%M %p')}"
-            return "Closed now", "No upcoming opening hours." 
+            return "Closed now", "No upcoming opening hours."
 
         open_time_obj = datetime.strptime(today_hours.open_time, '%H:%M').time()
         close_time_obj = datetime.strptime(today_hours.close_time, '%H:%M').time()
@@ -110,7 +121,7 @@ class Restaurant(db.Model):
             return "Open now", f"Closes at {close_time_obj.strftime('%I:%M %p')}"
         elif current_time < open_time_obj:
             return "Closed now", f"Opens at {open_time_obj.strftime('%I:%M %p')}"
-        else: 
+        else:
             days_of_week_ordered = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
             current_day_index = days_of_week_ordered.index(current_day)
 
@@ -132,9 +143,9 @@ class Restaurant(db.Model):
 class OperatingHour(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
-    day_of_week = db.Column(db.String(10), nullable=False) 
-    open_time = db.Column(db.String(5)) 
-    close_time = db.Column(db.String(5)) 
+    day_of_week = db.Column(db.String(10), nullable=False)
+    open_time = db.Column(db.String(5))
+    close_time = db.Column(db.String(5))
 
     __table_args__ = (db.UniqueConstraint('restaurant_id', 'day_of_week', name='uq_restaurant_day'),)
 
@@ -155,10 +166,18 @@ class Review(db.Model):
     def __repr__(self):
         return f'<Review by {self.author or "Anonymous"} for Restaurant {self.restaurant_id}>'
 
-# REMOVED: Global sets are no longer needed for persistent data
-# user_favourites = set()
-# user_past = set()
-# user_reviews = {}
+collection_restaurants = db.Table(
+    'collection_restaurants',
+    db.Column('collection_id', db.Integer, db.ForeignKey('collection.id')),
+    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurant.id'))
+)
+
+class Collection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Link to the User who owns the collection
+    restaurants = db.relationship('Restaurant', secondary=collection_restaurants, backref='collections')
+
 
 @app.cli.command("init-db")
 def init_db_command():
@@ -345,7 +364,7 @@ def profile():
         if new_first_name != original_first_name:
             current_user.first_name = new_first_name
             updated_fields.append('first name')
-        
+
         if updated_fields:
             db.session.commit()
             if len(updated_fields) == 1:
@@ -356,115 +375,8 @@ def profile():
             flash('No changes detected.', category='info')
 
         return redirect(url_for('profile'))
-    
+
     return render_template('profile.html', user=current_user)
-
-
-@app.route('/favourite/<int:id>')
-@login_required
-def favourite(id):
-    restaurant = Restaurant.query.get_or_404(id)
-    if restaurant not in current_user.favourites:
-        current_user.favourites.append(restaurant)
-        db.session.commit()
-        flash("Added to favourites!", category='success')
-    else:
-        flash("Already in favourites.", category='info')
-    return redirect(url_for('index'))
-
-@app.route('/unfavourite/<int:id>')
-@login_required
-def unfavourite(id):
-    restaurant = Restaurant.query.get_or_404(id)
-    if restaurant in current_user.favourites:
-        current_user.favourites.remove(restaurant)
-        db.session.commit()
-        flash("Removed from favourites.", category='warning')
-    return redirect(url_for('favourites_page'))
-
-@app.route('/favourites')
-@login_required
-def favourites_page():
-    return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
-
-@app.route('/mark-past/<int:id>')
-@login_required
-def mark_past(id):
-    restaurant = Restaurant.query.get_or_404(id)
-    # MODIFIED: Use the new 'past_visits' relationship
-    if restaurant not in current_user.past_visits:
-        current_user.past_visits.append(restaurant)
-        db.session.commit()
-        flash("Marked as visited.", category='info')
-    else:
-        flash("Already marked as visited.", category='info')
-    return redirect(url_for('index')) # Or the page you want to redirect to
-
-# Inside your app.py
-
-@app.route('/past')
-@login_required
-def past_page():
-    return render_template('past_restaurants.html', user=current_user, past_restaurants=current_user.past_visits)
-
-@app.route('/unmark_past/<int:id>')
-@login_required
-def unmark_past(id):
-    restaurant = Restaurant.query.get_or_404(id)
-    if restaurant in current_user.past_visits:
-        current_user.past_visits.remove(restaurant)
-        db.session.commit()
-        flash("Removed from visited restaurants.", "warning")
-    return redirect(url_for('past_page'))
-
-@app.route('/random', methods=['GET', 'POST'])
-@login_required
-def random_restaurant():
-    selected = None
-    # Define available cuisines and price ranges for the filter form
-    available_cuisines = ['Any', 'Italian', 'Mexican', 'Japanese', 'Indian', 'Chinese', 'American', 'Cafe', 'Dessert']
-    available_prices = ['Any', '$', '$$', '$$$']
-
-    # Initialize selected_cuisine and selected_price to 'Any' as default
-    # or to whatever the default value of your dropdowns should be on first load
-    selected_cuisine = 'Any'
-    selected_price = 'Any'
-
-    if request.method == 'POST':
-        # Get filter criteria from the form
-        cuisine_filter = request.form.get('cuisine_filter')
-        price_filter = request.form.get('price_filter')
-
-        # Store the selected filters to pass back to the template
-        selected_cuisine = cuisine_filter
-        selected_price = price_filter
-
-        # Start with a base query of all restaurants
-        query = Restaurant.query
-
-        # Apply cuisine filter if selected (and not 'Any')
-        if cuisine_filter and cuisine_filter != 'Any':
-            query = query.filter_by(cuisine=cuisine_filter)
-
-        # Apply price filter if selected (and not 'Any')
-        if price_filter and price_filter != 'Any':
-            query = query.filter_by(price=price_filter)
-
-        # Get a random restaurant from the filtered results
-        selected = query.order_by(func.random()).first()
-
-        if not selected:
-            flash("No restaurants found matching your criteria. Try different filters!", category='warning')
-
-    return render_template(
-        "random.html",
-        user=current_user,
-        selected=selected,
-        available_cuisines=available_cuisines,
-        available_prices=available_prices,
-        selected_cuisine=selected_cuisine, 
-        selected_price=selected_price      
-    )
 
 # Restaurant Things
 def allowed_file(filename):
@@ -492,7 +404,7 @@ def display_restaurant(restaurant_id):
         else:
             full_operating_hours.append({
                 'day': day,
-                'open_time': 'Closed', 
+                'open_time': 'Closed',
                 'close_time': None
             })
 
@@ -526,7 +438,7 @@ def add_restaurant():
         price = request.form['price']
         latitude = float(request.form['latitude'])
         longitude = float(request.form['longitude'])
-        is_24_hours = 'all_week_24h' in request.form 
+        is_24_hours = 'all_week_24h' in request.form
 
         new_restaurant = Restaurant(
             name=name,
@@ -538,10 +450,10 @@ def add_restaurant():
             price=price,
             latitude=latitude,
             longitude=longitude,
-            is_24_hours=is_24_hours 
+            is_24_hours=is_24_hours
         )
         db.session.add(new_restaurant)
-        db.session.commit() 
+        db.session.commit()
 
         days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         for day in days_of_week:
@@ -644,7 +556,7 @@ def edit_restaurant(restaurant_id):
         restaurant.price = request.form['price']
         restaurant.latitude = float(request.form['latitude'])
         restaurant.longitude = float(request.form['longitude'])
-        restaurant.is_24_hours = 'all_week_24h' in request.form 
+        restaurant.is_24_hours = 'all_week_24h' in request.form
 
         # Handle operating hours update
         days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -654,10 +566,10 @@ def edit_restaurant(restaurant_id):
                 operating_hour = OperatingHour(restaurant_id=restaurant.id, day_of_week=day)
                 db.session.add(operating_hour)
 
-            if restaurant.is_24_hours: 
+            if restaurant.is_24_hours:
                 operating_hour.open_time = '00:00'
                 operating_hour.close_time = '00:00'
-            else: 
+            else:
                 closed_key = f"{day.lower()}_closed"
                 open_time_key = f"{day.lower()}_open"
                 close_time_key = f"{day.lower()}_close"
@@ -709,7 +621,7 @@ def edit_restaurant(restaurant_id):
         db.session.commit()
         flash("Restaurant details updated!", "success")
         return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
-    
+
     # For GET request, prepare operating hours data to pre-fill the form
     operating_hours_data = {oh.day_of_week: oh for oh in restaurant.operating_hours}
     # Ensure all days are represented for the template, even if no data exists yet
@@ -720,17 +632,57 @@ def edit_restaurant(restaurant_id):
 
     return render_template('edit_restaurant.html', restaurant=restaurant, operating_hours_data=operating_hours_data)
 
+@app.route('/favourite/<int:id>', methods=['POST'])
+@login_required
+def favourite(id):
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant not in current_user.favourites:
+        current_user.favourites.append(restaurant)
+        db.session.commit()
+        flash("Added to favourites!", category='success')
+    else:
+        flash("Already in favourites.", category='info')
+    return redirect(url_for('index'))
+
+@app.route('/unfavourite/<int:id>')
+@login_required
+def unfavourite(id):
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant in current_user.favourites:
+        current_user.favourites.remove(restaurant)
+        db.session.commit()
+        flash("Removed from favourites.", category='warning')
+    return redirect(url_for('favourites_page'))
+
+@app.route('/favourites')
+@login_required
+def favourites_page():
+    return render_template('favourites.html', user=current_user, favourites=current_user.favourites)
+
+@app.route('/toggle_save/<int:restaurant_id>', methods=['POST'])
+@login_required
+def toggle_save(restaurant_id):
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+    if restaurant in current_user.favourites:
+        current_user.favourites.remove(restaurant)
+        db.session.commit()
+        flash("Removed from favourites!", category='warning')
+    else:
+        current_user.favourites.append(restaurant)
+        db.session.commit()
+        flash("Added to favourites!", category='success')
+    return redirect(request.referrer or url_for('display_restaurant', restaurant_id=restaurant_id))
 
 # NEW ROUTE FOR UPLOADING ADDITIONAL PHOTOS
 @app.route('/upload_photos/<int:restaurant_id>', methods=['GET', 'POST'])
-@login_required 
+@login_required
 def upload_photos(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
 
     if request.method == 'POST':
-        images = request.files.getlist('images') 
+        images = request.files.getlist('images')
         upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
-        os.makedirs(upload_folder, exist_ok=True) 
+        os.makedirs(upload_folder, exist_ok=True)
 
         uploaded_count = 0
         for image in images:
@@ -742,7 +694,7 @@ def upload_photos(restaurant_id):
 
                     image.save(image_path)
                     image_url = url_for('static', filename=f'uploads/{unique_filename}')
-                    
+
                     # Add new image to the RestaurantImage table
                     db.session.add(RestaurantImage(image_url=image_url, restaurant_id=restaurant.id))
                     uploaded_count += 1
@@ -809,37 +761,187 @@ def delete_image(image_id):
     return redirect(url_for('display_restaurant', restaurant_id=restaurant_id))
 
 @app.route('/restaurant/<int:restaurant_id>/review', methods=['POST'])
+@login_required # <--- ADD THIS LINE
 def submit_review(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
     rating = int(request.form['rating'])
     text = request.form['text']
-    author = request.form.get('author')
+
+    author = current_user.username
+
     review = Review(restaurant_id=restaurant.id, rating=rating, text=text, author=author)
     db.session.add(review)
     db.session.commit()
     flash('Your review has been submitted!', "success")
     return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
 
-@app.route('/restaurant/<int:restaurant_id>/save', methods=['POST'])
-@login_required # Add this decorator if you want only logged-in users to favorite
-def toggle_save(restaurant_id):
-    restaurant = Restaurant.query.get_or_404(restaurant_id)
-
-    # Check if the current restaurant is already in the user's favourites
-    if restaurant in current_user.favourites:
-        # If it's favourited, remove it
-        current_user.favourites.remove(restaurant)
-        flash("Removed from saved restaurants!", "info")
-        saved_status = False # For redirection logic
+@app.route('/mark-past/<int:id>')
+@login_required
+def mark_past(id):
+    restaurant = Restaurant.query.get_or_404(id)
+    # MODIFIED: Use the new 'past_visits' relationship
+    if restaurant not in current_user.past:
+        current_user.past.append(restaurant)
+        db.session.commit()
+        flash("Marked as visited.", category='info')
     else:
-        # If not favourited, add it
-        current_user.favourites.append(restaurant)
-        flash("Added to saved restaurants!", "success")
-        saved_status = True # For redirection logic
+        flash("Already marked as visited.", category='info')
+    return redirect(url_for('index')) # Or the page you want to redirect to
 
-    db.session.commit()
-    # You might want to redirect back to the display_restaurant page with the updated status
-    return redirect(url_for('display_restaurant', restaurant_id=restaurant.id))
+# Inside your app.py
+
+@app.route('/past')
+@login_required
+def past_page():
+    return render_template('past_restaurants.html', user=current_user, past_restaurants=current_user.past_visits)
+
+@app.route('/unmark_past/<int:id>')
+@login_required
+def unmark_past(id):
+    restaurant = Restaurant.query.get_or_404(id)
+    if restaurant in current_user.past_visits:
+        current_user.past_visits.remove(restaurant)
+        db.session.commit()
+        flash("Removed from visited restaurants.", "warning")
+    return redirect(url_for('past_page'))
+
+@app.route('/random', methods=['GET', 'POST'])
+@login_required
+def random_restaurant():
+    selected = None
+    available_cuisines = ['Any', 'Italian', 'Mexican', 'Japanese', 'Indian', 'Chinese', 'American', 'Cafe', 'Dessert']
+    available_prices = ['Any', '$', '$$', '$$$']
+
+    selected_cuisine = 'Any'
+    selected_price = 'Any'
+
+    if request.method == 'POST':
+        cuisine_filter = request.form.get('cuisine_filter')
+        price_filter = request.form.get('price_filter')
+
+        selected_cuisine = cuisine_filter
+        selected_price = price_filter
+
+        query = Restaurant.query
+
+        if cuisine_filter and cuisine_filter != 'Any':
+            query = query.filter_by(cuisine=cuisine_filter)
+
+        if price_filter and price_filter != 'Any':
+            query = query.filter_by(price=price_filter)
+
+        selected = query.order_by(func.random()).first()
+
+        if not selected:
+            flash("No restaurants found matching your criteria. Try different filters!", category='warning')
+
+    return render_template(
+        "random.html",
+        user=current_user,
+        selected=selected,
+        available_cuisines=available_cuisines,
+        available_prices=available_prices,
+        selected_cuisine=selected_cuisine,
+        selected_price=selected_price
+    )
+
+@app.route('/notes', methods=['GET', 'POST'])
+@login_required
+def session_notes():
+    if request.method == 'POST':
+        note_content = request.form.get('note')
+        if note_content:
+            new_note_db = Note(data=note_content, user_id=current_user.id)
+            db.session.add(new_note_db)
+            db.session.commit()
+            flash("Note added to database!", category='success')
+        else:
+            flash("Note cannot be empty!", category='error')
+
+
+    user_notes = Note.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('notes.html', user=current_user, notes=user_notes)
+
+@app.route('/past-restaurants')
+@login_required
+def past_restaurants():
+    # current_user.past automatically gives you the list of associated Restaurant objects
+    return render_template('past.html', user=current_user)
+
+@app.route('/collections', methods=['GET', 'POST'])
+@login_required
+def collections():
+    if request.method == 'POST':
+        collection_name = request.form.get('collection_name')
+        if collection_name:
+            # Check if a collection with the same name already exists for the user
+            existing_collection = Collection.query.filter_by(name=collection_name, user_id=current_user.id).first()
+            if existing_collection:
+                flash(f"Collection '{collection_name}' already exists!", category='error')
+            else:
+                new_collection = Collection(name=collection_name, user_id=current_user.id)
+                db.session.add(new_collection)
+                db.session.commit()
+                flash(f"Collection '{collection_name}' created successfully!", category='success')
+        else:
+            flash("Collection name cannot be empty!", category='error')
+        return redirect(url_for('collections')) # Redirect to prevent form resubmission
+
+    # For GET requests, render the page with the user's collections
+    return render_template('collections.html', user=current_user)
+
+
+# NEW: Route to view the details of a single collection
+@app.route('/collections/<int:collection_id>')
+@login_required
+def collection_detail(collection_id):
+    collection = Collection.query.get_or_404(collection_id)
+    # Ensure the collection belongs to the current user
+    if collection.user_id != current_user.id:
+        flash("You do not have permission to view this collection.", category='error')
+        return redirect(url_for('views.collections'))
+
+    return render_template('collection_detail.html', user=current_user, collection=collection)
+
+@app.route('/add-to-collection', methods=['POST'])
+@login_required
+def add_restaurant_to_collections():
+    restaurant_id = request.form.get('restaurant_id')
+    collection_ids = request.form.getlist('collection_ids') # getlist is used for multiple checkboxes with the same name
+
+    if not restaurant_id:
+        flash('No restaurant selected.', category='error')
+        return redirect(request.referrer or url_for('views.random_restaurant')) # Go back to the page they came from
+
+    restaurant = Restaurant.query.get(restaurant_id)
+    if not restaurant:
+        flash('Restaurant not found.', category='error')
+        return redirect(request.referrer or url_for('views.random_restaurant'))
+
+    if not collection_ids:
+        flash('Please select at least one collection.', category='error')
+        return redirect(request.referrer or url_for('views.random_restaurant'))
+
+    collections_added_to = []
+    for coll_id in collection_ids:
+        collection = Collection.query.get(coll_id)
+        if collection and collection.user_id == current_user.id:
+            if restaurant not in collection.restaurants: # Check if restaurant is already in collection
+                collection.restaurants.append(restaurant)
+                collections_added_to.append(collection.name)
+            else:
+                flash(f"'{restaurant.name}' is already in '{collection.name}'.", category='info')
+        else:
+            flash(f"Collection with ID {coll_id} not found or you don't own it.", category='error')
+
+    if collections_added_to:
+        db.session.commit()
+        flash(f"'{restaurant.name}' added to: {', '.join(collections_added_to)}!", category='success')
+    elif not collections_added_to and collection_ids:
+        flash(f"'{restaurant.name}' was already in the selected collections.", category='info')
+
+    return redirect(request.referrer or url_for('random_restaurant'))
 
 
 if __name__ == '__main__':

@@ -16,7 +16,6 @@ body {
   font-family: "Roboto", sans-serif;
   overflow: visible;
   position: relative;
-  z-index: 1000;
   transition: background-color 0.3s ease;
 }
 
@@ -64,7 +63,6 @@ body {
   border-radius: 10px;
   font-size: 0.9rem;
   position: relative;
-  z-index: 2000;
   overflow: visible;
   transition: background-color 0.3s ease, color 0.3s ease;
 }

@@ -778,34 +778,35 @@
             {% endif %}
         </div>
 
-        <div class="content-section submit-review-section">
-            <h3>Write a Review for {{ restaurant.name }}</h3>
-            <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}" class="review-form">
-                <div class="form-group">
-                    <label for="author">Your Name <span class="optional-text">(Optional)</span>:</label>
-                    <input type="text" id="author" name="author" class="form-control" placeholder="e.g., Alex P.">
-                </div>
-
-                <div class="form-group rating-group">
-                    <label>Your Rating:</label>
-                    <div class="star-rating-input">
-                        {# stars are listed from 5 to 1 #}
-                        <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars - Excellent">☆</label>
-                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Very Good">☆</label>
-                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average">☆</label>
-                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars - Poor">☆</label>
-                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star - Terrible">☆</label>
+            {% if current_user.is_authenticated %}
+            <div class="content-section submit-review-section">
+                <h3>Write a Review for {{ restaurant.name }}</h3>
+                <form method="POST" action="{{ url_for('submit_review', restaurant_id=restaurant.id) }}" class="review-form">
+                    <div class="form-group rating-group">
+                        <label>Your Rating:</label>
+                        <div class="star-rating-input">
+                            {# stars are listed from 5 to 1 #}
+                            <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars - Excellent">☆</label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Very Good">☆</label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average">☆</label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars - Poor">☆</label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star - Terrible">☆</label>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="text">Your Review:</label>
-                    <textarea name="text" id="text" rows="5" class="form-control" required placeholder="Share your experience... What did you like or dislike?"></textarea>
-                </div>
+                    <div class="form-group">
+                        <label for="text">Your Review:</label>
+                        <textarea name="text" id="text" rows="5" class="form-control" required placeholder="Share your experience... What did you like or dislike?"></textarea>
+                    </div>
 
-                <button type="submit" class="btn btn-primary btn-submit-review">Post Review</button>
-            </form>
-        </div>
+                    <button type="submit" class="btn btn-primary btn-submit-review">Post Review</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="content-section submit-review-section">
+                <p>Please <a href="{{ url_for('login') }}">log in</a> to leave a review.</p>
+            </div>
+            {% endif %}
     </div>
 
     <aside class="sidebar-column">
