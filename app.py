@@ -779,14 +779,13 @@ def submit_review(restaurant_id):
 @login_required
 def mark_past(id):
     restaurant = Restaurant.query.get_or_404(id)
-    # MODIFIED: Use the new 'past_visits' relationship
-    if restaurant not in current_user.past:
-        current_user.past.append(restaurant)
+    if restaurant not in current_user.past_visits:
+        current_user.past_visits.append(restaurant)
         db.session.commit()
         flash("Marked as visited.", category='info')
     else:
         flash("Already marked as visited.", category='info')
-    return redirect(url_for('index')) # Or the page you want to redirect to
+    return redirect(url_for('index')) 
 
 # Inside your app.py
 
