@@ -15,7 +15,8 @@ env/
 website/database.db
 
 # Ignore migration's pycache
-migrations/versions
+migrations/
+migration/versions
 
 .vscode/
 
