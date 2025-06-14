@@ -779,7 +779,7 @@ def submit_review(restaurant_id):
 @login_required
 def mark_past(id):
     restaurant = Restaurant.query.get_or_404(id)
-    if restaurant not in current_user.past_visits:
+    if restaurant not in current_user.past:
         current_user.past_visits.append(restaurant)
         db.session.commit()
         flash("Marked as visited.", category='info')
